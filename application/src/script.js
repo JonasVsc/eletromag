@@ -2,14 +2,13 @@
 
 class Application {
 
-    #canvas = null;
-    #device = null;
-    #context = null;
+    #canvas = document.getElementById("window");
+    #device;
+    #context;
 
     constructor() 
     {
         console.log("new application")
-        this.#canvas = document.getElementById("window");
     }
 
     initialize() 
@@ -20,7 +19,6 @@ class Application {
 
         this.createContext();
 
-        console.log("everything ok")
     }
 
     isWebGPUSupportable() 
@@ -42,16 +40,17 @@ class Application {
 
     async createContext() 
     {
-        this.#context = canvas.getContext("webgpu");
+        this.#context = this.#canvas.getContext("webgpu");
     }
 }
 
 
-
 // main
+function main() {
+    const app = new Application;
+    
+    app.initialize();
+}
 
-
-const app = new Application;
-
-app.initialize();
+main();
 
