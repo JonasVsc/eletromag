@@ -1,4 +1,6 @@
-.vs
+.vscode
 .cache
 build
 models
+index.wasm
+index.js
