@@ -9,8 +9,8 @@ add_executable(ElectroApp application/src/application.cpp)
 
 if(${CMAKE_SYSTEM_NAME} STREQUAL "Emscripten")
 
-    set(CMAKE_EXECUTABLE_SUFFIX ".html")  # Gera um arquivo .html
-
     target_link_options(ElectroApp PRIVATE -sUSE_WEBGPU=1 -sWASM=1)
+
+    configure_file(${CMAKE_SOURCE_DIR}/application/src/index.html ${CMAKE_BINARY_DIR}/index.html COPYONLY)
 
 endif()
