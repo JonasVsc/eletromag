@@ -1,7 +1,7 @@
 .vscode
 .vs
 .cache
-build
 models
 index.wasm
 index.js
+out
