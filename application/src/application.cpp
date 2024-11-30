@@ -1,6 +1,7 @@
 #include "application.h"
 
 #include "webgpu-utils.h"
+#include "glfw3webgpu.h"
 
 #include<iostream>
 
@@ -49,12 +50,16 @@ void Application::initWebGPU()
 		std::runtime_error("[ERROR] Could not initialize WebGPU!");
 	std::cout << "[INFO] WGPU Instance: " << instance << std::endl;
 
+	WGPUSurface surface = glfwGetWGPUSurface(instance, mWindow);
+
 	std::cout << "[INFO] Requesting adapter..." << std::endl;
 	WGPURequestAdapterOptions adapterOpts{};
 	adapterOpts.nextInChain = nullptr;
+	adapterOpts.compatibleSurface = surface;
 	WGPUAdapter adapter = requestAdapterSync(instance, &adapterOpts);
 	std::cout << "[INFO] Got Adapter: " << adapter << std::endl;
 
+	wgpuSurfaceRelease(surface);
 	wgpuInstanceRelease(instance);
 
 	WGPUDeviceDescriptor deviceDescriptor{};
