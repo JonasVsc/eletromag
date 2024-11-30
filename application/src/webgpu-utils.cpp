@@ -26,7 +26,7 @@ WGPUAdapter requestAdapterSync(WGPUInstance instance, WGPURequestAdapterOptions 
             }
             else
             {
-                std::cout << "Could not get WebGPU adapter: " << message << std::endl;
+                std::cout << "[ERROR] Could not get WebGPU adapter: " << message << std::endl;
             }
             userData.requestEnded = true;
         };
@@ -63,7 +63,7 @@ WGPUDevice requestDeviceSync(WGPUAdapter adapter, WGPUDeviceDescriptor const* de
             }
             else
             {
-                std::cout << "Could not get WebGPU device: " << message << std::endl;
+                std::cout << "[ERROR] Could not get WebGPU device: " << message << std::endl;
             }
             userData.requestEnded = true;
 
@@ -87,7 +87,7 @@ void inspectDevice(WGPUDevice device)
     std::vector<WGPUFeatureName> features(featureCount);
     wgpuDeviceEnumerateFeatures(device, features.data());
 
-    std::cout << "Device features: " << '\n';
+    std::cout << "[INFO] Device features: " << '\n';
     std::cout << std::hex;
     for (const auto& f : features)
     {
@@ -102,7 +102,7 @@ void inspectDevice(WGPUDevice device)
 
     if (success)
     {
-        std::cout << "Device limits:" << std::endl;
+        std::cout << "[INFO] Device limits:" << std::endl;
         std::cout << " - maxTextureDimension1D: " << limits.limits.maxTextureDimension1D << std::endl;
         std::cout << " - maxTextureDimension2D: " << limits.limits.maxTextureDimension2D << std::endl;
         std::cout << " - maxTextureDimension3D: " << limits.limits.maxTextureDimension3D << std::endl;
@@ -118,7 +118,7 @@ void inspectAdapter(WGPUAdapter adapter)
     bool success = wgpuAdapterGetLimits(adapter, &supportedLimits);
 
     if (success) {
-        std::cout << "Adapter limits:" << '\n';
+        std::cout << "[INFO] Adapter limits:" << '\n';
         std::cout << " - maxTextureDimension1D: " << supportedLimits.limits.maxTextureDimension1D << '\n';
         std::cout << " - maxTextureDimension2D: " << supportedLimits.limits.maxTextureDimension2D << '\n';
         std::cout << " - maxTextureDimension3D: " << supportedLimits.limits.maxTextureDimension3D << '\n';
@@ -130,7 +130,7 @@ void inspectAdapter(WGPUAdapter adapter)
     std::vector<WGPUFeatureName> features(featureCount);
     wgpuAdapterEnumerateFeatures(adapter, features.data());
 
-    std::cout << "Adapter features:" << '\n';
+    std::cout << "[INFO] Adapter features:" << '\n';
     std::cout << std::hex;
     for (const auto& f : features)
         std::cout << " - 0x" << f << '\n';
@@ -140,7 +140,7 @@ void inspectAdapter(WGPUAdapter adapter)
     properties.nextInChain = nullptr;
     wgpuAdapterGetProperties(adapter, &properties);
 
-    std::cout << "Adapter properties:" << std::endl;
+    std::cout << "[INFO] Adapter properties:" << std::endl;
     std::cout << " - vendorID: " << properties.vendorID << std::endl;
     if (properties.vendorName) {
         std::cout << " - vendorName: " << properties.vendorName << std::endl;

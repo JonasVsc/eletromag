@@ -9,6 +9,8 @@ add_executable(ElectroApp
     "application/src/main.cpp" 
     "application/src/webgpu-utils.h"
     "application/src/webgpu-utils.cpp"
+    "application/src/application.h" 
+    "application/src/application.cpp"
 )
 
 if(${CMAKE_SYSTEM_NAME} STREQUAL "Emscripten")
