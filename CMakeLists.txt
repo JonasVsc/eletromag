@@ -7,6 +7,8 @@ include_directories("C:/emsdk/upstream/emscripten/cache/sysroot/include")
 
 add_executable(ElectroApp 
     "application/src/main.cpp" 
+    "application/src/webgpu-utils.h"
+    "application/src/webgpu-utils.cpp"
 )
 
 if(${CMAKE_SYSTEM_NAME} STREQUAL "Emscripten")
