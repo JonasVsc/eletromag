@@ -7,18 +7,16 @@
 void Application::initialize()
 {
 	initWindow();
-
 	initWebGPU();
-
 }
 
 void Application::terminate()
 {
-	glfwDestroyWindow(mWindow);
-	glfwTerminate();
-
 	wgpuDeviceRelease(mDevice);
 	wgpuQueueRelease(mQueue);
+
+	glfwDestroyWindow(mWindow);
+	glfwTerminate();
 }
 
 void Application::mainLoop()
@@ -57,9 +55,6 @@ void Application::initWebGPU()
 	WGPUAdapter adapter = requestAdapterSync(instance, &adapterOpts);
 	std::cout << "[INFO] Got Adapter: " << adapter << std::endl;
 
-	// DISPLAY ADAPTER INFO
-	inspectAdapter(adapter);
-	
 	wgpuInstanceRelease(instance);
 
 	WGPUDeviceDescriptor deviceDescriptor{};
@@ -74,9 +69,6 @@ void Application::initWebGPU()
 	std::cout << "[INFO] Requesting device..." << std::endl;
 	mDevice = requestDeviceSync(adapter, &deviceDescriptor);
 	std::cout << "[INFO] Got device: " << mDevice << std::endl;
-
-	// DISPLAY DEVICE INFO
-	inspectDevice(mDevice);
 
 	deviceDescriptor.deviceLostCallback = [](WGPUDeviceLostReason reason, char const* message, void* userdata)
 	{
@@ -96,35 +88,4 @@ void Application::initWebGPU()
 	wgpuAdapterRelease(adapter);
 
 	mQueue = wgpuDeviceGetQueue(mDevice);
-
-	auto onQueueWorkDone = [](WGPUQueueWorkDoneStatus status, void* userdata)
-	{
-		std::cout << "[INFO] Queue work finished with status: " << status << '\n';
-	};
-	wgpuQueueOnSubmittedWorkDone(mQueue, onQueueWorkDone, nullptr);
-
-	WGPUCommandEncoderDescriptor encoderDesc{};
-	encoderDesc.nextInChain = nullptr;
-	encoderDesc.label = "My command encoder";
-	WGPUCommandEncoder encoder = wgpuDeviceCreateCommandEncoder(mDevice, &encoderDesc);
-
-	wgpuCommandEncoderInsertDebugMarker(encoder, "Do one thing");
-	wgpuCommandEncoderInsertDebugMarker(encoder, "Do another thing");
-
-	WGPUCommandBufferDescriptor cmdBufferDescriptor{};
-	cmdBufferDescriptor.nextInChain = nullptr;
-	cmdBufferDescriptor.label = "Command buffer";
-	WGPUCommandBuffer command = wgpuCommandEncoderFinish(encoder, &cmdBufferDescriptor);
-	wgpuCommandEncoderRelease(encoder);
-
-	std::cout << "Submiting command..." << std::endl;
-	wgpuQueueSubmit(mQueue, 1, &command);
-	wgpuCommandBufferRelease(command);
-	std::cout << "Command submited." << std::endl;
-
-	for (int i = 0; i < 5; ++i)
-	{
-		std::cout << "Tick/Poll device..." << std::endl;
-		emscripten_sleep(100);
-	}
 }
