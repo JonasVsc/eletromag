@@ -13,9 +13,10 @@ void Application::initialize()
 
 void Application::terminate()
 {
-	wgpuDeviceRelease(mDevice);
+	wgpuSurfaceUnconfigure(mSurface);
 	wgpuQueueRelease(mQueue);
-
+	wgpuSurfaceRelease(mSurface);
+	wgpuDeviceRelease(mDevice);
 	glfwDestroyWindow(mWindow);
 	glfwTerminate();
 }
@@ -23,6 +24,49 @@ void Application::terminate()
 void Application::mainLoop()
 {
 	glfwPollEvents();
+	
+	WGPUTextureView targetView = getNextSurfaceTextureView();
+	if (!targetView) return;
+
+	// command encoder
+	WGPUCommandEncoderDescriptor encoderDescriptor{};
+	encoderDescriptor.nextInChain = nullptr;
+	encoderDescriptor.label = "My command encoder";
+	WGPUCommandEncoder encoder = wgpuDeviceCreateCommandEncoder(mDevice, &encoderDescriptor);
+
+	WGPURenderPassDescriptor renderPassDescriptor{};
+	renderPassDescriptor.nextInChain = nullptr;
+
+
+	WGPURenderPassColorAttachment renderPassColorAttachment{};
+	renderPassColorAttachment.view = targetView;
+	renderPassColorAttachment.resolveTarget = nullptr;
+	renderPassColorAttachment.loadOp = WGPULoadOp_Clear;
+	renderPassColorAttachment.storeOp = WGPUStoreOp_Store;
+	renderPassColorAttachment.clearValue = WGPUColor{ 0.9, 0.1, 0.2, 1.0 };
+	renderPassColorAttachment.depthSlice = WGPU_DEPTH_SLICE_UNDEFINED;
+
+	renderPassDescriptor.colorAttachmentCount = 1;
+	renderPassDescriptor.colorAttachments = &renderPassColorAttachment;
+	renderPassDescriptor.depthStencilAttachment = nullptr;
+	renderPassDescriptor.timestampWrites = nullptr;
+
+	WGPURenderPassEncoder renderPass = wgpuCommandEncoderBeginRenderPass(encoder, &renderPassDescriptor);
+	wgpuRenderPassEncoderEnd(renderPass);
+	wgpuRenderPassEncoderRelease(renderPass);
+
+	WGPUCommandBufferDescriptor commandBufferDescriptor{};
+	commandBufferDescriptor.nextInChain = nullptr;
+	commandBufferDescriptor.label = "Command buffer";
+	WGPUCommandBuffer commandBuffer = wgpuCommandEncoderFinish(encoder, &commandBufferDescriptor);
+	wgpuCommandEncoderRelease(encoder);
+
+	std::cout << "Submiting command..." << std::endl;
+	wgpuQueueSubmit(mQueue, 1, &commandBuffer);
+	wgpuCommandBufferRelease(commandBuffer);
+	std::cout << "Command submitted." << std::endl;
+
+	wgpuTextureViewRelease(targetView);
 }
 
 bool Application::isRunning()
@@ -50,18 +94,18 @@ void Application::initWebGPU()
 		std::runtime_error("[ERROR] Could not initialize WebGPU!");
 	std::cout << "[INFO] WGPU Instance: " << instance << std::endl;
 
-	WGPUSurface surface = glfwGetWGPUSurface(instance, mWindow);
 
 	std::cout << "[INFO] Requesting adapter..." << std::endl;
+	mSurface = glfwGetWGPUSurface(instance, mWindow);
 	WGPURequestAdapterOptions adapterOpts{};
 	adapterOpts.nextInChain = nullptr;
-	adapterOpts.compatibleSurface = surface;
+	adapterOpts.compatibleSurface = mSurface;
 	WGPUAdapter adapter = requestAdapterSync(instance, &adapterOpts);
 	std::cout << "[INFO] Got Adapter: " << adapter << std::endl;
 
-	wgpuSurfaceRelease(surface);
 	wgpuInstanceRelease(instance);
 
+	std::cout << "[INFO] Requesting device..." << std::endl;
 	WGPUDeviceDescriptor deviceDescriptor{};
 	deviceDescriptor.nextInChain = nullptr;
 	deviceDescriptor.label = "My Device"; 
@@ -69,18 +113,13 @@ void Application::initWebGPU()
 	deviceDescriptor.requiredLimits = nullptr; 
 	deviceDescriptor.defaultQueue.nextInChain = nullptr;
 	deviceDescriptor.defaultQueue.label = "The default queue";
-	deviceDescriptor.deviceLostCallback = nullptr;
-
-	std::cout << "[INFO] Requesting device..." << std::endl;
-	mDevice = requestDeviceSync(adapter, &deviceDescriptor);
-	std::cout << "[INFO] Got device: " << mDevice << std::endl;
-
 	deviceDescriptor.deviceLostCallback = [](WGPUDeviceLostReason reason, char const* message, void* userdata)
 	{
 		std::cout << "[WARN] Device lost: reason " << reason << '\n';
 		if (message) std::cout << " (" << message << ')' << '\n';
 	};
-
+	mDevice = requestDeviceSync(adapter, &deviceDescriptor);
+	std::cout << "[INFO] Got device: " << mDevice << std::endl;
 	auto onDeviceError = [](WGPUErrorType type, char const* message, void* /* pUserData */) 
 	{
 		std::cout << "[ERROR] Uncaptured device error: type " << type;
@@ -90,7 +129,51 @@ void Application::initWebGPU()
 	
 	wgpuDeviceSetUncapturedErrorCallback(mDevice, onDeviceError, nullptr /* pUserData */);
 
+	mQueue = wgpuDeviceGetQueue(mDevice);
+
+
+
+	WGPUSurfaceConfiguration surfaceConfig{};
+	surfaceConfig.nextInChain = nullptr;
+
+	surfaceConfig.width = 640;
+	surfaceConfig.height = 480;
+	surfaceConfig.usage = WGPUTextureUsage_RenderAttachment;
+	WGPUTextureFormat surfaceFormat = wgpuSurfaceGetPreferredFormat(mSurface, adapter);
+	surfaceConfig.format = surfaceFormat;
+
+	surfaceConfig.viewFormatCount = 0;
+	surfaceConfig.viewFormats = nullptr;
+	surfaceConfig.device = mDevice;
+	surfaceConfig.presentMode = WGPUPresentMode_Fifo;
+	surfaceConfig.alphaMode = WGPUCompositeAlphaMode_Auto;
+
+	wgpuSurfaceConfigure(mSurface, &surfaceConfig);
+
 	wgpuAdapterRelease(adapter);
 
-	mQueue = wgpuDeviceGetQueue(mDevice);
+}
+
+WGPUTextureView Application::getNextSurfaceTextureView()
+{
+	WGPUSurfaceTexture surfaceTexture;
+	wgpuSurfaceGetCurrentTexture(mSurface, &surfaceTexture);
+	if (surfaceTexture.status != WGPUSurfaceGetCurrentTextureStatus_Success)
+		return nullptr;
+
+	WGPUTextureViewDescriptor viewDescriptor;
+	viewDescriptor.nextInChain = nullptr;
+	viewDescriptor.label = "Surface texture view";
+	viewDescriptor.format = wgpuTextureGetFormat(surfaceTexture.texture);
+	viewDescriptor.dimension = WGPUTextureViewDimension_2D;
+	viewDescriptor.baseMipLevel = 0;
+	viewDescriptor.mipLevelCount = 1;
+	viewDescriptor.baseArrayLayer = 0;
+	viewDescriptor.arrayLayerCount = 1;
+	viewDescriptor.aspect = WGPUTextureAspect_All;
+	WGPUTextureView targetView = wgpuTextureCreateView(surfaceTexture.texture, &viewDescriptor);
+
+	wgpuTextureRelease(surfaceTexture.texture);
+
+	return targetView;
 }

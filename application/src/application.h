@@ -24,10 +24,14 @@ private:
 
 private:
 
+	WGPUTextureView getNextSurfaceTextureView();
+
 	GLFWwindow* mWindow;
 
 	WGPUDevice mDevice;
 
 	WGPUQueue mQueue;
+
+	WGPUSurface mSurface;
 
 };
