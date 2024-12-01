@@ -1,0 +1,4 @@
+TODO:
+
+
+- Check device capabilites to procced with application initialization.

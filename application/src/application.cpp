@@ -4,6 +4,8 @@
 #include "glfw3webgpu.h"
 
 #include<iostream>
+#include<cstdint>
+#include<stdint.h>
 
 const char* shaderSource = R"(
 @vertex
@@ -85,10 +87,8 @@ void Application::mainLoop()
 	WGPUCommandBuffer commandBuffer = wgpuCommandEncoderFinish(commandEncoder, &commandBufferDescriptor);
 	wgpuCommandEncoderRelease(commandEncoder);
 
-	std::cout << "Submiting command..." << std::endl;
 	wgpuQueueSubmit(mQueue, 1, &commandBuffer);
 	wgpuCommandBufferRelease(commandBuffer);
-	std::cout << "Command submitted." << std::endl;
 
 	wgpuTextureViewRelease(targetView);
 }
@@ -109,6 +109,14 @@ void Application::initWindow()
 	glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
 
 	mWindow = glfwCreateWindow(640, 480, "Learn WebGPU", nullptr, nullptr);
+}
+
+void wgpuPollEvents(bool yieldToWebBrowser)
+{
+	if(yieldToWebBrowser)
+	{
+		emscripten_sleep(100);
+	}
 }
 
 void Application::initWebGPU()
@@ -150,6 +158,8 @@ void Application::initWebGPU()
 		if (message) std::cout << " (" << message << ")";
 		std::cout << std::endl;
 	};
+
+	deviceCapabilities(adapter);
 	
 	wgpuDeviceSetUncapturedErrorCallback(mDevice, onDeviceError, nullptr /* pUserData */);
 
@@ -178,7 +188,112 @@ void Application::initWebGPU()
 
 	initializeRenderPipeline();
 
+	playingWithBuffers();
+	
 }
+
+void Application::playingWithBuffers()
+{
+	// Experimentation for the "Playing with buffer" chapter
+	WGPUBufferDescriptor bufferDesc = {};
+	bufferDesc.nextInChain = nullptr;
+	bufferDesc.label = "Some GPU-side data buffer";
+	bufferDesc.usage = WGPUBufferUsage_CopyDst | WGPUBufferUsage_CopySrc;
+	bufferDesc.size = 16;
+	bufferDesc.mappedAtCreation = false;
+	WGPUBuffer buffer1 = wgpuDeviceCreateBuffer(mDevice, &bufferDesc);
+	bufferDesc.label = "Output buffer";
+	bufferDesc.usage = WGPUBufferUsage_CopyDst | WGPUBufferUsage_MapRead;
+	WGPUBuffer buffer2 = wgpuDeviceCreateBuffer(mDevice, &bufferDesc);
+	
+	// Create some CPU-side data buffer (of size 16 bytes)
+	std::vector<uint8_t> numbers(16);
+	for (uint8_t i = 0; i < 16; ++i) numbers[i] = i;
+	// `numbers` now contains [ 0, 1, 2, ... ]
+	
+	// Copy this from `numbers` (RAM) to `buffer1` (VRAM)
+	wgpuQueueWriteBuffer(mQueue, buffer1, 0, numbers.data(), numbers.size());
+	
+	WGPUCommandEncoder encoder = wgpuDeviceCreateCommandEncoder(mDevice, nullptr);
+	
+	// After creating the command encoder
+	wgpuCommandEncoderCopyBufferToBuffer(encoder, buffer1, 0, buffer2, 0, 16);
+	
+	WGPUCommandBuffer command = wgpuCommandEncoderFinish(encoder, nullptr);
+	wgpuCommandEncoderRelease(encoder);
+	wgpuQueueSubmit(mQueue, 1, &command);
+	wgpuCommandBufferRelease(command);
+	
+	// The context shared between this main function and the callback.
+	struct Context {
+		bool ready;
+		WGPUBuffer buffer;
+	};
+	
+	auto onBuffer2Mapped = [](WGPUBufferMapAsyncStatus status, void* pUserData) {
+		Context* context = reinterpret_cast<Context*>(pUserData);
+		context->ready = true;
+		std::cout << "Buffer 2 mapped with status " << status << std::endl;
+		if (status != WGPUBufferMapAsyncStatus_Success) return;
+	
+		// Get a pointer to wherever the driver mapped the GPU memory to the RAM
+		uint8_t* bufferData = (uint8_t*)wgpuBufferGetConstMappedRange(context->buffer, 0, 16);
+		
+		std::cout << "bufferData = [";
+		for (int i = 0; i < 16; ++i) {
+			if (i > 0) std::cout << ", ";
+			std::cout << (int)bufferData[i];
+		}
+		std::cout << "]" << std::endl;
+		
+		// Then do not forget to unmap the memory
+		wgpuBufferUnmap(context->buffer);
+	};
+	
+	// Create the Context instance
+	Context context = { false, buffer2 };
+	
+	wgpuBufferMapAsync(buffer2, WGPUMapMode_Read, 0, 16, onBuffer2Mapped, (void*)&context);
+	//                      Pass the address of the Context instance here: ^^^^^^^^^^^^^^
+	
+	while (!context.ready) {
+		//  ^^^^^^^^^^^^^ Use context.ready here instead of ready
+		wgpuPollEvents(true /* yieldToBrowser */);
+	}
+	
+	// In Terminate()
+	wgpuBufferRelease(buffer1);
+	wgpuBufferRelease(buffer2);
+}
+
+void Application::vertexBuffer()
+{
+	// vertex Buffer
+	WGPUBufferDescriptor bufferDescriptor{};
+	bufferDescriptor.nextInChain = nullptr;
+	bufferDescriptor.label = "vertex Buffer";
+	bufferDescriptor.usage = WGPUBufferUsage_CopySrc | WGPUBufferUsage_CopyDst;
+	bufferDescriptor.size = 3;
+
+	WGPUBuffer buffer = wgpuDeviceCreateBuffer(mDevice, &bufferDescriptor);
+	
+
+}
+
+void Application::deviceCapabilities(WGPUAdapter adapter)
+{
+	WGPUSupportedLimits supportedLimits{};
+	supportedLimits.nextInChain = nullptr;
+
+	wgpuAdapterGetLimits(adapter, &supportedLimits);
+	std::cout << "adapter.maxVertexAttributes: " << supportedLimits.limits.maxVertexAttributes << std::endl;
+
+	wgpuDeviceGetLimits(mDevice, &supportedLimits);
+	std::cout << "device.maxVertexAttributes: " << supportedLimits.limits.maxVertexAttributes << std::endl;
+
+}
+
+
 
 void Application::initializeRenderPipeline()
 {

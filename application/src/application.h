@@ -1,8 +1,7 @@
 #pragma once
 
 #include <emscripten.h>
-
-#include <webgpu/webgpu_cpp.h>
+#include <webgpu/webgpu.h>
 #include <GLFW/glfw3.h>
 
 class Application
@@ -20,12 +19,22 @@ public:
 private:
 
 	void initWindow();
+
 	void initWebGPU();
-	void initializeRenderPipeline();
 
 private:
 
+	void initializeRenderPipeline();
+
+	void playingWithBuffers();
+
+	void vertexBuffer();
+
+	void deviceCapabilities(WGPUAdapter);
+
 	WGPUTextureView getNextSurfaceTextureView();
+
+private:
 
 	GLFWwindow* mWindow;
 
