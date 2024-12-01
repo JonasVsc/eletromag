@@ -5,6 +5,26 @@
 
 #include<iostream>
 
+const char* shaderSource = R"(
+@vertex
+fn vs_main(@builtin(vertex_index) in_vertex_index: u32) -> @builtin(position) vec4f {
+	var p = vec2f(0.0, 0.0);
+	if (in_vertex_index == 0u) {
+		p = vec2f(-0.5, -0.5);
+	} else if (in_vertex_index == 1u) {
+		p = vec2f(0.5, -0.5);
+	} else {
+		p = vec2f(0.0, 0.5);
+	}
+	return vec4f(p, 0.0, 1.0);
+}
+
+@fragment
+fn fs_main() -> @location(0) vec4f {
+	return vec4f(0.0, 0.4, 1.0, 1.0);
+}
+)";
+
 void Application::initialize()
 {
 	initWindow();
@@ -13,6 +33,7 @@ void Application::initialize()
 
 void Application::terminate()
 {
+	wgpuRenderPipelineRelease(mPipeline);
 	wgpuSurfaceUnconfigure(mSurface);
 	wgpuQueueRelease(mQueue);
 	wgpuSurfaceRelease(mSurface);
@@ -29,16 +50,15 @@ void Application::mainLoop()
 	if (!targetView) return;
 
 	// command encoder
-	WGPUCommandEncoderDescriptor encoderDescriptor{};
+	WGPUCommandEncoderDescriptor encoderDescriptor = {};
 	encoderDescriptor.nextInChain = nullptr;
 	encoderDescriptor.label = "My command encoder";
-	WGPUCommandEncoder encoder = wgpuDeviceCreateCommandEncoder(mDevice, &encoderDescriptor);
+	WGPUCommandEncoder commandEncoder = wgpuDeviceCreateCommandEncoder(mDevice, &encoderDescriptor);
 
-	WGPURenderPassDescriptor renderPassDescriptor{};
+	WGPURenderPassDescriptor renderPassDescriptor = {};
 	renderPassDescriptor.nextInChain = nullptr;
 
-
-	WGPURenderPassColorAttachment renderPassColorAttachment{};
+	WGPURenderPassColorAttachment renderPassColorAttachment = {};
 	renderPassColorAttachment.view = targetView;
 	renderPassColorAttachment.resolveTarget = nullptr;
 	renderPassColorAttachment.loadOp = WGPULoadOp_Clear;
@@ -51,15 +71,19 @@ void Application::mainLoop()
 	renderPassDescriptor.depthStencilAttachment = nullptr;
 	renderPassDescriptor.timestampWrites = nullptr;
 
-	WGPURenderPassEncoder renderPass = wgpuCommandEncoderBeginRenderPass(encoder, &renderPassDescriptor);
+	WGPURenderPassEncoder renderPass = wgpuCommandEncoderBeginRenderPass(commandEncoder, &renderPassDescriptor);
+
+	wgpuRenderPassEncoderSetPipeline(renderPass, mPipeline);
+	wgpuRenderPassEncoderDraw(renderPass, 3, 1, 0, 0);
+
 	wgpuRenderPassEncoderEnd(renderPass);
 	wgpuRenderPassEncoderRelease(renderPass);
 
 	WGPUCommandBufferDescriptor commandBufferDescriptor{};
 	commandBufferDescriptor.nextInChain = nullptr;
 	commandBufferDescriptor.label = "Command buffer";
-	WGPUCommandBuffer commandBuffer = wgpuCommandEncoderFinish(encoder, &commandBufferDescriptor);
-	wgpuCommandEncoderRelease(encoder);
+	WGPUCommandBuffer commandBuffer = wgpuCommandEncoderFinish(commandEncoder, &commandBufferDescriptor);
+	wgpuCommandEncoderRelease(commandEncoder);
 
 	std::cout << "Submiting command..." << std::endl;
 	wgpuQueueSubmit(mQueue, 1, &commandBuffer);
@@ -152,7 +176,75 @@ void Application::initWebGPU()
 
 	wgpuAdapterRelease(adapter);
 
+	initializeRenderPipeline();
+
 }
+
+void Application::initializeRenderPipeline()
+{
+	// load Shader Module
+	WGPUShaderModuleDescriptor shaderDescriptor{};
+	WGPUShaderModuleWGSLDescriptor shaderCodeDescriptor{};
+	shaderCodeDescriptor.chain.next = nullptr;
+	shaderCodeDescriptor.chain.sType = WGPUSType_ShaderModuleWGSLDescriptor;
+	shaderDescriptor.nextInChain = &shaderCodeDescriptor.chain;
+	shaderCodeDescriptor.code = shaderSource;
+	WGPUShaderModule shaderModule = wgpuDeviceCreateShaderModule(mDevice, &shaderDescriptor);
+
+	// create render pipeline
+	WGPURenderPipelineDescriptor pipelineDescriptor{};
+	pipelineDescriptor.nextInChain = nullptr;
+
+	// vertex
+	pipelineDescriptor.vertex.bufferCount = 0;
+	pipelineDescriptor.vertex.buffers = nullptr;
+	pipelineDescriptor.vertex.module = shaderModule;
+	pipelineDescriptor.vertex.entryPoint = "vs_main";
+	pipelineDescriptor.vertex.constantCount = 0;
+	pipelineDescriptor.vertex.constants = nullptr;
+
+	// primitive
+	pipelineDescriptor.primitive.topology = WGPUPrimitiveTopology_TriangleList;
+	pipelineDescriptor.primitive.stripIndexFormat = WGPUIndexFormat_Undefined;
+	pipelineDescriptor.primitive.frontFace = WGPUFrontFace_CCW;
+	pipelineDescriptor.primitive.cullMode = WGPUCullMode_None;
+
+	// fragment
+	WGPUFragmentState fragmentState{};
+	fragmentState.module = shaderModule;
+	fragmentState.entryPoint = "fs_main";
+	fragmentState.constantCount = 0;
+	fragmentState.constants = nullptr;
+
+	//blend
+	WGPUBlendState blendState{};
+	blendState.color.srcFactor = WGPUBlendFactor_SrcAlpha;
+	blendState.color.dstFactor = WGPUBlendFactor_OneMinusSrcAlpha;
+	blendState.color.operation = WGPUBlendOperation_Add;
+	blendState.alpha.srcFactor = WGPUBlendFactor_Zero;
+	blendState.alpha.dstFactor = WGPUBlendFactor_One;
+	blendState.alpha.operation = WGPUBlendOperation_Add;
+
+	WGPUColorTargetState colorTarget{};
+	colorTarget.format = mSurfaceFormat;
+	colorTarget.blend = &blendState;
+	colorTarget.writeMask = WGPUColorWriteMask_All;
+	
+	fragmentState.targetCount = 1;
+	fragmentState.targets = &colorTarget;
+	pipelineDescriptor.fragment = &fragmentState;
+	
+	pipelineDescriptor.depthStencil = nullptr;
+	pipelineDescriptor.multisample.count = 1;
+	pipelineDescriptor.multisample.mask = ~0u;
+	pipelineDescriptor.multisample.alphaToCoverageEnabled = false;
+	pipelineDescriptor.layout = nullptr;
+
+	mPipeline = wgpuDeviceCreateRenderPipeline(mDevice, &pipelineDescriptor);
+
+	wgpuShaderModuleRelease(shaderModule);
+}
+
 
 WGPUTextureView Application::getNextSurfaceTextureView()
 {

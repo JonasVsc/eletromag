@@ -18,12 +18,11 @@ add_subdirectory(application/vendor/glfw3webgpu)
 
 if(${CMAKE_SYSTEM_NAME} STREQUAL "Emscripten")
 
-    set_target_properties(ElectroApp PROPERTIES SUFFIX ".html")
 
     target_link_libraries(ElectroApp PRIVATE glfw3webgpu)
 
     target_link_options(ElectroApp PRIVATE -sUSE_WEBGPU=1 -sWASM=1 -sUSE_GLFW=3 -sASYNCIFY)
 
-    # configure_file(${CMAKE_SOURCE_DIR}/application/src/index.html ${CMAKE_BINARY_DIR}/index.html COPYONLY)
+    configure_file(${CMAKE_SOURCE_DIR}/application/src/index.html ${CMAKE_BINARY_DIR}/index.html COPYONLY)
 
 endif()

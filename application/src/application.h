@@ -21,6 +21,7 @@ private:
 
 	void initWindow();
 	void initWebGPU();
+	void initializeRenderPipeline();
 
 private:
 
@@ -33,5 +34,9 @@ private:
 	WGPUQueue mQueue;
 
 	WGPUSurface mSurface;
+
+	WGPUTextureFormat mSurfaceFormat = WGPUTextureFormat_BGRA8Unorm;
+
+	WGPURenderPipeline mPipeline;
 
 };
