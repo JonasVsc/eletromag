@@ -10,16 +10,8 @@
 
 const char* shaderSource = R"(
 @vertex
-fn vs_main(@builtin(vertex_index) in_vertex_index: u32) -> @builtin(position) vec4f {
-	var p = vec2f(0.0, 0.0);
-	if (in_vertex_index == 0u) {
-		p = vec2f(-0.5, -0.5);
-	} else if (in_vertex_index == 1u) {
-		p = vec2f(0.5, -0.5);
-	} else {
-		p = vec2f(0.0, 0.5);
-	}
-	return vec4f(p, 0.0, 1.0);
+fn vs_main(@location(0) in_vertex_position: vec2f) -> @builtin(position) vec4f {
+	return vec4f(in_vertex_position, 0.0, 1.0);
 }
 
 @fragment
@@ -36,6 +28,7 @@ void Application::initialize()
 
 void Application::terminate()
 {
+	wgpuBufferRelease(vertexBuffer);
 	wgpuRenderPipelineRelease(mPipeline);
 	wgpuSurfaceUnconfigure(mSurface);
 	wgpuQueueRelease(mQueue);
@@ -77,7 +70,9 @@ void Application::mainLoop()
 	WGPURenderPassEncoder renderPass = wgpuCommandEncoderBeginRenderPass(commandEncoder, &renderPassDescriptor);
 
 	wgpuRenderPassEncoderSetPipeline(renderPass, mPipeline);
-	wgpuRenderPassEncoderDraw(renderPass, 3, 1, 0, 0);
+
+	wgpuRenderPassEncoderSetVertexBuffer(renderPass, 0, vertexBuffer, 0, wgpuBufferGetSize(vertexBuffer));
+	wgpuRenderPassEncoderDraw(renderPass, vertexCount, 1, 0, 0);
 
 	wgpuRenderPassEncoderEnd(renderPass);
 	wgpuRenderPassEncoderRelease(renderPass);
@@ -189,7 +184,7 @@ void Application::initWebGPU()
 
 	initializeRenderPipeline();
 
-	playingWithBuffers();
+	initializeBuffers();
 	
 }
 
@@ -267,17 +262,34 @@ void Application::playingWithBuffers()
 	wgpuBufferRelease(buffer2);
 }
 
-void Application::vertexBuffer()
+void Application::initializeBuffers()
 {
-	// vertex Buffer
-	WGPUBufferDescriptor bufferDescriptor{};
-	bufferDescriptor.nextInChain = nullptr;
-	bufferDescriptor.label = "vertex Buffer";
-	bufferDescriptor.usage = WGPUBufferUsage_CopySrc | WGPUBufferUsage_CopyDst;
-	bufferDescriptor.size = 3;
-
-	WGPUBuffer buffer = wgpuDeviceCreateBuffer(mDevice, &bufferDescriptor);
+	std::vector<float> vertexData = {
+		// Define a first triangle:
+		-0.5, -0.5,
+		+0.5, -0.5,
+		+0.0, +0.5,
 	
+		// Add a second triangle:
+		-0.55f, -0.5,
+		-0.05f, +0.5,
+		-0.55f, +0.5
+	};
+	
+	vertexCount = static_cast<uint32_t>(vertexData.size() / 2);
+
+	WGPUBufferDescriptor bufferDescriptor{};
+	bufferDescriptor.label = "vertex buffer";
+	bufferDescriptor.nextInChain = nullptr;
+	bufferDescriptor.size = vertexData.size() * sizeof(float);
+	bufferDescriptor.usage = WGPUBufferUsage_CopyDst | WGPUBufferUsage_Vertex;
+	bufferDescriptor.mappedAtCreation = false;
+	
+	vertexBuffer = wgpuDeviceCreateBuffer(mDevice, &bufferDescriptor);
+
+
+	wgpuQueueWriteBuffer(mQueue, vertexBuffer, 0, vertexData.data(), bufferDescriptor.size);
+
 
 }
 
@@ -311,9 +323,23 @@ void Application::initializeRenderPipeline()
 	WGPURenderPipelineDescriptor pipelineDescriptor{};
 	pipelineDescriptor.nextInChain = nullptr;
 
+
+	WGPUVertexBufferLayout bufferLayout{};
+	
+	WGPUVertexAttribute positionAtrib;
+	positionAtrib.shaderLocation = 0;
+	positionAtrib.format = WGPUVertexFormat_Float32x2;
+	positionAtrib.offset = 0;
+
+	bufferLayout.attributeCount = 1;
+	bufferLayout.attributes = &positionAtrib;
+	bufferLayout.arrayStride = 2 * sizeof(float);
+	bufferLayout.stepMode = WGPUVertexStepMode_Vertex;
+
+
 	// vertex
-	pipelineDescriptor.vertex.bufferCount = 0;
-	pipelineDescriptor.vertex.buffers = nullptr;
+	pipelineDescriptor.vertex.bufferCount = 1;
+	pipelineDescriptor.vertex.buffers = &bufferLayout;
 	pipelineDescriptor.vertex.module = shaderModule;
 	pipelineDescriptor.vertex.entryPoint = "vs_main";
 	pipelineDescriptor.vertex.constantCount = 0;

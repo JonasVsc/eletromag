@@ -30,7 +30,7 @@ private:
 
 	void playingWithBuffers();
 
-	void vertexBuffer();
+	void initializeBuffers();
 
 	void deviceCapabilities(WGPUAdapter);
 
@@ -49,5 +49,8 @@ private:
 	WGPUTextureFormat mSurfaceFormat = WGPUTextureFormat_BGRA8Unorm;
 
 	WGPURenderPipeline mPipeline;
+
+	WGPUBuffer vertexBuffer;
+	uint32_t vertexCount;
 
 };
