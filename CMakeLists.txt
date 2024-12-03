@@ -17,7 +17,6 @@ add_executable(ElectroApp
 )
 
 add_subdirectory(application/vendor/glfw3webgpu)
-
 if(${CMAKE_SYSTEM_NAME} STREQUAL "Emscripten")
 
 
