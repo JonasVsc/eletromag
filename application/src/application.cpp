@@ -9,14 +9,27 @@
 #include<vector>
 
 const char* shaderSource = R"(
+struct VertexInput {
+    @location(0) position: vec2f,
+    @location(1) color: vec3f,
+}
+
+struct VertexOutput {
+    @builtin(position) position: vec4f,
+    @location(0) color: vec3f,
+}
+
 @vertex
-fn vs_main(@location(0) in_vertex_position: vec2f) -> @builtin(position) vec4f {
-	return vec4f(in_vertex_position, 0.0, 1.0);
+fn vs_main(in: VertexInput) -> VertexOutput {
+    var out: VertexOutput;
+    out.position = vec4f(in.position, 0.0, 1.0);
+    out.color = in.color;
+    return out;
 }
 
 @fragment
-fn fs_main() -> @location(0) vec4f {
-	return vec4f(0.0, 0.4, 1.0, 1.0);
+fn fs_main(in: VertexOutput) -> @location(0) vec4f {
+	return vec4f(in.color, 1.0);
 }
 )";
 
@@ -72,6 +85,7 @@ void Application::mainLoop()
 	wgpuRenderPassEncoderSetPipeline(renderPass, mPipeline);
 
 	wgpuRenderPassEncoderSetVertexBuffer(renderPass, 0, vertexBuffer, 0, wgpuBufferGetSize(vertexBuffer));
+	wgpuRenderPassEncoderSetVertexBuffer(renderPass, 1, vertexBuffer, 2 * sizeof(float), wgpuBufferGetSize(vertexBuffer) - 2 * sizeof(float));
 	wgpuRenderPassEncoderDraw(renderPass, vertexCount, 1, 0, 0);
 
 	wgpuRenderPassEncoderEnd(renderPass);
@@ -265,18 +279,20 @@ void Application::playingWithBuffers()
 void Application::initializeBuffers()
 {
 	std::vector<float> vertexData = {
-		// Define a first triangle:
-		-0.5, -0.5,
-		+0.5, -0.5,
-		+0.0, +0.5,
-	
-		// Add a second triangle:
-		-0.55f, -0.5,
-		-0.05f, +0.5,
-		-0.55f, +0.5
+		// x0,  y0,  r0,  g0,  b0
+		-0.5, -0.5, 1.0, 0.0, 0.0,
+
+		// x1,  y1,  r1,  g1,  b1
+		+0.5, -0.5, 0.0, 1.0, 0.0,
+
+		// ...
+		+0.0,   +0.5, 0.0, 0.0, 1.0,
+		-0.55f, -0.5, 1.0, 1.0, 0.0,
+		-0.05f, +0.5, 1.0, 0.0, 1.0,
+		-0.55f, +0.5, 0.0, 1.0, 1.0
 	};
 	
-	vertexCount = static_cast<uint32_t>(vertexData.size() / 2);
+	vertexCount = static_cast<uint32_t>(vertexData.size() / 5);
 
 	WGPUBufferDescriptor bufferDescriptor{};
 	bufferDescriptor.label = "vertex buffer";
@@ -326,14 +342,20 @@ void Application::initializeRenderPipeline()
 
 	WGPUVertexBufferLayout bufferLayout{};
 	
-	WGPUVertexAttribute positionAtrib;
-	positionAtrib.shaderLocation = 0;
-	positionAtrib.format = WGPUVertexFormat_Float32x2;
-	positionAtrib.offset = 0;
+	std::vector<WGPUVertexAttribute> vertexAttributes(2);
 
-	bufferLayout.attributeCount = 1;
-	bufferLayout.attributes = &positionAtrib;
-	bufferLayout.arrayStride = 2 * sizeof(float);
+	// position attribute
+	vertexAttributes[0].shaderLocation = 0;
+	vertexAttributes[0].format = WGPUVertexFormat_Float32x2;
+	vertexAttributes[0].offset = 0;
+
+	vertexAttributes[1].shaderLocation = 1;
+	vertexAttributes[1].format = WGPUVertexFormat_Float32x3;
+	vertexAttributes[1].offset = 2 * sizeof(float);
+
+	bufferLayout.attributeCount = static_cast<uint32_t>(vertexAttributes.size());
+	bufferLayout.attributes = vertexAttributes.data();
+	bufferLayout.arrayStride = 5 * sizeof(float);
 	bufferLayout.stepMode = WGPUVertexStepMode_Vertex;
 
 
