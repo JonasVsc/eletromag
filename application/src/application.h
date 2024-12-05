@@ -53,4 +53,7 @@ private:
 	WGPUBuffer vertexBuffer;
 	uint32_t vertexCount;
 
+	WGPUBuffer indexBuffer;
+	uint32_t indexCount;
+
 };

@@ -21,8 +21,9 @@ struct VertexOutput {
 
 @vertex
 fn vs_main(in: VertexInput) -> VertexOutput {
+	let ratio = 640.0 / 480.0;
     var out: VertexOutput;
-    out.position = vec4f(in.position, 0.0, 1.0);
+    out.position = vec4f(in.position.x, in.position.y * ratio, 0.0, 1.0);
     out.color = in.color;
     return out;
 }
@@ -41,6 +42,7 @@ void Application::initialize()
 
 void Application::terminate()
 {
+	wgpuBufferRelease(indexBuffer);
 	wgpuBufferRelease(vertexBuffer);
 	wgpuRenderPipelineRelease(mPipeline);
 	wgpuSurfaceUnconfigure(mSurface);
@@ -72,7 +74,7 @@ void Application::mainLoop()
 	renderPassColorAttachment.resolveTarget = nullptr;
 	renderPassColorAttachment.loadOp = WGPULoadOp_Clear;
 	renderPassColorAttachment.storeOp = WGPUStoreOp_Store;
-	renderPassColorAttachment.clearValue = WGPUColor{ 1.0, 1.0, 1.0, 1.0 };
+	renderPassColorAttachment.clearValue = WGPUColor{ 0.5, 1.0, 1.0, 1.0 };
 	renderPassColorAttachment.depthSlice = WGPU_DEPTH_SLICE_UNDEFINED;
 
 	renderPassDescriptor.colorAttachmentCount = 1;
@@ -85,8 +87,9 @@ void Application::mainLoop()
 	wgpuRenderPassEncoderSetPipeline(renderPass, mPipeline);
 
 	wgpuRenderPassEncoderSetVertexBuffer(renderPass, 0, vertexBuffer, 0, wgpuBufferGetSize(vertexBuffer));
-	wgpuRenderPassEncoderSetVertexBuffer(renderPass, 1, vertexBuffer, 2 * sizeof(float), wgpuBufferGetSize(vertexBuffer) - 2 * sizeof(float));
-	wgpuRenderPassEncoderDraw(renderPass, vertexCount, 1, 0, 0);
+	wgpuRenderPassEncoderSetIndexBuffer(renderPass, indexBuffer, WGPUIndexFormat_Uint16, 0, wgpuBufferGetSize(indexBuffer));
+
+	wgpuRenderPassEncoderDrawIndexed(renderPass, indexCount, 1, 0, 0, 0);
 
 	wgpuRenderPassEncoderEnd(renderPass);
 	wgpuRenderPassEncoderRelease(renderPass);
@@ -279,20 +282,20 @@ void Application::playingWithBuffers()
 void Application::initializeBuffers()
 {
 	std::vector<float> vertexData = {
-		// x0,  y0,  r0,  g0,  b0
-		-0.5, -0.5, 1.0, 0.0, 0.0,
-
-		// x1,  y1,  r1,  g1,  b1
-		+0.5, -0.5, 0.0, 1.0, 0.0,
-
-		// ...
-		+0.0,   +0.5, 0.0, 0.0, 1.0,
-		-0.55f, -0.5, 1.0, 1.0, 0.0,
-		-0.05f, +0.5, 1.0, 0.0, 1.0,
-		-0.55f, +0.5, 0.0, 1.0, 1.0
+		// x,   y,     r,   g,   b
+		-1.0, -1.0,   1.0, 0.0, 0.0,
+		+1.0, -1.0,   0.0, 1.0, 0.0,
+		+1.0, +1.0,   0.0, 0.0, 1.0,
+		-1.0, +1.0,   1.0, 1.0, 0.0
 	};
 	
-	vertexCount = static_cast<uint32_t>(vertexData.size() / 5);
+	std::vector<uint16_t> indexData = {
+		0, 1, 2,
+		0, 2, 3
+	};
+
+	vertexCount = static_cast<uint32_t>(vertexData.size() / 4);
+	indexCount = static_cast<uint32_t>(indexData.size());
 
 	WGPUBufferDescriptor bufferDescriptor{};
 	bufferDescriptor.label = "vertex buffer";
@@ -302,9 +305,14 @@ void Application::initializeBuffers()
 	bufferDescriptor.mappedAtCreation = false;
 	
 	vertexBuffer = wgpuDeviceCreateBuffer(mDevice, &bufferDescriptor);
-
-
 	wgpuQueueWriteBuffer(mQueue, vertexBuffer, 0, vertexData.data(), bufferDescriptor.size);
+
+	bufferDescriptor.size = indexData.size() * sizeof(uint16_t);
+	bufferDescriptor.size = (bufferDescriptor.size + 3) & ~3; // round up to the next multiple of 4
+	bufferDescriptor.usage = WGPUBufferUsage_CopyDst | WGPUBufferUsage_Index;
+
+	indexBuffer = wgpuDeviceCreateBuffer(mDevice, &bufferDescriptor);
+	wgpuQueueWriteBuffer(mQueue, indexBuffer, 0, indexData.data(), bufferDescriptor.size);
 
 
 }
