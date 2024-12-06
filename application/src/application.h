@@ -32,6 +32,8 @@ private:
 
 	void initializeBuffers();
 
+	void initializeBindGroups();
+
 	void deviceCapabilities(WGPUAdapter);
 
 	WGPUTextureView getNextSurfaceTextureView();
@@ -50,10 +52,18 @@ private:
 
 	WGPURenderPipeline mPipeline;
 
+	WGPUPipelineLayout mLayout;
+
+	WGPUBindGroupLayout mBindGroupLayout;
+
+	WGPUBindGroup mBindGroup;
+
 	WGPUBuffer vertexBuffer;
 	uint32_t vertexCount;
 
 	WGPUBuffer indexBuffer;
 	uint32_t indexCount;
+
+	WGPUBuffer uniformBuffer;
 
 };
