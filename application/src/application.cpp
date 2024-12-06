@@ -35,9 +35,9 @@ void Application::terminate()
 void Application::mainLoop()
 {
 	glfwPollEvents();
-	
-	float t = static_cast<float>(glfwGetTime());
-	wgpuQueueWriteBuffer(mQueue, uniformBuffer, 0, &t, sizeof(float));
+
+	float time = static_cast<float>(glfwGetTime());
+	wgpuQueueWriteBuffer(mQueue, uniformBuffer, offsetof(MyUniforms, time), &time, sizeof(float));
 
 	WGPUTextureView targetView = getNextSurfaceTextureView();
 	if (!targetView) return;
@@ -277,6 +277,7 @@ void Application::initializeBuffers()
 	vertexCount = static_cast<uint32_t>(vertexData.size() / 4);
 	indexCount = static_cast<uint32_t>(indexData.size());
 
+	// vertex buffer
 	WGPUBufferDescriptor bufferDescriptor{};
 	bufferDescriptor.label = "vertex buffer";
 	bufferDescriptor.nextInChain = nullptr;
@@ -287,6 +288,7 @@ void Application::initializeBuffers()
 	vertexBuffer = wgpuDeviceCreateBuffer(mDevice, &bufferDescriptor);
 	wgpuQueueWriteBuffer(mQueue, vertexBuffer, 0, vertexData.data(), bufferDescriptor.size);
 
+	// index buffer
 	bufferDescriptor.size = indexData.size() * sizeof(uint16_t);
 	bufferDescriptor.size = (bufferDescriptor.size + 3) & ~3; // round up to the next multiple of 4
 	bufferDescriptor.usage = WGPUBufferUsage_CopyDst | WGPUBufferUsage_Index;
@@ -294,14 +296,16 @@ void Application::initializeBuffers()
 	indexBuffer = wgpuDeviceCreateBuffer(mDevice, &bufferDescriptor);
 	wgpuQueueWriteBuffer(mQueue, indexBuffer, 0, indexData.data(), bufferDescriptor.size);
 
-	bufferDescriptor.size = 4 * sizeof(float);
+	// uniform buffer
+	bufferDescriptor.size = sizeof(MyUniforms);
 	bufferDescriptor.usage = WGPUBufferUsage_CopyDst | WGPUBufferUsage_Uniform;
 	bufferDescriptor.mappedAtCreation = false;
 	uniformBuffer = wgpuDeviceCreateBuffer(mDevice, &bufferDescriptor);
-	float currentTime = 1.0f;
-	wgpuQueueWriteBuffer(mQueue, uniformBuffer, 0, &currentTime, sizeof(float));
 
-
+	MyUniforms uniforms;
+	uniforms.time = 1.0f;
+	uniforms.color = { 0.0f, 1.0f, 0.4f, 1.0f };
+	wgpuQueueWriteBuffer(mQueue, uniformBuffer, 0, &uniforms, sizeof(MyUniforms));
 }
 
 void Application::initializeBindGroups()
@@ -312,7 +316,7 @@ void Application::initializeBindGroups()
 	binding.binding = 0;
 	binding.buffer = uniformBuffer;
 	binding.offset = 0;
-	binding.size = 4 * sizeof(float);
+	binding.size = sizeof(MyUniforms);
 
 	WGPUBindGroupDescriptor bindGroupDescriptor{};
 	bindGroupDescriptor.nextInChain = nullptr;
@@ -429,9 +433,9 @@ void Application::initializeRenderPipeline()
     bindingLayout.texture.sampleType = WGPUTextureSampleType_Undefined;
     bindingLayout.texture.viewDimension = WGPUTextureViewDimension_Undefined;
 	bindingLayout.binding = 0;
-	bindingLayout.visibility = WGPUShaderStage_Vertex;
+	bindingLayout.visibility = WGPUShaderStage_Vertex | WGPUShaderStage_Fragment;
 	bindingLayout.buffer.type = WGPUBufferBindingType_Uniform;
-	bindingLayout.buffer.minBindingSize = 4 * sizeof(float);
+	bindingLayout.buffer.minBindingSize = sizeof(MyUniforms);
 
 	// bind group layout
 	WGPUBindGroupLayoutDescriptor bindGroupLayoutDescriptor{};

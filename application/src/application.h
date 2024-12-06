@@ -6,6 +6,10 @@
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
 
+#include <array>
+
+
+
 class Application
 {
 public:
@@ -65,5 +69,13 @@ private:
 	uint32_t indexCount;
 
 	WGPUBuffer uniformBuffer;
+
+	struct MyUniforms {
+		std::array<float, 4> color;
+		float time;
+		float _pad[3];
+	};
+
+	static_assert(sizeof(MyUniforms) % 16 == 0);
 
 };
