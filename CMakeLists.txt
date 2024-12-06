@@ -10,10 +10,15 @@ include_directories("application/vendor/glfw3webgpu")
 
 add_executable(ElectroApp 
     "application/src/main.cpp" 
+
     "application/src/webgpu-utils.h"
     "application/src/webgpu-utils.cpp"
+
     "application/src/application.h" 
     "application/src/application.cpp"
+
+    "application/src/resource-manager.h"
+    "application/src/resource-manager.cpp"
 )
 
 add_subdirectory(application/vendor/glfw3webgpu)
@@ -26,4 +31,15 @@ if(${CMAKE_SYSTEM_NAME} STREQUAL "Emscripten")
 
     configure_file(${CMAKE_SOURCE_DIR}/application/src/index.html ${CMAKE_BINARY_DIR}/index.html COPYONLY)
 
+    target_compile_definitions(ElectroApp PRIVATE
+        RESOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}/application/resources"
+    )
+
+    target_link_options(ElectroApp PRIVATE
+        --preload-file "${CMAKE_CURRENT_SOURCE_DIR}/application/resources"
+    )
+
+
+
 endif()
+

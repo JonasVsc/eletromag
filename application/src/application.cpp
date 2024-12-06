@@ -2,37 +2,12 @@
 
 #include "webgpu-utils.h"
 #include "glfw3webgpu.h"
+#include "resource-manager.h"
 
 #include<iostream>
 #include<cstdint>
 #include<stdint.h>
 #include<vector>
-
-const char* shaderSource = R"(
-struct VertexInput {
-    @location(0) position: vec2f,
-    @location(1) color: vec3f,
-}
-
-struct VertexOutput {
-    @builtin(position) position: vec4f,
-    @location(0) color: vec3f,
-}
-
-@vertex
-fn vs_main(in: VertexInput) -> VertexOutput {
-	let ratio = 640.0 / 480.0;
-    var out: VertexOutput;
-    out.position = vec4f(in.position.x, in.position.y * ratio, 0.0, 1.0);
-    out.color = in.color;
-    return out;
-}
-
-@fragment
-fn fs_main(in: VertexOutput) -> @location(0) vec4f {
-	return vec4f(in.color, 1.0);
-}
-)";
 
 void Application::initialize()
 {
@@ -281,19 +256,14 @@ void Application::playingWithBuffers()
 
 void Application::initializeBuffers()
 {
-	std::vector<float> vertexData = {
-		// x,   y,     r,   g,   b
-		-1.0, -1.0,   1.0, 0.0, 0.0,
-		+1.0, -1.0,   0.0, 1.0, 0.0,
-		+1.0, +1.0,   0.0, 0.0, 1.0,
-		-1.0, +1.0,   1.0, 1.0, 0.0
-	};
-	
-	std::vector<uint16_t> indexData = {
-		0, 1, 2,
-		0, 2, 3
-	};
+	std::vector<float> vertexData;
+	std::vector<uint16_t> indexData;
 
+	bool success = ResourceManager::loadGeometry("C:/Dev/eletromag/application/resources/webgpu.txt", vertexData, indexData);
+
+	if(!success)
+		std::cerr << "[ERROR] could not load geometry" << '\n';
+	
 	vertexCount = static_cast<uint32_t>(vertexData.size() / 4);
 	indexCount = static_cast<uint32_t>(indexData.size());
 
@@ -334,14 +304,8 @@ void Application::deviceCapabilities(WGPUAdapter adapter)
 
 void Application::initializeRenderPipeline()
 {
-	// load Shader Module
-	WGPUShaderModuleDescriptor shaderDescriptor{};
-	WGPUShaderModuleWGSLDescriptor shaderCodeDescriptor{};
-	shaderCodeDescriptor.chain.next = nullptr;
-	shaderCodeDescriptor.chain.sType = WGPUSType_ShaderModuleWGSLDescriptor;
-	shaderDescriptor.nextInChain = &shaderCodeDescriptor.chain;
-	shaderCodeDescriptor.code = shaderSource;
-	WGPUShaderModule shaderModule = wgpuDeviceCreateShaderModule(mDevice, &shaderDescriptor);
+	
+	WGPUShaderModule shaderModule = ResourceManager::loadShaderModule("C:/Dev/eletromag/application/resources/shader.wgsl", mDevice);
 
 	// create render pipeline
 	WGPURenderPipelineDescriptor pipelineDescriptor{};
