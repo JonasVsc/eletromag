@@ -1,20 +1,31 @@
-#include "application.h"
+#include "app.h"
 
-int main(int argc, char** argv) 
+#include <emscripten.h>
+#include <exception>
+#include <iostream>
+
+int main() 
 {
-    Application app;
     
-    app.initialize();
-
-    auto callback = [](void* arg) 
-    {
-        Application* pApp = reinterpret_cast<Application*>(arg);
-        pApp->mainLoop(); 
-    };
-
-    emscripten_set_main_loop_arg(callback, &app, 0, true);
         
-    app.terminate();
+    try 
+    {
+        Application& app = Application::get();
+
+        auto callback = [](void* arg) 
+        {
+            Application* pApp = reinterpret_cast<Application*>(arg);
+            pApp->run(); 
+        };
+
+        emscripten_set_main_loop_arg(callback, &app, 0, true);
+
+        app.terminate();
+    }
+    catch(std::exception& e)
+    {
+        std::cerr << e.what() << std::endl;
+    }
+
     return 0;
 }
-

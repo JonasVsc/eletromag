@@ -11,14 +11,11 @@ include_directories("application/vendor/glfw3webgpu")
 add_executable(ElectroApp 
     "application/src/main.cpp" 
 
-    "application/src/webgpu-utils.h"
-    "application/src/webgpu-utils.cpp"
+    "application/src/app.h"
+    "application/src/app.cpp"
 
-    "application/src/application.h" 
-    "application/src/application.cpp"
-
-    "application/src/resource-manager.h"
-    "application/src/resource-manager.cpp"
+    "application/src/window.h"
+    "application/src/window.cpp"
 )
 
 add_subdirectory(application/vendor/glfw3webgpu)
