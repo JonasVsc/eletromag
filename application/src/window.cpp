@@ -21,6 +21,9 @@ void Window::init()
     if(!glfwInit())
         throw std::runtime_error("[ERROR] failed to init glfw");
 
+    glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+    glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
+
     mWindow = glfwCreateWindow(mData.width, mData.height, mData.title, nullptr, nullptr);
 
     if(mWindow == nullptr)

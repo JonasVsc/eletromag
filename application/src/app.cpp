@@ -2,23 +2,31 @@
 
 #include <emscripten.h>
 
+ Application* Application::sInstance = nullptr;
+
 Application::Application()
 {
-	mWindow = new Window;
-	mWindow->create(1280, 720, "Pitanguinha");
-	mWindow->init();
+    sInstance = this;
+	mWindow.create(640, 480, "WebGPU");
+}
+
+void Application::init()
+{
+    mWindow.init();
+    mRenderer.init();
 }
 
 void Application::run()
 {
     while (true)
     {
-        mWindow->update();
+        mWindow.update();
         emscripten_sleep(100);
     }
 }
 
 void Application::terminate()
 {
-    mWindow->terminate();
+    mWindow.terminate();
+    mRenderer.terminate();
 }

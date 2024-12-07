@@ -17,6 +17,8 @@ public:
 
     void terminate();
 
+    inline void* getNativeWindow() const { return mWindow;  }
+
 private:
 
     GLFWwindow* mWindow;

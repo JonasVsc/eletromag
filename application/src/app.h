@@ -1,32 +1,29 @@
 #pragma once
 
 #include "window.h"
-#include "wgpu_renderer.h"
+#include "wgpu-renderer.h"
 
 class Application
 {
 public:
 
+    Application();
+
+    void init();
+
     void run();
 
     void terminate();
 
-    static inline Application& get() {  static Application instance; return instance; };
+    inline Window& getWindow() { return mWindow; }
 
-
-private:
-
-    Application();
-
-    Application(const Application&) = delete;
-
-    Application& operator=(const Application&) = delete;
+    static inline Application& get() { return *sInstance; }
 
 private:
 
-    Window* mWindow;
+    Window mWindow;
 
     Renderer mRenderer;
 
-
+    static Application* sInstance;
 };

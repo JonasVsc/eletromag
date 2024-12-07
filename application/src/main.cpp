@@ -6,11 +6,10 @@
 
 int main() 
 {
-    
-        
     try 
     {
-        Application& app = Application::get();
+        Application app;
+        app.init();
 
         auto callback = [](void* arg) 
         {
