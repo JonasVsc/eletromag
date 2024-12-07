@@ -56,6 +56,8 @@ private:
 
 	WGPURenderPipeline mPipeline;
 
+	WGPUTextureView mDepthTextureView;
+
 	WGPUPipelineLayout mLayout;
 
 	WGPUBindGroupLayout mBindGroupLayout;

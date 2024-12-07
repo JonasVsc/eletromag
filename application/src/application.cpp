@@ -17,6 +17,7 @@ void Application::initialize()
 
 void Application::terminate()
 {
+	wgpuTextureViewRelease(mDepthTextureView);
 	wgpuBindGroupRelease(mBindGroup);
 	wgpuPipelineLayoutRelease(mLayout);
 	wgpuBindGroupLayoutRelease(mBindGroupLayout);
@@ -61,7 +62,20 @@ void Application::mainLoop()
 
 	renderPassDescriptor.colorAttachmentCount = 1;
 	renderPassDescriptor.colorAttachments = &renderPassColorAttachment;
-	renderPassDescriptor.depthStencilAttachment = nullptr;
+
+	WGPURenderPassDepthStencilAttachment depthStencilAttachment;
+	depthStencilAttachment.view = mDepthTextureView;
+	depthStencilAttachment.depthClearValue = 1.0f;
+	depthStencilAttachment.depthLoadOp = WGPULoadOp_Clear;
+	depthStencilAttachment.depthStoreOp = WGPUStoreOp_Store;
+	depthStencilAttachment.depthReadOnly = false;
+	depthStencilAttachment.stencilClearValue = 0;
+	depthStencilAttachment.stencilLoadOp = WGPULoadOp_Undefined;
+	depthStencilAttachment.stencilStoreOp = WGPUStoreOp_Undefined;
+	depthStencilAttachment.stencilReadOnly = true;
+
+
+	renderPassDescriptor.depthStencilAttachment = &depthStencilAttachment;
 	renderPassDescriptor.timestampWrites = nullptr;
 
 	WGPURenderPassEncoder renderPass = wgpuCommandEncoderBeginRenderPass(commandEncoder, &renderPassDescriptor);
@@ -408,7 +422,59 @@ void Application::initializeRenderPipeline()
 	fragmentState.targets = &colorTarget;
 	pipelineDescriptor.fragment = &fragmentState;
 	
-	pipelineDescriptor.depthStencil = nullptr;
+	// depth/stencil
+	WGPUDepthStencilState depthStencilState{};
+    depthStencilState.depthWriteEnabled = false;
+    depthStencilState.depthCompare = WGPUCompareFunction_Less;
+    depthStencilState.stencilReadMask = 0;
+    depthStencilState.stencilWriteMask = 0;
+    depthStencilState.depthBias = 0;
+    depthStencilState.depthBiasSlopeScale = 0;
+    depthStencilState.depthBiasClamp = 0;
+
+	depthStencilState.stencilFront.compare = WGPUCompareFunction_Always;
+    depthStencilState.stencilFront.failOp = WGPUStencilOperation_Keep;
+    depthStencilState.stencilFront.depthFailOp = WGPUStencilOperation_Keep;
+    depthStencilState.stencilFront.passOp = WGPUStencilOperation_Keep;
+	
+	depthStencilState.stencilBack.compare = WGPUCompareFunction_Always;
+    depthStencilState.stencilBack.failOp = WGPUStencilOperation_Keep;
+    depthStencilState.stencilBack.depthFailOp = WGPUStencilOperation_Keep;
+    depthStencilState.stencilBack.passOp = WGPUStencilOperation_Keep;
+	
+
+	
+
+	WGPUTextureFormat depthTextureFormat = WGPUTextureFormat_Depth24Plus;
+	depthStencilState.format = depthTextureFormat;
+	
+	// depth texture
+	WGPUTextureDescriptor depthTextureDescriptor{};
+	depthTextureDescriptor.dimension = WGPUTextureDimension_2D;
+	depthTextureDescriptor.format = depthTextureFormat;
+	depthTextureDescriptor.mipLevelCount = 1;
+	depthTextureDescriptor.sampleCount = 1;
+	depthTextureDescriptor.size = {640, 480, 1};
+	depthTextureDescriptor.usage = WGPUTextureUsage_RenderAttachment;
+	depthTextureDescriptor.viewFormatCount = 1;
+	depthTextureDescriptor.viewFormats = &depthTextureFormat;
+	WGPUTexture depthTexture = wgpuDeviceCreateTexture(mDevice, &depthTextureDescriptor);
+
+	WGPUTextureViewDescriptor depthTextureViewDescriptor{};
+	depthTextureViewDescriptor.aspect = WGPUTextureAspect_DepthOnly;
+	depthTextureViewDescriptor.baseArrayLayer = 0;
+	depthTextureViewDescriptor.arrayLayerCount = 1;
+	depthTextureViewDescriptor.baseMipLevel = 0;
+	depthTextureViewDescriptor.mipLevelCount = 1;
+	depthTextureViewDescriptor.dimension = WGPUTextureViewDimension_2D;
+	depthTextureViewDescriptor.format = depthTextureFormat;
+	mDepthTextureView = wgpuTextureCreateView(depthTexture, &depthTextureViewDescriptor);
+	
+
+	pipelineDescriptor.depthStencil = &depthStencilState;
+
+
+
 	pipelineDescriptor.multisample.count = 1;
 	pipelineDescriptor.multisample.mask = ~0u;
 	pipelineDescriptor.multisample.alphaToCoverageEnabled = false;
@@ -457,7 +523,6 @@ void Application::initializeRenderPipeline()
 
 	wgpuShaderModuleRelease(shaderModule);
 }
-
 
 WGPUTextureView Application::getNextSurfaceTextureView()
 {

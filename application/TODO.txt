@@ -3,3 +3,4 @@ TODO:
 
 - Check device capabilites to procced with application initialization.
 - pre-load files in a virtual filesystem
+- fix depth config
