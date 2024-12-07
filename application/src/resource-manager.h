@@ -6,6 +6,6 @@
 class ResourceManager
 {
 public:
-    static bool loadGeometry(const std::filesystem::path& path, std::vector<float>& pointData, std::vector<uint16_t>& indexData);
+    static bool loadGeometry(const std::filesystem::path& path, std::vector<float>& pointData, std::vector<uint16_t>& indexData, int dimensions);
     static WGPUShaderModule loadShaderModule(const std::filesystem::path& path, WGPUDevice device);
 };

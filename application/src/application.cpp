@@ -269,7 +269,7 @@ void Application::initializeBuffers()
 	std::vector<float> vertexData;
 	std::vector<uint16_t> indexData;
 
-	bool success = ResourceManager::loadGeometry("C:/Dev/eletromag/application/resources/webgpu.txt", vertexData, indexData);
+	bool success = ResourceManager::loadGeometry("C:/Dev/eletromag/application/resources/pyramid.txt", vertexData, indexData, 3);
 
 	if(!success)
 		std::cerr << "[ERROR] could not load geometry" << '\n';
@@ -357,16 +357,16 @@ void Application::initializeRenderPipeline()
 
 	// position attribute
 	vertexAttributes[0].shaderLocation = 0;
-	vertexAttributes[0].format = WGPUVertexFormat_Float32x2;
+	vertexAttributes[0].format = WGPUVertexFormat_Float32x3;
 	vertexAttributes[0].offset = 0;
 
 	vertexAttributes[1].shaderLocation = 1;
 	vertexAttributes[1].format = WGPUVertexFormat_Float32x3;
-	vertexAttributes[1].offset = 2 * sizeof(float);
+	vertexAttributes[1].offset = 3 * sizeof(float);
 
 	bufferLayout.attributeCount = static_cast<uint32_t>(vertexAttributes.size());
 	bufferLayout.attributes = vertexAttributes.data();
-	bufferLayout.arrayStride = 5 * sizeof(float);
+	bufferLayout.arrayStride = 6 * sizeof(float);
 	bufferLayout.stepMode = WGPUVertexStepMode_Vertex;
 
 	// vertex

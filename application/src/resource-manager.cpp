@@ -4,7 +4,7 @@
 #include <sstream>
 #include <string>
 
-bool ResourceManager::loadGeometry(const std::filesystem::path& path, std::vector<float>& pointData, std::vector<uint16_t>& indexData) {
+bool ResourceManager::loadGeometry(const std::filesystem::path& path, std::vector<float>& pointData, std::vector<uint16_t>& indexData, int dimensions) {
     std::ifstream file(path);
     if (!file.is_open()) {
         return false;
@@ -43,7 +43,7 @@ bool ResourceManager::loadGeometry(const std::filesystem::path& path, std::vecto
         else if (currentSection == Section::Points) {
             std::istringstream iss(line);
             // Get x, y, r, g, b
-            for (int i = 0; i < 5; ++i) {
+            for (int i = 0; i < dimensions + 3; ++i) {
                 iss >> value;
                 pointData.push_back(value);
             }
