@@ -46,6 +46,8 @@ void Renderer::initDevice()
     Application& app = Application::get();
     GLFWwindow* window = static_cast<GLFWwindow*>(app.getWindow().getNativeWindow());
 
+    mSurface = glfwGetWGPUSurface(mInstance, window);
+
     WGPURequestAdapterOptions adapterOpts{};
     adapterOpts.compatibleSurface = mSurface;
 
@@ -78,6 +80,11 @@ void Renderer::initDevice()
     deviceDesc.requiredFeatureCount = 0;
 	deviceDesc.requiredLimits = &requiredLimits;
 	deviceDesc.defaultQueue.label = "The default queue";
+    deviceDesc.deviceLostCallback = [](WGPUDeviceLostReason reason, char const* message, void* userdata)
+	{
+		std::cout << "[WARN] Device lost: reason " << reason << '\n';
+		if (message) std::cout << " (" << message << ')' << '\n';
+	};
     mDevice = requestDeviceSync(adapter, &deviceDesc);
     std::cout << "[INFO] Device: " << mDevice << std::endl;
 
@@ -89,11 +96,22 @@ void Renderer::initDevice()
 	};
 	wgpuDeviceSetUncapturedErrorCallback(mDevice, errorCallbackHandle, nullptr /* pUserData */);
 
-    // TODO: SurfaceConfig
-
-    mSwapChainFormat = wgpuSurfaceGetPreferredFormat(mSurface, adapter);
-
     mQueue = wgpuDeviceGetQueue(mDevice);
+
+    WGPUSurfaceConfiguration surfaceConfig{};
+	surfaceConfig.nextInChain = nullptr;
+	surfaceConfig.width = 640;
+	surfaceConfig.height = 480;
+	surfaceConfig.usage = WGPUTextureUsage_RenderAttachment;
+	
+    WGPUTextureFormat surfaceFormat = wgpuSurfaceGetPreferredFormat(mSurface, adapter);
+	surfaceConfig.format = surfaceFormat;
+	surfaceConfig.viewFormatCount = 0;
+	surfaceConfig.viewFormats = nullptr;
+	surfaceConfig.device = mDevice;
+	surfaceConfig.presentMode = WGPUPresentMode_Fifo;
+	surfaceConfig.alphaMode = WGPUCompositeAlphaMode_Auto;
+	wgpuSurfaceConfigure(mSurface, &surfaceConfig);
 
     wgpuAdapterRelease(adapter);
 }

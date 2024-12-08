@@ -24,9 +24,9 @@ private:
 
     WGPUSurface mSurface;
 
-    WGPUDevice mDevice;
+	WGPUTextureFormat mSurfaceFormat = WGPUTextureFormat_BGRA8Unorm;
 
-    WGPUTextureFormat mSwapChainFormat;
+    WGPUDevice mDevice;
 
     WGPUQueue mQueue;
 };
