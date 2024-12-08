@@ -26,5 +26,7 @@ private:
 
     WGPUDevice mDevice;
 
+    WGPUTextureFormat mSwapChainFormat;
+
     WGPUQueue mQueue;
 };

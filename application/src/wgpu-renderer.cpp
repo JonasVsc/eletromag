@@ -19,6 +19,11 @@ void Renderer::init()
 
 void Renderer::terminate()
 {
+
+    // terminate initDevice
+    wgpuQueueRelease(mQueue);
+    wgpuDeviceRelease(mDevice);
+    wgpuSurfaceRelease(mSurface);
     wgpuInstanceRelease(mInstance);
 }
 
@@ -83,6 +88,10 @@ void Renderer::initDevice()
 		std::cout << std::endl;
 	};
 	wgpuDeviceSetUncapturedErrorCallback(mDevice, errorCallbackHandle, nullptr /* pUserData */);
+
+    // TODO: SurfaceConfig
+
+    mSwapChainFormat = wgpuSurfaceGetPreferredFormat(mSurface, adapter);
 
     mQueue = wgpuDeviceGetQueue(mDevice);
 
