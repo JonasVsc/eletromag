@@ -14,6 +14,7 @@
 void Renderer::init()
 {
     initDevice();
+    initSwapChain();
 }
 
 
@@ -98,20 +99,26 @@ void Renderer::initDevice()
 
     mQueue = wgpuDeviceGetQueue(mDevice);
 
-    WGPUSurfaceConfiguration surfaceConfig{};
-	surfaceConfig.nextInChain = nullptr;
-	surfaceConfig.width = 640;
-	surfaceConfig.height = 480;
-	surfaceConfig.usage = WGPUTextureUsage_RenderAttachment;
-	
-    WGPUTextureFormat surfaceFormat = wgpuSurfaceGetPreferredFormat(mSurface, adapter);
-	surfaceConfig.format = surfaceFormat;
-	surfaceConfig.viewFormatCount = 0;
-	surfaceConfig.viewFormats = nullptr;
-	surfaceConfig.device = mDevice;
-	surfaceConfig.presentMode = WGPUPresentMode_Fifo;
-	surfaceConfig.alphaMode = WGPUCompositeAlphaMode_Auto;
-	wgpuSurfaceConfigure(mSurface, &surfaceConfig);
+    mSwapChainFormat = WGPUTextureFormat_BGRA8Unorm;
 
     wgpuAdapterRelease(adapter);
+}
+
+void Renderer::initSwapChain()
+{
+    Application& app = Application::get();
+    GLFWwindow* window = static_cast<GLFWwindow*>(app.getWindow().getNativeWindow());
+    // Get the current size of the window's framebuffer:
+	int width, height;
+	glfwGetFramebufferSize(window, &width, &height);
+
+	WGPUSwapChainDescriptor swapChainDesc;
+	swapChainDesc.width = static_cast<uint32_t>(width);
+	swapChainDesc.height = static_cast<uint32_t>(height);
+	swapChainDesc.usage = WGPUTextureUsage_RenderAttachment;
+	swapChainDesc.format = mSwapChainFormat;
+	swapChainDesc.presentMode = WGPUPresentMode_Fifo;
+	mSwapChain = wgpuDeviceCreateSwapChain(mDevice, mSurface, &swapChainDesc);
+	std::cout << "Swapchain: " << mSwapChain << std::endl;
+
 }

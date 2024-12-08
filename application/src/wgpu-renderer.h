@@ -18,6 +18,8 @@ private:
 
     void initDevice();
 
+    void initSwapChain();
+
 private:
 
     WGPUInstance mInstance;
@@ -25,6 +27,10 @@ private:
     WGPUSurface mSurface;
 
 	WGPUTextureFormat mSurfaceFormat = WGPUTextureFormat_BGRA8Unorm;
+
+    WGPUSwapChain mSwapChain;
+
+    WGPUTextureFormat mSwapChainFormat;
 
     WGPUDevice mDevice;
 
