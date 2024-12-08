@@ -23,4 +23,8 @@ private:
     WGPUInstance mInstance;
 
     WGPUSurface mSurface;
+
+    WGPUDevice mDevice;
+
+    WGPUQueue mQueue;
 };
