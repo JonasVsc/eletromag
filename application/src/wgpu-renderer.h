@@ -20,19 +20,21 @@ private:
 
     void initSwapChain();
 
+    void initDepthBuffer();
+
 private:
 
     WGPUInstance mInstance;
 
     WGPUSurface mSurface;
 
-	WGPUTextureFormat mSurfaceFormat = WGPUTextureFormat_BGRA8Unorm;
-
     WGPUSwapChain mSwapChain;
-
-    WGPUTextureFormat mSwapChainFormat;
 
     WGPUDevice mDevice;
 
     WGPUQueue mQueue;
+
+    // depth
+    WGPUTexture mDepthDexture;
+    WGPUTextureView mDepthTextureView;
 };

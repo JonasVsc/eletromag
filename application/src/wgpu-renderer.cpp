@@ -15,11 +15,19 @@ void Renderer::init()
 {
     initDevice();
     initSwapChain();
+    initDepthBuffer();
 }
 
 
 void Renderer::terminate()
 {
+    // terminate depthBuffer
+    wgpuTextureViewRelease(mDepthTextureView);
+    wgpuTextureDestroy(mDepthDexture);
+    wgpuTextureRelease(mDepthDexture);
+
+    // terminate swapChain
+    wgpuSwapChainRelease(mSwapChain);
 
     // terminate initDevice
     wgpuQueueRelease(mQueue);
@@ -99,8 +107,6 @@ void Renderer::initDevice()
 
     mQueue = wgpuDeviceGetQueue(mDevice);
 
-    mSwapChainFormat = WGPUTextureFormat_BGRA8Unorm;
-
     wgpuAdapterRelease(adapter);
 }
 
@@ -116,9 +122,42 @@ void Renderer::initSwapChain()
 	swapChainDesc.width = static_cast<uint32_t>(width);
 	swapChainDesc.height = static_cast<uint32_t>(height);
 	swapChainDesc.usage = WGPUTextureUsage_RenderAttachment;
-	swapChainDesc.format = mSwapChainFormat;
+	swapChainDesc.format = WGPUTextureFormat_BGRA8Unorm;
 	swapChainDesc.presentMode = WGPUPresentMode_Fifo;
 	mSwapChain = wgpuDeviceCreateSwapChain(mDevice, mSurface, &swapChainDesc);
-	std::cout << "Swapchain: " << mSwapChain << std::endl;
+	std::cout << "[INFO] Swapchain: " << mSwapChain << std::endl;
+}
+
+void Renderer::initDepthBuffer()
+{
+    // in case of bug, try make this a member
+    WGPUTextureFormat depthTextureFormat = WGPUTextureFormat_Depth24Plus;
+
+    WGPUTextureDescriptor depthTextureDesc{};
+    depthTextureDesc.dimension = WGPUTextureDimension_2D;
+    depthTextureDesc.format = depthTextureFormat;
+    depthTextureDesc.mipLevelCount = 1;
+    depthTextureDesc.sampleCount = 1;
+    depthTextureDesc.size = { 640, 480, 1 };
+    depthTextureDesc.usage = WGPUTextureUsage_RenderAttachment;
+    depthTextureDesc.viewFormatCount = 1;
+    depthTextureDesc.viewFormats = (WGPUTextureFormat*)&depthTextureFormat;
+    mDepthDexture = wgpuDeviceCreateTexture(mDevice, &depthTextureDesc);
+	std::cout << "[INFO] Depth texture: " << mDepthDexture << std::endl;
+
+    WGPUTextureViewDescriptor depthTextureViewDesc{};
+    depthTextureViewDesc.aspect = WGPUTextureAspect_DepthOnly;
+	depthTextureViewDesc.baseArrayLayer = 0;
+	depthTextureViewDesc.arrayLayerCount = 1;
+	depthTextureViewDesc.baseMipLevel = 0;
+	depthTextureViewDesc.mipLevelCount = 1;
+	depthTextureViewDesc.dimension = WGPUTextureViewDimension_2D;
+	depthTextureViewDesc.format = depthTextureFormat;
+    mDepthTextureView = wgpuTextureCreateView(mDepthDexture, &depthTextureViewDesc);
+	std::cout << "[INFO] Depth texture view: " << mDepthTextureView << std::endl;
+
+    if(mDepthTextureView == nullptr)
+        throw std::runtime_error("[ERROR] failed to create depth texture view");
 
 }
+
