@@ -17,11 +17,17 @@ void Renderer::init()
     initDevice();
     initSwapChain();
     initDepthBuffer();
+    initRenderPipeline();
 }
 
 
 void Renderer::terminate()
 {
+    // terminate render pipeline
+    wgpuRenderPipelineRelease(mPipeline);
+    wgpuShaderModuleRelease(mShaderModule);
+    wgpuBindGroupLayoutRelease(mBindGroupLayout);
+
     // terminate depthBuffer
     wgpuTextureViewRelease(mDepthTextureView);
     wgpuTextureDestroy(mDepthDexture);
@@ -132,17 +138,16 @@ void Renderer::initSwapChain()
 void Renderer::initDepthBuffer()
 {
     // in case of bug, try make this a member
-    WGPUTextureFormat depthTextureFormat = WGPUTextureFormat_Depth24Plus;
 
     WGPUTextureDescriptor depthTextureDesc{};
     depthTextureDesc.dimension = WGPUTextureDimension_2D;
-    depthTextureDesc.format = depthTextureFormat;
+    depthTextureDesc.format = mDepthTextureFormat;
     depthTextureDesc.mipLevelCount = 1;
     depthTextureDesc.sampleCount = 1;
     depthTextureDesc.size = { 640, 480, 1 };
     depthTextureDesc.usage = WGPUTextureUsage_RenderAttachment;
     depthTextureDesc.viewFormatCount = 1;
-    depthTextureDesc.viewFormats = (WGPUTextureFormat*)&depthTextureFormat;
+    depthTextureDesc.viewFormats = (WGPUTextureFormat*)&mDepthTextureFormat;
     mDepthDexture = wgpuDeviceCreateTexture(mDevice, &depthTextureDesc);
 	std::cout << "[INFO] Depth texture: " << mDepthDexture << std::endl;
 
@@ -153,7 +158,7 @@ void Renderer::initDepthBuffer()
 	depthTextureViewDesc.baseMipLevel = 0;
 	depthTextureViewDesc.mipLevelCount = 1;
 	depthTextureViewDesc.dimension = WGPUTextureViewDimension_2D;
-	depthTextureViewDesc.format = depthTextureFormat;
+	depthTextureViewDesc.format = mDepthTextureFormat;
     mDepthTextureView = wgpuTextureCreateView(mDepthDexture, &depthTextureViewDesc);
 	std::cout << "[INFO] Depth texture view: " << mDepthTextureView << std::endl;
 
@@ -164,7 +169,9 @@ void Renderer::initDepthBuffer()
 
 void Renderer::initRenderPipeline()
 {
-    mShaderModule = ResourceManager::loadShaderModule("resources/shader.wgsl", mDevice);
+    mShaderModule = ResourceManager::loadShaderModule("C:/Dev/eletromag/application/resources/shader.wgsl", mDevice);
+    if(mShaderModule == nullptr)
+        throw std::runtime_error("failed to load shader module.");
 
     WGPURenderPipelineDescriptor pipelineDesc{};
 
@@ -208,14 +215,14 @@ void Renderer::initRenderPipeline()
     pipelineDesc.primitive.frontFace = WGPUFrontFace_CCW;
     pipelineDesc.primitive.cullMode = WGPUCullMode_Undefined;
 
-    WGPUFragmentState fragmentState;
+    WGPUFragmentState fragmentState{};
     fragmentState.module = mShaderModule;
     fragmentState.entryPoint = "fs_main";
     fragmentState.constantCount = 0;
     fragmentState.constants = nullptr;
     pipelineDesc.fragment = &fragmentState;
 
-    WGPUBlendState blendState;
+    WGPUBlendState blendState{};
     blendState.color.srcFactor = WGPUBlendFactor_SrcAlpha;
 	blendState.color.dstFactor = WGPUBlendFactor_OneMinusSrcAlpha;
 	blendState.color.operation = WGPUBlendOperation_Add;
@@ -223,7 +230,7 @@ void Renderer::initRenderPipeline()
 	blendState.alpha.dstFactor = WGPUBlendFactor_One;
 	blendState.alpha.operation = WGPUBlendOperation_Add;
 
-    WGPUColorTargetState colorTarget;
+    WGPUColorTargetState colorTarget{};
     colorTarget.format = mSwapChainFormat;
     colorTarget.blend = &blendState;
     colorTarget.writeMask = WGPUColorWriteMask_All;
@@ -232,22 +239,72 @@ void Renderer::initRenderPipeline()
     fragmentState.targets = &colorTarget;
     
     WGPUDepthStencilState depthStencilState{};
-    depthStencilState.depthCompare = WGPUCompareFunction_Less;
-    depthStencilState.format = mDepthTextureView;
+    depthStencilState.format = mDepthTextureFormat;
     depthStencilState.depthWriteEnabled = true;
+    depthStencilState.depthCompare = WGPUCompareFunction_Less;
     depthStencilState.stencilReadMask = 0;
     depthStencilState.stencilWriteMask = 0;
     depthStencilState.depthBias = 0;
     depthStencilState.depthBiasSlopeScale = 0;
     depthStencilState.depthBiasClamp = 0;
+
+    depthStencilState.stencilFront.compare = WGPUCompareFunction_Always;
+    depthStencilState.stencilFront.failOp = WGPUStencilOperation_Keep;
+    depthStencilState.stencilFront.depthFailOp = WGPUStencilOperation_Keep;
+    depthStencilState.stencilFront.passOp = WGPUStencilOperation_Keep;
+	
+	depthStencilState.stencilBack.compare = WGPUCompareFunction_Always;
+    depthStencilState.stencilBack.failOp = WGPUStencilOperation_Keep;
+    depthStencilState.stencilBack.depthFailOp = WGPUStencilOperation_Keep;
+    depthStencilState.stencilBack.passOp = WGPUStencilOperation_Keep;
+	
+
     pipelineDesc.depthStencil = &depthStencilState;
 
     pipelineDesc.multisample.count = 1;
     pipelineDesc.multisample.mask = ~0u;
     pipelineDesc.multisample.alphaToCoverageEnabled = false;
 
-	WGPUBindGroupLayoutEntry bindingLayout{};
+    std::vector<WGPUBindGroupLayoutEntry> bindingLayoutEntries(3);
 
+    // uniform buffer binding
+	WGPUBindGroupLayoutEntry& bindingLayout = bindingLayoutEntries[0];
+    bindingLayout.binding = 0;
+    bindingLayout.visibility = WGPUShaderStage_Vertex | WGPUShaderStage_Fragment;
+    bindingLayout.buffer.type = WGPUBufferBindingType_Uniform;
+    bindingLayout.buffer.minBindingSize = sizeof(MyUniforms);
+
+    // texture binding
+	WGPUBindGroupLayoutEntry& textureBindingLayout = bindingLayoutEntries[1];
+    textureBindingLayout.binding = 1;
+    textureBindingLayout.visibility = WGPUShaderStage_Fragment;
+    textureBindingLayout.texture.sampleType = WGPUTextureSampleType_Float;
+    textureBindingLayout.texture.viewDimension = WGPUTextureViewDimension_2D;
+
+    // texture sampler binding
+    WGPUBindGroupLayoutEntry& samplerBindingLayout = bindingLayoutEntries[2];
+    samplerBindingLayout.binding = 2;
+    samplerBindingLayout.visibility = WGPUShaderStage_Fragment;
+    samplerBindingLayout.sampler.type = WGPUSamplerBindingType_Filtering;
+
+    // bind group layout
+    WGPUBindGroupLayoutDescriptor bindGroupLayoutDesc{};
+    bindGroupLayoutDesc.entryCount = (uint32_t)bindingLayoutEntries.size();
+    bindGroupLayoutDesc.entries = bindingLayoutEntries.data();
+    mBindGroupLayout = wgpuDeviceCreateBindGroupLayout(mDevice, &bindGroupLayoutDesc);
+
+    // pipeline layout
+    WGPUPipelineLayoutDescriptor layoutDesc{};
+    layoutDesc.bindGroupLayoutCount = 1;
+    layoutDesc.bindGroupLayouts = (WGPUBindGroupLayout*)&mBindGroupLayout;
+    WGPUPipelineLayout layout = wgpuDeviceCreatePipelineLayout(mDevice, &layoutDesc);
+    pipelineDesc.layout = layout;
+
+    mPipeline = wgpuDeviceCreateRenderPipeline(mDevice, &pipelineDesc);
+    std::cout << "[INFO] Render pipeline: " << mPipeline << std::endl;
+
+    if(mPipeline == nullptr)
+        throw std::runtime_error("failed create render pipeline");
 
 }
 
