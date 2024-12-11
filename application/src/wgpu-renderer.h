@@ -22,6 +22,8 @@ private:
 
     void initDepthBuffer();
 
+    void initRenderPipeline();
+
 private:
 
     WGPUInstance mInstance;
@@ -29,6 +31,7 @@ private:
     WGPUSurface mSurface;
 
     WGPUSwapChain mSwapChain;
+    WGPUTextureFormat mSwapChainFormat = WGPUTextureFormat_BGRA8Unorm;
 
     WGPUDevice mDevice;
 
@@ -37,4 +40,7 @@ private:
     // depth
     WGPUTexture mDepthDexture;
     WGPUTextureView mDepthTextureView;
+
+    WGPUShaderModule mShaderModule;
+
 };

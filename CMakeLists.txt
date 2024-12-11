@@ -29,6 +29,8 @@ add_executable(ElectroApp
     "application/src/webgpu-utils.cpp"
 )
 
+add_subdirectory("application/vendor/glm")
+
 if(${CMAKE_SYSTEM_NAME} STREQUAL "Emscripten")
 
     target_link_options(ElectroApp PRIVATE -sUSE_WEBGPU=1 -sWASM=1 -sUSE_GLFW=3 -sASYNCIFY -sNO_DISABLE_EXCEPTION_CATCHING)
@@ -43,7 +45,7 @@ if(${CMAKE_SYSTEM_NAME} STREQUAL "Emscripten")
         --preload-file "${CMAKE_CURRENT_SOURCE_DIR}/application/resources"
     )
 
-
+    target_link_libraries(ElectroApp PRIVATE glm)
 
 endif()
 

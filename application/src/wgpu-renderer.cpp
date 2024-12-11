@@ -3,6 +3,7 @@
 #include "glfw3webgpu.h"
 #include "webgpu-utils.h"
 #include "app.h"
+#include "resource-manager.h"
 
 #include <iostream>
 #include<cstdint>
@@ -122,7 +123,7 @@ void Renderer::initSwapChain()
 	swapChainDesc.width = static_cast<uint32_t>(width);
 	swapChainDesc.height = static_cast<uint32_t>(height);
 	swapChainDesc.usage = WGPUTextureUsage_RenderAttachment;
-	swapChainDesc.format = WGPUTextureFormat_BGRA8Unorm;
+	swapChainDesc.format = mSwapChainFormat;
 	swapChainDesc.presentMode = WGPUPresentMode_Fifo;
 	mSwapChain = wgpuDeviceCreateSwapChain(mDevice, mSurface, &swapChainDesc);
 	std::cout << "[INFO] Swapchain: " << mSwapChain << std::endl;
@@ -158,6 +159,95 @@ void Renderer::initDepthBuffer()
 
     if(mDepthTextureView == nullptr)
         throw std::runtime_error("[ERROR] failed to create depth texture view");
+
+}
+
+void Renderer::initRenderPipeline()
+{
+    mShaderModule = ResourceManager::loadShaderModule("resources/shader.wgsl", mDevice);
+
+    WGPURenderPipelineDescriptor pipelineDesc{};
+
+    std::vector<WGPUVertexAttribute> vertexAttribs(4);
+
+    // Position attribute
+    vertexAttribs[0].shaderLocation = 0;
+    vertexAttribs[0].format = WGPUVertexFormat_Float32x3;
+    vertexAttribs[0].offset = 0;
+
+    // Normal attribute
+	vertexAttribs[1].shaderLocation = 1;
+	vertexAttribs[1].format = WGPUVertexFormat_Float32x3;
+	vertexAttribs[1].offset = offsetof(ResourceManager::VertexAttributes, normal);
+
+	// Color attribute
+	vertexAttribs[2].shaderLocation = 2;
+	vertexAttribs[2].format = WGPUVertexFormat_Float32x3;
+	vertexAttribs[2].offset = offsetof(ResourceManager::VertexAttributes, color);
+
+	// UV attribute
+	vertexAttribs[3].shaderLocation = 3;
+	vertexAttribs[3].format = WGPUVertexFormat_Float32x2;
+	vertexAttribs[3].offset = offsetof(ResourceManager::VertexAttributes, uv);
+
+    WGPUVertexBufferLayout vertexBufferLayout{};
+    vertexBufferLayout.attributeCount = (uint32_t)vertexAttribs.size();
+    vertexBufferLayout.attributes = vertexAttribs.data();
+    vertexBufferLayout.arrayStride = sizeof(ResourceManager::VertexAttributes);
+    vertexBufferLayout.stepMode = WGPUVertexStepMode_Vertex;
+
+    pipelineDesc.vertex.bufferCount = 1;
+    pipelineDesc.vertex.buffers = &vertexBufferLayout;
+    pipelineDesc.vertex.module = mShaderModule;
+    pipelineDesc.vertex.entryPoint = "vs_main";
+    pipelineDesc.vertex.constantCount = 0;
+    pipelineDesc.vertex.constants = nullptr;
+
+    pipelineDesc.primitive.topology = WGPUPrimitiveTopology_TriangleList;
+    pipelineDesc.primitive.stripIndexFormat = WGPUIndexFormat_Undefined;
+    pipelineDesc.primitive.frontFace = WGPUFrontFace_CCW;
+    pipelineDesc.primitive.cullMode = WGPUCullMode_Undefined;
+
+    WGPUFragmentState fragmentState;
+    fragmentState.module = mShaderModule;
+    fragmentState.entryPoint = "fs_main";
+    fragmentState.constantCount = 0;
+    fragmentState.constants = nullptr;
+    pipelineDesc.fragment = &fragmentState;
+
+    WGPUBlendState blendState;
+    blendState.color.srcFactor = WGPUBlendFactor_SrcAlpha;
+	blendState.color.dstFactor = WGPUBlendFactor_OneMinusSrcAlpha;
+	blendState.color.operation = WGPUBlendOperation_Add;
+	blendState.alpha.srcFactor = WGPUBlendFactor_Zero;
+	blendState.alpha.dstFactor = WGPUBlendFactor_One;
+	blendState.alpha.operation = WGPUBlendOperation_Add;
+
+    WGPUColorTargetState colorTarget;
+    colorTarget.format = mSwapChainFormat;
+    colorTarget.blend = &blendState;
+    colorTarget.writeMask = WGPUColorWriteMask_All;
+
+    fragmentState.targetCount = 1;
+    fragmentState.targets = &colorTarget;
+    
+    WGPUDepthStencilState depthStencilState{};
+    depthStencilState.depthCompare = WGPUCompareFunction_Less;
+    depthStencilState.format = mDepthTextureView;
+    depthStencilState.depthWriteEnabled = true;
+    depthStencilState.stencilReadMask = 0;
+    depthStencilState.stencilWriteMask = 0;
+    depthStencilState.depthBias = 0;
+    depthStencilState.depthBiasSlopeScale = 0;
+    depthStencilState.depthBiasClamp = 0;
+    pipelineDesc.depthStencil = &depthStencilState;
+
+    pipelineDesc.multisample.count = 1;
+    pipelineDesc.multisample.mask = ~0u;
+    pipelineDesc.multisample.alphaToCoverageEnabled = false;
+
+	WGPUBindGroupLayoutEntry bindingLayout{};
+
 
 }
 
