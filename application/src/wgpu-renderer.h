@@ -6,6 +6,17 @@
 #include <glm/glm.hpp>
 #include <glm/ext.hpp>
 
+struct MyUniforms {
+        glm::mat4x4 projectionMatrix;
+        glm::mat4x4 viewMatrix;
+        glm::mat4x4 modelMatrix;
+		glm::vec4 color;
+		float time;
+		float _pad[3];
+	};
+
+static_assert(sizeof(MyUniforms) % 16 == 0);
+
 
 class Renderer 
 {
@@ -17,6 +28,10 @@ public:
     void terminate();
 
     void render();
+
+    inline WGPUQueue getQueue() { return mQueue; }
+
+    inline WGPUBuffer getUniformBuffer() { return mUniformBuffer; }
 
 private:
 
@@ -39,6 +54,8 @@ private:
     // utility temporary
     WGPUTextureView getNextSurfaceTextureView();
 
+    void processInput();
+
 private:
 
     WGPUInstance mInstance;
@@ -58,18 +75,6 @@ private:
     WGPUTextureFormat mDepthTextureFormat = WGPUTextureFormat_Depth24Plus;
 
     WGPUShaderModule mShaderModule;
-
-    struct MyUniforms {
-        glm::mat4x4 projectionMatrix;
-        glm::mat4x4 viewMatrix;
-        glm::mat4x4 modelMatrix;
-		glm::vec4 color;
-		float time;
-		float _pad[3];
-	};
-
-	static_assert(sizeof(MyUniforms) % 16 == 0);
-
 
     WGPUBindGroupLayout mBindGroupLayout;
 

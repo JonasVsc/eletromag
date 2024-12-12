@@ -30,8 +30,12 @@ void Renderer::init()
 
 void Renderer::render()
 {
+    processInput();
+
     float time = static_cast<float>(glfwGetTime());
 	wgpuQueueWriteBuffer(mQueue, mUniformBuffer, offsetof(MyUniforms, time), &time, sizeof(float));
+
+    wgpuQueueWriteBuffer(mQueue, mUniformBuffer, offsetof(MyUniforms, color), &mUniforms.color, sizeof(glm::vec4));
 
     WGPUTextureView nextTexture = getNextSurfaceTextureView();
     if(!nextTexture)
@@ -130,7 +134,6 @@ void Renderer::terminate()
     wgpuSurfaceRelease(mSurface);
     wgpuInstanceRelease(mInstance);
 }
-
 
 ////////////////////////////////////////////////////////////////////////////
 // Private Methods /////////////////////////////////////////////////////////
@@ -405,8 +408,9 @@ void Renderer::initUniforms()
 	bufferDesc.mappedAtCreation = false;
 	mUniformBuffer = wgpuDeviceCreateBuffer(mDevice, &bufferDesc);
 
+
     mUniforms.modelMatrix = glm::mat4x4(1.0f);
-    mUniforms.viewMatrix = glm::lookAt(glm::vec3(-2.0f, -3.0f, 2.0f), glm::vec3(0.0f), glm::vec3(0, 0, 1));
+    mUniforms.viewMatrix = glm::lookAt(glm::vec3(0.0f, -3.0f, 2.0f), glm::vec3(0.0f), glm::vec3(0, 0, 1));
     mUniforms.projectionMatrix = glm::perspective(45 * PI / 180, 640.0f / 480.0f, 0.01f, 100.0f);
     mUniforms.time = 1.0f;
 	mUniforms.color = { 0.0f, 1.0f, 0.4f, 1.0f };
@@ -462,3 +466,32 @@ WGPUTextureView Renderer::getNextSurfaceTextureView()
 
 	return targetView;
 }
+
+
+void Renderer::processInput()
+{
+    Application& app = Application::get();
+    GLFWwindow* window = static_cast<GLFWwindow*>(app.getWindow().getNativeWindow());
+
+    if(glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS)
+    {
+        if(mUniforms.color.r > 1)
+            mUniforms.color.r = 0;
+        mUniforms.color.r += 0.01;
+    }
+    if(glfwGetKey(window, GLFW_KEY_G) == GLFW_PRESS)
+    {
+        if(mUniforms.color.g > 1)
+            mUniforms.color.g = 0;
+        mUniforms.color.g += 0.01;
+    }
+    if(glfwGetKey(window, GLFW_KEY_B) == GLFW_PRESS)
+    {
+        if(mUniforms.color.b > 1)
+            mUniforms.color.b = 0;
+        mUniforms.color.b += 0.01;        
+    }
+    
+    std::cout << "[COLOR] " << mUniforms.color.r << ' ' << mUniforms.color.g << ' ' << mUniforms.color.b << '\n';
+}
+
