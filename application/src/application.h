@@ -1,83 +1,29 @@
 #pragma once
 
-#include <emscripten.h>
-#include <webgpu/webgpu.h>
-
-#define GLFW_INCLUDE_NONE
-#include <GLFW/glfw3.h>
-
-#include <array>
-
-
+#include "window.h"
+#include "wgpu-renderer.h"
 
 class Application
 {
 public:
 
-	void initialize();
+    Application();
 
-	void terminate();
+    void init();
 
-	void mainLoop();
+    void run();
 
-	bool isRunning();
+    void terminate();
 
-private:
+    inline Window& getWindow() { return mWindow; }
 
-	void initWindow();
-
-	void initWebGPU();
+    static inline Application& get() { return *sInstance; }
 
 private:
 
-	void initializeRenderPipeline();
+    Window mWindow;
 
-	void playingWithBuffers();
+    Renderer mRenderer;
 
-	void initializeBuffers();
-
-	void initializeBindGroups();
-
-	void deviceCapabilities(WGPUAdapter);
-
-	WGPUTextureView getNextSurfaceTextureView();
-
-private:
-
-	GLFWwindow* mWindow;
-
-	WGPUDevice mDevice;
-
-	WGPUQueue mQueue;
-
-	WGPUSurface mSurface;
-
-	WGPUTextureFormat mSurfaceFormat = WGPUTextureFormat_BGRA8Unorm;
-
-	WGPURenderPipeline mPipeline;
-
-	WGPUTextureView mDepthTextureView;
-
-	WGPUPipelineLayout mLayout;
-
-	WGPUBindGroupLayout mBindGroupLayout;
-
-	WGPUBindGroup mBindGroup;
-
-	WGPUBuffer vertexBuffer;
-	uint32_t vertexCount;
-
-	WGPUBuffer indexBuffer;
-	uint32_t indexCount;
-
-	WGPUBuffer uniformBuffer;
-
-	struct MyUniforms {
-		std::array<float, 4> color;
-		float time;
-		float _pad[3];
-	};
-
-	static_assert(sizeof(MyUniforms) % 16 == 0);
-
+    static Application* sInstance;
 };

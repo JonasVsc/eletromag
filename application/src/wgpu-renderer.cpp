@@ -2,7 +2,7 @@
 
 #include "glfw3webgpu.h"
 #include "webgpu-utils.h"
-#include "app.h"
+#include "application.h"
 #include "resource-manager.h"
 
 #include <glm/glm.hpp>
@@ -195,7 +195,7 @@ void Renderer::initDevice()
 		std::cout << std::endl;
 	};
 	wgpuDeviceSetUncapturedErrorCallback(mDevice, errorCallbackHandle, nullptr /* pUserData */);
-    
+
     mQueue = wgpuDeviceGetQueue(mDevice);
 
     wgpuAdapterRelease(adapter);

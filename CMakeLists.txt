@@ -10,8 +10,8 @@ include_directories("C:/emsdk/upstream/emscripten/cache/sysroot/include")
 add_executable(ElectroApp 
     "application/src/main.cpp" 
 
-    "application/src/app.h"
-    "application/src/app.cpp"
+    "application/src/application.h"
+    "application/src/application.cpp"
 
     "application/src/window.h"
     "application/src/window.cpp"

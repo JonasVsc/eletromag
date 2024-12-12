@@ -1,4 +1,4 @@
-#include "app.h"
+#include "application.h"
 
 #include <emscripten.h>
 #include <exception>
