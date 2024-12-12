@@ -230,6 +230,15 @@
         };
       };
     </script>
+
+    <script>
+        window.addEventListener("keydown", (event) => {
+            // Desabilita o espaço e as setas para evitar rolagem
+            if ([" ", "ArrowUp", "ArrowDown"].includes(event.key)) {
+                event.preventDefault();  // Desabilita o comportamento padrão
+            }
+        });
+    </script>
     <script async type="text/javascript" src="ElectroApp.js"></script>
 </body>
 </html>
