@@ -195,7 +195,7 @@ void Renderer::initDevice()
 		std::cout << std::endl;
 	};
 	wgpuDeviceSetUncapturedErrorCallback(mDevice, errorCallbackHandle, nullptr /* pUserData */);
-
+    
     mQueue = wgpuDeviceGetQueue(mDevice);
 
     wgpuAdapterRelease(adapter);
@@ -405,7 +405,10 @@ void Renderer::initUniforms()
 	bufferDesc.mappedAtCreation = false;
 	mUniformBuffer = wgpuDeviceCreateBuffer(mDevice, &bufferDesc);
 
-	mUniforms.time = 1.0f;
+    mUniforms.modelMatrix = glm::mat4x4(1.0f);
+    mUniforms.viewMatrix = glm::lookAt(glm::vec3(-2.0f, -3.0f, 2.0f), glm::vec3(0.0f), glm::vec3(0, 0, 1));
+    mUniforms.projectionMatrix = glm::perspective(45 * PI / 180, 640.0f / 480.0f, 0.01f, 100.0f);
+    mUniforms.time = 1.0f;
 	mUniforms.color = { 0.0f, 1.0f, 0.4f, 1.0f };
     wgpuQueueWriteBuffer(mQueue, mUniformBuffer, 0, &mUniforms, sizeof(MyUniforms));
 

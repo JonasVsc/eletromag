@@ -9,6 +9,9 @@ struct VertexOutput {
 };
 
 struct MyUniforms {
+    projectionMatrix: mat4x4f,
+    viewMatrix: mat4x4f,
+    modelMatrix: mat4x4f,
     color: vec4f,
     time: f32,
 };
@@ -30,7 +33,7 @@ fn vs_main(in: VertexInput) -> VertexOutput {
         alpha * in.position.z - beta * in.position.y,
     );
 
-    out.position = vec4f(position.x, position.y * ratio, position.z * 0.5 + 0.5, 1.0);
+    out.position = uMyUniforms.projectionMatrix * uMyUniforms.viewMatrix * uMyUniforms.modelMatrix * vec4f(position.x, position.y * ratio, position.z * 0.5 + 0.5, 1.0);
     out.color = in.color;
     return out;
 }

@@ -60,6 +60,9 @@ private:
     WGPUShaderModule mShaderModule;
 
     struct MyUniforms {
+        glm::mat4x4 projectionMatrix;
+        glm::mat4x4 viewMatrix;
+        glm::mat4x4 modelMatrix;
 		glm::vec4 color;
 		float time;
 		float _pad[3];
