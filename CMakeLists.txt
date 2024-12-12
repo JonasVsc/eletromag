@@ -27,13 +27,17 @@ add_executable(ElectroApp
 
     "application/src/webgpu-utils.h"
     "application/src/webgpu-utils.cpp"
+
+    "application/src/tiny_obj_loader.h"
+    "application/src/stb_image.h"
+
 )
 
 add_subdirectory("application/vendor/glm")
 
 if(${CMAKE_SYSTEM_NAME} STREQUAL "Emscripten")
 
-    target_link_options(ElectroApp PRIVATE -sUSE_WEBGPU=1 -sWASM=1 -sUSE_GLFW=3 -sASYNCIFY -sNO_DISABLE_EXCEPTION_CATCHING)
+    target_link_options(ElectroApp PRIVATE -sUSE_WEBGPU=1 -sWASM=1 -sUSE_GLFW=3 -sASYNCIFY -sNO_DISABLE_EXCEPTION_CATCHING -sALLOW_MEMORY_GROWTH)
 
     configure_file(${CMAKE_SOURCE_DIR}/application/src/index.html ${CMAKE_BINARY_DIR}/index.html COPYONLY)
 

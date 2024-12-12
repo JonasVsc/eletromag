@@ -20,7 +20,10 @@ void Application::run()
 {
     while (true)
     {
+        mRenderer.render();
+
         mWindow.update();
+        
         emscripten_sleep(100);
     }
 }

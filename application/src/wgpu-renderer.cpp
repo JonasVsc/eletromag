@@ -5,8 +5,13 @@
 #include "app.h"
 #include "resource-manager.h"
 
+#include <glm/glm.hpp>
+#include <glm/ext.hpp>
+
 #include <iostream>
 #include<cstdint>
+
+constexpr float PI = 3.14159265358979323846f;
 
 ////////////////////////////////////////////////////////////////////////////
 // Public Methods //////////////////////////////////////////////////////////
@@ -18,11 +23,94 @@ void Renderer::init()
     initSwapChain();
     initDepthBuffer();
     initRenderPipeline();
+    initTexture();
+    initGeometry();
+    initUniforms();
+    initBindGroup();
 }
+
+void Renderer::render()
+{
+    float time = static_cast<float>(glfwGetTime());
+	wgpuQueueWriteBuffer(mQueue, mUniformBuffer, offsetof(MyUniforms, time), &time, sizeof(float));
+
+    WGPUTextureView nextTexture = wgpuSwapChainGetCurrentTextureView(mSwapChain);
+    if(!nextTexture)
+        throw std::runtime_error("failed to acquire next swap chain texture");
+
+    // command encoder
+	WGPUCommandEncoderDescriptor encoderDescriptor = {};
+	encoderDescriptor.nextInChain = nullptr;
+	encoderDescriptor.label = "Command Encoder";
+	WGPUCommandEncoder commandEncoder = wgpuDeviceCreateCommandEncoder(mDevice, &encoderDescriptor);
+
+	WGPURenderPassDescriptor renderPassDesc{};
+
+    WGPURenderPassColorAttachment renderPassColorAttachment{};
+    renderPassColorAttachment.view = nextTexture;
+    renderPassColorAttachment.resolveTarget = nullptr;
+    renderPassColorAttachment.loadOp = WGPULoadOp_Clear;
+	renderPassColorAttachment.storeOp = WGPUStoreOp_Store;
+    renderPassColorAttachment.clearValue = WGPUColor{ 0.05, 0.05, 0.05, 1.0 };
+	renderPassDesc.colorAttachmentCount = 1;
+	renderPassDesc.colorAttachments = &renderPassColorAttachment;
+
+	WGPURenderPassDepthStencilAttachment depthStencilAttachment{};
+    depthStencilAttachment.view = mDepthTextureView;
+	depthStencilAttachment.depthClearValue = 1.0f;
+	depthStencilAttachment.depthLoadOp = WGPULoadOp_Clear;
+	depthStencilAttachment.depthStoreOp = WGPUStoreOp_Store;
+	depthStencilAttachment.depthReadOnly = false;
+	depthStencilAttachment.stencilClearValue = 0;
+	depthStencilAttachment.stencilLoadOp = WGPULoadOp_Undefined;
+	depthStencilAttachment.stencilStoreOp = WGPUStoreOp_Undefined;
+	depthStencilAttachment.stencilReadOnly = true;
+
+    renderPassDesc.timestampWrites = nullptr;
+
+	WGPURenderPassEncoder renderPass = wgpuCommandEncoderBeginRenderPass(commandEncoder, &renderPassDesc);
+	
+    wgpuRenderPassEncoderSetPipeline(renderPass, mPipeline);
+    wgpuRenderPassEncoderSetVertexBuffer(renderPass, 0, mVertexBuffer, 0, mVertexCount * sizeof(ResourceManager::VertexAttributes));
+    wgpuRenderPassEncoderSetBindGroup(renderPass, 0, mBindGroup, 0, nullptr);
+    wgpuRenderPassEncoderDraw(renderPass, mVertexCount, 1, 0, 0);
+
+    wgpuRenderPassEncoderEnd(renderPass);
+    wgpuRenderPassEncoderRelease(renderPass);
+
+    WGPUCommandBufferDescriptor commandBufferDesc{};
+    commandBufferDesc.label = "Command Buffer";
+    WGPUCommandBuffer commandBuffer = wgpuCommandEncoderFinish(commandEncoder, &commandBufferDesc);
+	wgpuCommandEncoderRelease(commandEncoder);
+
+    wgpuQueueSubmit(mQueue, 1, &commandBuffer);
+    wgpuCommandBufferRelease(commandBuffer);
+
+    wgpuTextureViewRelease(nextTexture);
+}
+
 
 
 void Renderer::terminate()
 {
+    // terminate bind groups
+    wgpuBindGroupRelease(mBindGroup);
+
+    // terminate uniforms
+    wgpuBufferDestroy(mUniformBuffer);
+    wgpuBufferRelease(mUniformBuffer);
+
+    // terminate geometry
+    wgpuBufferDestroy(mVertexBuffer);
+    wgpuBufferRelease(mVertexBuffer);
+    mVertexCount = 0;
+
+    // terminate texture
+    wgpuTextureViewRelease(mTextureView);
+    wgpuTextureDestroy(mTexture);
+    wgpuTextureRelease(mTexture);
+    wgpuSamplerRelease(mSampler);
+
     // terminate render pipeline
     wgpuRenderPipelineRelease(mPipeline);
     wgpuShaderModuleRelease(mShaderModule);
@@ -43,10 +131,6 @@ void Renderer::terminate()
     wgpuInstanceRelease(mInstance);
 }
 
-void Renderer::update()
-{
-
-}
 
 ////////////////////////////////////////////////////////////////////////////
 // Private Methods /////////////////////////////////////////////////////////
@@ -308,3 +392,121 @@ void Renderer::initRenderPipeline()
 
 }
 
+void Renderer::initTexture() {
+	// Create a sampler
+	WGPUSamplerDescriptor samplerDesc{};
+	samplerDesc.addressModeU = WGPUAddressMode_Repeat;
+	samplerDesc.addressModeV = WGPUAddressMode_Repeat;
+	samplerDesc.addressModeW = WGPUAddressMode_Repeat;
+	samplerDesc.magFilter = WGPUFilterMode_Linear;
+	samplerDesc.minFilter = WGPUFilterMode_Linear;
+	samplerDesc.mipmapFilter = WGPUMipmapFilterMode_Linear;
+	samplerDesc.lodMinClamp = 0.0f;
+	samplerDesc.lodMaxClamp = 8.0f;
+	samplerDesc.compare = WGPUCompareFunction_Undefined;
+	samplerDesc.maxAnisotropy = 1;
+    mSampler = wgpuDeviceCreateSampler(mDevice, &samplerDesc);
+
+	// Create a texture
+	mTexture = ResourceManager::loadTexture("C:/Dev/eletromag/application/resources/fourareen2K_albedo.jpg", mDevice, &mTextureView);
+	if (!mTexture)
+        throw std::runtime_error("failed load texture");
+
+	std::cout << "Texture: " << mTexture << std::endl;
+	std::cout << "Texture view: " << mTextureView << std::endl;
+}
+
+void Renderer::initGeometry()
+{
+    // Load mesh data from OBJ file
+    std::vector<ResourceManager::VertexAttributes> vertexData;
+	bool success = ResourceManager::loadGeometryFromObj("C:/Dev/eletromag/application/resources/pyramid.obj", vertexData);
+	if (!success) 
+		throw std::runtime_error("failed to load geometry from obj");
+
+	// Create vertex buffer
+	WGPUBufferDescriptor bufferDesc{};
+	bufferDesc.size = vertexData.size() * sizeof(ResourceManager::VertexAttributes);
+	bufferDesc.usage = WGPUBufferUsage_CopyDst | WGPUBufferUsage_Vertex;
+	bufferDesc.mappedAtCreation = false;
+    mVertexBuffer = wgpuDeviceCreateBuffer(mDevice, &bufferDesc);
+    wgpuQueueWriteBuffer(mQueue, mVertexBuffer, 0, vertexData.data(), bufferDesc.size);
+	mVertexCount = static_cast<int>(vertexData.size());
+
+    if(mVertexBuffer == nullptr)
+		throw std::runtime_error("failed to create vertexBuffer");
+}
+
+void Renderer::initUniforms()
+{
+    // Create uniform buffer
+	WGPUBufferDescriptor bufferDesc{};
+	bufferDesc.size = sizeof(MyUniforms);
+	bufferDesc.usage = WGPUBufferUsage_CopyDst | WGPUBufferUsage_Uniform;
+	bufferDesc.mappedAtCreation = false;
+	mUniformBuffer = wgpuDeviceCreateBuffer(mDevice, &bufferDesc);
+
+	// Upload the initial value of the uniforms
+	mUniforms.modelMatrix = glm::mat4x4(1.0);
+	mUniforms.viewMatrix = glm::lookAt(glm::vec3(-2.0f, -3.0f, 2.0f), glm::vec3(0.0f), glm::vec3(0, 0, 1));
+	mUniforms.projectionMatrix = glm::perspective(45 * PI / 180, 640.0f / 480.0f, 0.01f, 100.0f);
+	mUniforms.time = 1.0f;
+	mUniforms.color = { 0.0f, 1.0f, 0.4f, 1.0f };
+    wgpuQueueWriteBuffer(mQueue, mUniformBuffer, 0, &mUniforms, sizeof(MyUniforms));
+
+    if(mUniformBuffer == nullptr)
+        throw std::runtime_error("failed to init uniform buffer");
+}
+
+void Renderer::initBindGroup()
+{
+
+    std::vector<WGPUBindGroupEntry> bindings(3);
+    bindings[0].binding = 0;
+    bindings[0].buffer = mUniformBuffer;
+    bindings[0].offset = 0;
+    bindings[0].size = sizeof(MyUniforms);
+
+    bindings[1].binding = 1;
+    bindings[1].textureView = mTextureView;
+
+    bindings[2].binding = 2;
+    bindings[2].sampler = mSampler;
+
+    WGPUBindGroupDescriptor bindGroupDesc{};
+    bindGroupDesc.layout = mBindGroupLayout;
+    bindGroupDesc.entryCount = (uint32_t)bindings.size();
+    bindGroupDesc.entries = bindings.data();
+    mBindGroup = wgpuDeviceCreateBindGroup(mDevice, &bindGroupDesc);
+
+    if(mBindGroup == nullptr)
+        throw std::runtime_error("failed to init bind group");
+}
+
+////////////////////////////////////////////////////////////////////////////
+// Utility Methods /////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
+
+WGPUTextureView Renderer::getNextSurfaceTextureView()
+{
+	WGPUSurfaceTexture surfaceTexture;
+	wgpuSurfaceGetCurrentTexture(mSurface, &surfaceTexture);
+	if (surfaceTexture.status != WGPUSurfaceGetCurrentTextureStatus_Success)
+		return nullptr;
+
+	WGPUTextureViewDescriptor viewDescriptor;
+	viewDescriptor.nextInChain = nullptr;
+	viewDescriptor.label = "Surface texture view";
+	viewDescriptor.format = wgpuTextureGetFormat(surfaceTexture.texture);
+	viewDescriptor.dimension = WGPUTextureViewDimension_3D;
+	viewDescriptor.baseMipLevel = 0;
+	viewDescriptor.mipLevelCount = 1;
+	viewDescriptor.baseArrayLayer = 0;
+	viewDescriptor.arrayLayerCount = 1;
+	viewDescriptor.aspect = WGPUTextureAspect_All;
+	WGPUTextureView targetView = wgpuTextureCreateView(surfaceTexture.texture, &viewDescriptor);
+
+	wgpuTextureRelease(surfaceTexture.texture);
+
+	return targetView;
+}

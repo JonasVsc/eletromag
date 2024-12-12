@@ -2,7 +2,9 @@
 
 #include <emscripten.h>
 #include <webgpu/webgpu.h>
+
 #include <glm/glm.hpp>
+#include <glm/ext.hpp>
 
 
 class Renderer 
@@ -11,9 +13,10 @@ public:
 
     void init();
 
-    void update();
 
     void terminate();
+
+    void render();
 
 private:
 
@@ -24,6 +27,17 @@ private:
     void initDepthBuffer();
 
     void initRenderPipeline();
+
+    void initTexture();
+
+    void initGeometry();
+
+    void initUniforms();
+
+    void initBindGroup();
+
+    // utility temporary
+    WGPUTextureView getNextSurfaceTextureView();
 
 private:
 
@@ -57,6 +71,21 @@ private:
 
     WGPUBindGroupLayout mBindGroupLayout;
 
+    WGPUBindGroup mBindGroup;
+
     WGPURenderPipeline mPipeline;
+
+    WGPUTexture mTexture;
+    WGPUTextureView mTextureView;
+
+    WGPUSampler mSampler;
+
+    WGPUBuffer mVertexBuffer;
+    int mVertexCount;
+
+    WGPUBuffer mUniformBuffer;
+
+    MyUniforms mUniforms;
+
 
 };
