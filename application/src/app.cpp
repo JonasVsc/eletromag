@@ -24,7 +24,7 @@ void Application::run()
 
         mWindow.update();
         
-        emscripten_sleep(100);
+        emscripten_sleep(10);
     }
 }
 

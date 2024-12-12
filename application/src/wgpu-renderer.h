@@ -60,14 +60,13 @@ private:
     WGPUShaderModule mShaderModule;
 
     struct MyUniforms {
-		// We add transform matrices
-		glm::mat4x4 projectionMatrix;
-		glm::mat4x4 viewMatrix;
-		glm::mat4x4 modelMatrix;
 		glm::vec4 color;
 		float time;
 		float _pad[3];
 	};
+
+	static_assert(sizeof(MyUniforms) % 16 == 0);
+
 
     WGPUBindGroupLayout mBindGroupLayout;
 
@@ -82,6 +81,10 @@ private:
 
     WGPUBuffer mVertexBuffer;
     int mVertexCount;
+
+    WGPUBuffer mIndexBuffer;
+	uint32_t mIndexCount;
+
 
     WGPUBuffer mUniformBuffer;
 
