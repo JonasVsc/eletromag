@@ -66,6 +66,7 @@ void Renderer::render()
 	depthStencilAttachment.stencilStoreOp = WGPUStoreOp_Undefined;
 	depthStencilAttachment.stencilReadOnly = true;
 
+    renderPassDesc.depthStencilAttachment = &depthStencilAttachment;
     renderPassDesc.timestampWrites = nullptr;
 
 	WGPURenderPassEncoder renderPass = wgpuCommandEncoderBeginRenderPass(commandEncoder, &renderPassDesc);
@@ -330,6 +331,7 @@ void Renderer::initRenderPipeline()
     depthStencilState.stencilBack.depthFailOp = WGPUStencilOperation_Keep;
     depthStencilState.stencilBack.passOp = WGPUStencilOperation_Keep;
 	
+    pipelineDesc.depthStencil = &depthStencilState;
 
     pipelineDesc.multisample.count = 1;
     pipelineDesc.multisample.mask = ~0u;
