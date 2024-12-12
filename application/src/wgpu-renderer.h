@@ -1,5 +1,7 @@
 #pragma once
 
+#include "camera.h"
+
 #include <emscripten.h>
 #include <webgpu/webgpu.h>
 
@@ -98,5 +100,10 @@ private:
 
     MyUniforms mUniforms;
 
+    // external
+    Camera mMainCamera;
 
+    // deltaTime
+    double deltaTime = 0.0f;
+    double lastFrame = 0.0f;
 };

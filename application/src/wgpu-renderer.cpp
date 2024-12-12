@@ -30,7 +30,16 @@ void Renderer::init()
 
 void Renderer::render()
 {
+    // delta Time
+    deltaTime = glfwGetTime() - lastFrame;
+	lastFrame = glfwGetTime();
+
     processInput();
+
+    // update camera
+    glm::mat4 view(1.0f);
+    view = mMainCamera.getViewMatrix();
+    wgpuQueueWriteBuffer(mQueue, mUniformBuffer, offsetof(MyUniforms, viewMatrix), &view, sizeof(glm::mat4));
 
     float time = static_cast<float>(glfwGetTime());
 	wgpuQueueWriteBuffer(mQueue, mUniformBuffer, offsetof(MyUniforms, time), &time, sizeof(float));
@@ -401,6 +410,7 @@ void Renderer::initGeometry()
 
 void Renderer::initUniforms()
 {
+
     // Create uniform buffer
 	WGPUBufferDescriptor bufferDesc{};
 	bufferDesc.size = sizeof(MyUniforms);
@@ -410,7 +420,7 @@ void Renderer::initUniforms()
 
 
     mUniforms.modelMatrix = glm::mat4x4(1.0f);
-    mUniforms.viewMatrix = glm::lookAt(glm::vec3(0.0f, -3.0f, 2.0f), glm::vec3(0.0f), glm::vec3(0, 0, 1));
+    mUniforms.viewMatrix = mMainCamera.getViewMatrix();
     mUniforms.projectionMatrix = glm::perspective(45 * PI / 180, 640.0f / 480.0f, 0.01f, 100.0f);
     mUniforms.time = 1.0f;
 	mUniforms.color = { 0.0f, 1.0f, 0.4f, 1.0f };
@@ -470,6 +480,8 @@ WGPUTextureView Renderer::getNextSurfaceTextureView()
 
 void Renderer::processInput()
 {
+    float speed = 5.5f * deltaTime;
+
     Application& app = Application::get();
     GLFWwindow* window = static_cast<GLFWwindow*>(app.getWindow().getNativeWindow());
 
@@ -493,5 +505,32 @@ void Renderer::processInput()
     }
     
     std::cout << "[COLOR] " << mUniforms.color.r << ' ' << mUniforms.color.g << ' ' << mUniforms.color.b << '\n';
+
+
+    // Camera Movement
+	if (glfwGetKey(window, GLFW_KEY_W) && GLFW_PRESS)
+	{
+		mMainCamera.mPosition += speed * mMainCamera.mFront;
+	}
+	if (glfwGetKey(window, GLFW_KEY_S) && GLFW_PRESS)
+	{
+		mMainCamera.mPosition -= speed * mMainCamera.mFront;
+	}
+	if (glfwGetKey(window, GLFW_KEY_A) && GLFW_PRESS)
+	{
+		mMainCamera.mPosition -= speed * glm::normalize(glm::cross(mMainCamera.mFront, mMainCamera.mUp));
+	}
+	if (glfwGetKey(window, GLFW_KEY_D) && GLFW_PRESS)
+	{
+		mMainCamera.mPosition += speed * glm::normalize(glm::cross(mMainCamera.mFront, mMainCamera.mUp));
+	}
+	if (glfwGetKey(window,GLFW_KEY_SPACE) && GLFW_PRESS)
+	{
+		mMainCamera.mPosition += speed * mMainCamera.mUp;
+	}
+	if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) && GLFW_PRESS)
+	{
+		mMainCamera.mPosition -= speed * mMainCamera.mUp;
+	}
 }
 

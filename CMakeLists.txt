@@ -31,6 +31,9 @@ add_executable(ElectroApp
     "application/src/tiny_obj_loader.h"
     "application/src/stb_image.h"
 
+    "application/src/camera.h"
+    "application/src/camera.cpp"
+
 )
 
 add_subdirectory("application/vendor/glm")
