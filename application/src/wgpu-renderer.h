@@ -4,6 +4,8 @@
 
 #include <emscripten.h>
 #include <webgpu/webgpu.h>
+#include "glfw3webgpu.h"
+
 
 #include <glm/glm.hpp>
 #include <glm/ext.hpp>
@@ -34,7 +36,6 @@ public:
     inline WGPUQueue getQueue() { return mQueue; }
 
     inline WGPUBuffer getUniformBuffer() { return mUniformBuffer; }
-
 private:
 
     void initDevice();
@@ -56,7 +57,20 @@ private:
     // utility temporary
     WGPUTextureView getNextSurfaceTextureView();
 
+
+    // events
     void processInput();
+
+    // Mouse Movement
+    void processMouseMovement(double xposIn, double yposIn);
+    void processMouseButtonCallback(int button, int action, int mods);
+
+	bool firstMouse = true;
+    bool rightbuttonPressed = false;
+	float yaw = -90.0f;
+	float pitch = 0.0f;
+	float lastX = 640.0f / 2.0;
+	float lastY = 480.0 / 2.0;
 
 private:
 

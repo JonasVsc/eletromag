@@ -160,6 +160,25 @@ void Renderer::initDevice()
 
     mSurface = glfwGetWGPUSurface(mInstance, window);
 
+    glfwSetWindowUserPointer(window, this);
+    
+    // callbacks 
+    glfwSetCursorPosCallback(window, [](GLFWwindow* window, double xpos, double ypos)
+    {
+        Renderer* renderer = static_cast<Renderer*>(glfwGetWindowUserPointer(window));
+        if (renderer) {
+            renderer->processMouseMovement(xpos, ypos);
+        }
+    });
+
+    glfwSetMouseButtonCallback(window, [](GLFWwindow* window, int button, int action, int mods)
+    {
+        Renderer* renderer = static_cast<Renderer*>(glfwGetWindowUserPointer(window));
+        if (renderer) {
+            renderer->processMouseButtonCallback(button, action, mods);
+        }
+    });
+
     WGPURequestAdapterOptions adapterOpts{};
     adapterOpts.compatibleSurface = mSurface;
 
@@ -485,28 +504,6 @@ void Renderer::processInput()
     Application& app = Application::get();
     GLFWwindow* window = static_cast<GLFWwindow*>(app.getWindow().getNativeWindow());
 
-    if(glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS)
-    {
-        if(mUniforms.color.r > 1)
-            mUniforms.color.r = 0;
-        mUniforms.color.r += 0.01;
-    }
-    if(glfwGetKey(window, GLFW_KEY_G) == GLFW_PRESS)
-    {
-        if(mUniforms.color.g > 1)
-            mUniforms.color.g = 0;
-        mUniforms.color.g += 0.01;
-    }
-    if(glfwGetKey(window, GLFW_KEY_B) == GLFW_PRESS)
-    {
-        if(mUniforms.color.b > 1)
-            mUniforms.color.b = 0;
-        mUniforms.color.b += 0.01;        
-    }
-    
-    std::cout << "[COLOR] " << mUniforms.color.r << ' ' << mUniforms.color.g << ' ' << mUniforms.color.b << '\n';
-
-
     // Camera Movement
 	if (glfwGetKey(window, GLFW_KEY_W) && GLFW_PRESS)
 	{
@@ -534,3 +531,64 @@ void Renderer::processInput()
 	}
 }
 
+void Renderer::processMouseMovement(double xposIn, double yposIn)
+{
+    float xpos = static_cast<float>(xposIn);
+	float ypos = static_cast<float>(yposIn);
+    if(rightbuttonPressed)
+    {
+
+        if (firstMouse)
+        {
+            lastX = xpos;
+            lastY = ypos;
+            firstMouse = false;
+        }
+
+        float xoffset = xpos - lastX;
+        float yoffset = lastY - ypos; // reversed since y-coordinates go from bottom to top
+        lastX = xpos;
+        lastY = ypos;
+
+        float sensitivity = 0.1f; // change this value to your liking
+        xoffset *= sensitivity;
+        yoffset *= sensitivity;
+
+        yaw += xoffset;
+        pitch += yoffset;
+
+        // make sure that when pitch is out of bounds, screen doesn't get flipped
+        if (pitch > 89.0f)
+            pitch = 89.0f;
+        if (pitch < -89.0f)
+            pitch = -89.0f;
+
+        glm::vec3 front;
+        front.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
+        front.y = sin(glm::radians(pitch));
+        front.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+        mMainCamera.mFront = glm::normalize(front);
+
+    }
+}
+
+void Renderer::processMouseButtonCallback(int button, int action, int mods)
+{
+    Application& app = Application::get();
+    GLFWwindow* window = static_cast<GLFWwindow*>(app.getWindow().getNativeWindow());
+
+    if (button == GLFW_MOUSE_BUTTON_RIGHT) 
+    {
+        if (action == GLFW_PRESS) 
+        {
+            rightbuttonPressed = true;
+            glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);  // Esconde o cursor
+        }
+        if (action == GLFW_RELEASE) 
+        {
+            rightbuttonPressed = false;
+            firstMouse = true;
+            glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);  // Mostra o cursor
+        }
+    }
+}
