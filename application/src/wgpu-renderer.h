@@ -38,6 +38,8 @@ public:
     inline WGPUBuffer getUniformBuffer() { return mUniformBuffer; }
 private:
 
+    void initGui();
+
     void initDevice();
 
     void initSwapChain();
@@ -53,6 +55,8 @@ private:
     void initUniforms();
 
     void initBindGroup();
+
+    void updateGui(WGPURenderPassEncoder renderPass);
 
     // utility temporary
     WGPUTextureView getNextSurfaceTextureView();

@@ -12,6 +12,10 @@
 #include <iostream>
 #include<cstdint>
 
+#include <imgui.h>
+#include <backends/imgui_impl_wgpu.h>
+#include <backends/imgui_impl_glfw.h>
+
 constexpr float PI = 3.14159265358979323846f;
 
 ////////////////////////////////////////////////////////////////////////////
@@ -27,6 +31,7 @@ void Renderer::init()
     initGeometry();
     initUniforms();
     initBindGroup();
+    initGui();
 }
 
 void Renderer::render()
@@ -95,6 +100,8 @@ void Renderer::render()
 
 	wgpuRenderPassEncoderDrawIndexed(renderPass, mIndexCount, 1, 0, 0, 0);
 
+    updateGui(renderPass);
+
     wgpuRenderPassEncoderEnd(renderPass);
     wgpuRenderPassEncoderRelease(renderPass);
 
@@ -113,6 +120,10 @@ void Renderer::render()
 
 void Renderer::terminate()
 {
+    // terminate gui
+    ImGui_ImplGlfw_Shutdown();
+    ImGui_ImplWGPU_Shutdown();
+
     // terminate bind groups
     wgpuBindGroupRelease(mBindGroup);
 
@@ -197,7 +208,7 @@ void Renderer::initDevice()
 	requiredLimits.limits.minStorageBufferOffsetAlignment = supportedLimits.limits.minStorageBufferOffsetAlignment;
 	requiredLimits.limits.minUniformBufferOffsetAlignment = supportedLimits.limits.minUniformBufferOffsetAlignment;
 	requiredLimits.limits.maxInterStageShaderComponents = 8;
-	requiredLimits.limits.maxBindGroups = 1;
+	requiredLimits.limits.maxBindGroups = 2;
 	requiredLimits.limits.maxUniformBuffersPerShaderStage = 1;
 	requiredLimits.limits.maxUniformBufferBindingSize = 16 * 4 * sizeof(float);
 	// Allow textures up to 2K
@@ -468,6 +479,67 @@ void Renderer::initBindGroup()
     if(mBindGroup == nullptr)
         throw std::runtime_error("failed to init bind group");
 }
+
+void Renderer::initGui()
+{
+    Application& app = Application::get();
+    GLFWwindow* window = static_cast<GLFWwindow*>(app.getWindow().getNativeWindow());
+     // Setup Dear ImGui context
+    IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
+    ImGui::GetIO();
+
+    // Setup Platform/Renderer backends
+    ImGui_ImplGlfw_InitForOther(window, true);
+    ImGui_ImplWGPU_InitInfo init_info;
+    init_info.Device = mDevice;
+    init_info.NumFramesInFlight = 3;
+    init_info.RenderTargetFormat = WGPUTextureFormat_BGRA8Unorm;
+    init_info.DepthStencilFormat = WGPUTextureFormat_Depth24Plus;
+    ImGui_ImplWGPU_Init(&init_info);
+}
+
+void Renderer::updateGui(WGPURenderPassEncoder renderPass)
+{
+    // Start the Dear ImGui frame
+    ImGui_ImplWGPU_NewFrame();
+    ImGui_ImplGlfw_NewFrame();
+    ImGui::NewFrame();
+
+    // [...] Build our UI
+    // Build our UI
+    static float f = 0.0f;
+    static int counter = 0;
+    static bool show_demo_window = true;
+    static bool show_another_window = false;
+    static ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
+
+    ImGui::Begin("Hello, world!");                                // Create a window called "Hello, world!" and append into it.
+
+    ImGui::Text("This is some useful text.");                     // Display some text (you can use a format strings too)
+    ImGui::Checkbox("Demo Window", &show_demo_window);            // Edit bools storing our window open/close state
+    ImGui::Checkbox("Another Window", &show_another_window);
+
+    ImGui::SliderFloat("float", &f, 0.0f, 1.0f);                  // Edit 1 float using a slider from 0.0f to 1.0f
+    ImGui::ColorEdit3("clear color", (float*)&clear_color);       // Edit 3 floats representing a color
+
+    if (ImGui::Button("Button"))                                  // Buttons return true when clicked (most widgets return true when edited/activated)
+        counter++;
+    ImGui::SameLine();
+    ImGui::Text("counter = %d", counter);
+
+    ImGuiIO& io = ImGui::GetIO();
+    ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
+    ImGui::End();
+
+    // Draw the UI
+    ImGui::EndFrame();
+    // Convert the UI defined above into low-level drawing commands
+    ImGui::Render();
+    // Execute the low-level drawing commands on the WebGPU backend
+    ImGui_ImplWGPU_RenderDrawData(ImGui::GetDrawData(), renderPass);
+}
+
 
 ////////////////////////////////////////////////////////////////////////////
 // Utility Methods /////////////////////////////////////////////////////////

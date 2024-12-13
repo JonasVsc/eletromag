@@ -2,7 +2,7 @@
 
 #include <emscripten.h>
 
- Application* Application::sInstance = nullptr;
+Application* Application::sInstance = nullptr;
 
 Application::Application()
 {

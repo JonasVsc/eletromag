@@ -37,6 +37,7 @@ add_executable(ElectroApp
 )
 
 add_subdirectory("application/vendor/glm")
+add_subdirectory("application/vendor/imgui")
 
 if(${CMAKE_SYSTEM_NAME} STREQUAL "Emscripten")
 
@@ -52,7 +53,7 @@ if(${CMAKE_SYSTEM_NAME} STREQUAL "Emscripten")
         --preload-file "${CMAKE_CURRENT_SOURCE_DIR}/application/resources"
     )
 
-    target_link_libraries(ElectroApp PRIVATE glm)
+    target_link_libraries(ElectroApp PRIVATE glm imgui)
 
 endif()
 
