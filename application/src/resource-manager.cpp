@@ -107,11 +107,11 @@ bool ResourceManager::loadGeometryFromObj(const std::filesystem::path& path, std
 				attrib.vertices[3 * idx.vertex_index + 1]
 			};
 
-			// vertexData[offset + i].normal = {
-			// 	attrib.normals[3 * idx.normal_index + 0],
-			// 	-attrib.normals[3 * idx.normal_index + 2],
-			// 	attrib.normals[3 * idx.normal_index + 1]
-			// };
+			vertexData[offset + i].normal = {
+				attrib.normals[3 * idx.normal_index + 0],
+				-attrib.normals[3 * idx.normal_index + 2],
+				attrib.normals[3 * idx.normal_index + 1]
+			};
 
 			vertexData[offset + i].color = {
 				attrib.colors[3 * idx.vertex_index + 0],

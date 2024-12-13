@@ -304,7 +304,7 @@ void Renderer::initRenderPipeline()
 
     WGPURenderPipelineDescriptor pipelineDesc{};
 
-    std::vector<WGPUVertexAttribute> vertexAttribs(2);
+    std::vector<WGPUVertexAttribute> vertexAttribs(3);
 
     // Position attribute
     vertexAttribs[0].shaderLocation = 0;
@@ -313,12 +313,16 @@ void Renderer::initRenderPipeline()
 
     vertexAttribs[1].shaderLocation = 1;
     vertexAttribs[1].format = WGPUVertexFormat_Float32x3;
-	vertexAttribs[1].offset = offsetof(ResourceManager::VertexAttributes, color);
+	vertexAttribs[1].offset = offsetof(ResourceManager::VertexAttributes, normal);
+    
+    vertexAttribs[2].shaderLocation = 2;
+    vertexAttribs[2].format = WGPUVertexFormat_Float32x3;
+	vertexAttribs[2].offset = offsetof(ResourceManager::VertexAttributes, color);
 
     WGPUVertexBufferLayout vertexBufferLayout{};
     vertexBufferLayout.attributeCount = (uint32_t)vertexAttribs.size();
     vertexBufferLayout.attributes = vertexAttribs.data();
-    vertexBufferLayout.arrayStride = 6 * sizeof(float);
+    vertexBufferLayout.arrayStride = sizeof(ResourceManager::VertexAttributes);
     vertexBufferLayout.stepMode = WGPUVertexStepMode_Vertex;
 
     pipelineDesc.vertex.bufferCount = 1;
@@ -507,7 +511,7 @@ void Renderer::updateGui(WGPURenderPassEncoder renderPass)
     static float f = 0.0f;
     static int counter = 0;
 
-    ImGui::Begin("Triangle Properties");                                
+    ImGui::Begin("Object Properties");                                
 
     ImGui::ColorEdit3("Color", (float*)&mUniforms.color);       // Edit 3 floats representing a color
 
