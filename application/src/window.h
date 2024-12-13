@@ -19,10 +19,6 @@ public:
 
     inline void* getNativeWindow() const { return mWindow;  }
 
-private:
-
-    GLFWwindow* mWindow;
-
     struct WindowData
     {
         unsigned int width = 1280, height = 720;
@@ -31,5 +27,11 @@ private:
     };
 
     WindowData mData;
+
+private:
+
+    GLFWwindow* mWindow;
+
+
 
 };

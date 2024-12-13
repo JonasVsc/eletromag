@@ -4,6 +4,7 @@
 #include "webgpu-utils.h"
 #include "application.h"
 #include "resource-manager.h"
+#include "window.h"
 
 #include <glm/glm.hpp>
 #include <glm/ext.hpp>
@@ -191,8 +192,8 @@ void Renderer::initDevice()
     WGPURequiredLimits requiredLimits{};
     requiredLimits.limits.maxVertexAttributes = 4;
 	requiredLimits.limits.maxVertexBuffers = 1;
-	requiredLimits.limits.maxBufferSize = 150000 * sizeof(WGPUVertexAttribute);
-	requiredLimits.limits.maxVertexBufferArrayStride = sizeof(WGPUVertexAttribute);
+	requiredLimits.limits.maxBufferSize = 16 * sizeof(ResourceManager::VertexAttributes);
+	requiredLimits.limits.maxVertexBufferArrayStride = sizeof(ResourceManager::VertexAttributes);
 	requiredLimits.limits.minStorageBufferOffsetAlignment = supportedLimits.limits.minStorageBufferOffsetAlignment;
 	requiredLimits.limits.minUniformBufferOffsetAlignment = supportedLimits.limits.minUniformBufferOffsetAlignment;
 	requiredLimits.limits.maxInterStageShaderComponents = 8;
@@ -259,7 +260,7 @@ void Renderer::initDepthBuffer()
     depthTextureDesc.format = mDepthTextureFormat;
     depthTextureDesc.mipLevelCount = 1;
     depthTextureDesc.sampleCount = 1;
-    depthTextureDesc.size = { 640, 480, 1 };
+    depthTextureDesc.size = { 1280, 720, 1 };
     depthTextureDesc.usage = WGPUTextureUsage_RenderAttachment;
     depthTextureDesc.viewFormatCount = 1;
     depthTextureDesc.viewFormats = &mDepthTextureFormat;
@@ -295,11 +296,11 @@ void Renderer::initRenderPipeline()
     // Position attribute
     vertexAttribs[0].shaderLocation = 0;
     vertexAttribs[0].format = WGPUVertexFormat_Float32x3;
-    vertexAttribs[0].offset = 0;
+    vertexAttribs[0].offset = offsetof(ResourceManager::VertexAttributes, position);
 
     vertexAttribs[1].shaderLocation = 1;
     vertexAttribs[1].format = WGPUVertexFormat_Float32x3;
-	vertexAttribs[1].offset = 3 * sizeof(float);
+	vertexAttribs[1].offset = offsetof(ResourceManager::VertexAttributes, color);
 
     WGPUVertexBufferLayout vertexBufferLayout{};
     vertexBufferLayout.attributeCount = (uint32_t)vertexAttribs.size();

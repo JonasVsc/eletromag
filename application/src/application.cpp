@@ -7,7 +7,7 @@
 Application::Application()
 {
     sInstance = this;
-	mWindow.create(640, 480, "WebGPU");
+	mWindow.create(1280, 720, "WebGPU");
 }
 
 void Application::init()
