@@ -22,18 +22,8 @@ struct MyUniforms {
 @vertex
 fn vs_main(in: VertexInput) -> VertexOutput {
     var out: VertexOutput;
-    let ratio = 640.0 / 480.0;
-    let angle = uMyUniforms.time;
-    let alpha = cos(angle);
-    let beta = sin(angle);
 
-    var position = vec3f(
-        in.position.x,
-        alpha * in.position.y + beta * in.position.z,
-        alpha * in.position.z - beta * in.position.y,
-    );
-
-    out.position = uMyUniforms.projectionMatrix * uMyUniforms.viewMatrix * uMyUniforms.modelMatrix * vec4f(position.x, position.y * ratio, position.z * 0.5 + 0.5, 1.0);
+    out.position = uMyUniforms.projectionMatrix * uMyUniforms.viewMatrix * uMyUniforms.modelMatrix * vec4f(in.position, 1.0);
     out.color = in.color;
     return out;
 }

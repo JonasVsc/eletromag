@@ -42,6 +42,10 @@ void Renderer::render()
 
     processInput();
 
+    glm::mat4 model(1.0f);
+    model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+    wgpuQueueWriteBuffer(mQueue, mUniformBuffer, offsetof(MyUniforms, modelMatrix), &model, sizeof(glm::mat4));
+
     // update camera
     glm::mat4 view(1.0f);
     view = mMainCamera.getViewMatrix();
