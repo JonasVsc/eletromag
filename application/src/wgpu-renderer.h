@@ -35,7 +35,7 @@ public:
 
     inline WGPUQueue getQueue() { return mQueue; }
 
-    inline WGPUBuffer getUniformBuffer() { return mUniformBuffer; }
+    inline WGPUBuffer getUniformBuffer() { return mUniformElectronBuffer; }
 private:
 
     void initGui();
@@ -97,25 +97,32 @@ private:
 
     WGPUShaderModule mShaderModule;
 
-    WGPUBindGroupLayout mBindGroupLayout;
-
-    WGPUBindGroup mBindGroup;
-
     WGPURenderPipeline mPipeline;
+
+    WGPUBindGroupLayout mBindGroupLayout;
 
     WGPUTexture mTexture;
     WGPUTextureView mTextureView;
 
     WGPUSampler mSampler;
 
-    WGPUBuffer mVertexBuffer;
-    int mVertexCount;
+    // Buffers
+    WGPUBuffer mElectronVertexBuffer;
+    int mElectronVertexCount;
 
-    WGPUBuffer mIndexBuffer;
-	uint32_t mIndexCount;
+    WGPUBuffer mFieldVertexBuffer;
+    int mFieldVertexCount;
 
+    WGPUBuffer mVectorVertexBuffer;
+    int mVectorVertexCount;
 
-    WGPUBuffer mUniformBuffer;
+    WGPUBuffer mUniformElectronBuffer;
+    WGPUBuffer mUniformFieldBuffer;
+    WGPUBuffer mUniformVectorBuffer;
+
+    WGPUBindGroup mElectronBindGroup;
+    WGPUBindGroup mFieldBindGroup;
+    WGPUBindGroup mVectorBindGroup;
 
     MyUniforms mUniforms;
 

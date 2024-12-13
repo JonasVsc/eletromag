@@ -33,19 +33,11 @@ fn vs_main(in: VertexInput) -> VertexOutput {
 
 @fragment
 fn fs_main(in: VertexOutput) -> @location(0) vec4f {
-    let normal = normalize(in.normal);
+    
+    let ambientStrength = 1.0;
+    let ambient = ambientStrength * vec3f(1.0, 1.0, 1.0); // lightColor
 
-    let lightColor1 = vec3f(1.0, 0.9, 0.6);
-    let lightColor2 = vec3f(0.6, 0.9, 1.0);
-    let lightDirection1 = vec3f(0.5, -0.9, 0.1);
-    let lightDirection2 = vec3f(0.2, 0.4, 0.3);
-
-    let shading1 = max(0.0, dot(lightDirection1, normal));
-    let shading2 = max(0.0, dot(lightDirection2, normal));
-
-    let shading = shading1 * lightColor1 + shading2 * lightColor2;
-    let color = in.color * shading;
-
+    let color = ambient * (in.color * uMyUniforms.color.rgb);
     let linear_color = pow(color, vec3f(2.2));
 	return vec4f(linear_color, 1.0);
 }

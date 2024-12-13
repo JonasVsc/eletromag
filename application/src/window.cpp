@@ -38,36 +38,36 @@ void Window::init()
     });
 
     // TODO: glfw callbacks
-    glfwSetCursorPosCallback(mWindow, [](GLFWwindow* window, double xpos, double ypos)
-    {
-        // ("Cursor moved callback!");
-    });
+    // glfwSetCursorPosCallback(mWindow, [](GLFWwindow* window, double xpos, double ypos)
+    // {
+    //     // ("Cursor moved callback!");
+    // });
 
-    glfwSetKeyCallback(mWindow, [](GLFWwindow* window, int key, int scancode, int action, int mods)
-    {
-        switch (action)
-        {
-        case GLFW_PRESS:
-            std::cout << "[INFO] " << "Key " << key << " Pressed" << '\n';
-            break;
-        case GLFW_RELEASE:
-            std::cout << "[INFO] " << "Key " << key << " Released" << '\n';
-            break;
-        }
-    });
+    // glfwSetKeyCallback(mWindow, [](GLFWwindow* window, int key, int scancode, int action, int mods)
+    // {
+    //     switch (action)
+    //     {
+    //     case GLFW_PRESS:
+    //         std::cout << "[INFO] " << "Key " << key << " Pressed" << '\n';
+    //         break;
+    //     case GLFW_RELEASE:
+    //         std::cout << "[INFO] " << "Key " << key << " Released" << '\n';
+    //         break;
+    //     }
+    // });
 
-    glfwSetMouseButtonCallback(mWindow, [](GLFWwindow* window, int button, int action, int mods)
-    {
-        switch (action)
-        {
-        case GLFW_PRESS:
-            std::cout << "[INFO] " << "Mouse button " << button << " Pressed" << '\n';
-            break;
-        case GLFW_RELEASE:
-            std::cout << "[INFO] " << "Mouse button " << button << " Released" << '\n';
-            break;
-        }
-    });
+    // glfwSetMouseButtonCallback(mWindow, [](GLFWwindow* window, int button, int action, int mods)
+    // {
+    //     switch (action)
+    //     {
+    //     case GLFW_PRESS:
+    //         std::cout << "[INFO] " << "Mouse button " << button << " Pressed" << '\n';
+    //         break;
+    //     case GLFW_RELEASE:
+    //         std::cout << "[INFO] " << "Mouse button " << button << " Released" << '\n';
+    //         break;
+    //     }
+    // });
 }
 
 void Window::update()

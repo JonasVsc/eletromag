@@ -45,7 +45,9 @@ void Renderer::render()
     // update camera
     glm::mat4 view(1.0f);
     view = mMainCamera.getViewMatrix();
-    wgpuQueueWriteBuffer(mQueue, mUniformBuffer, offsetof(MyUniforms, viewMatrix), &view, sizeof(glm::mat4));
+    wgpuQueueWriteBuffer(mQueue, mUniformElectronBuffer, offsetof(MyUniforms, viewMatrix), &view, sizeof(glm::mat4));
+    wgpuQueueWriteBuffer(mQueue, mUniformFieldBuffer, offsetof(MyUniforms, viewMatrix), &view, sizeof(glm::mat4));
+    wgpuQueueWriteBuffer(mQueue, mUniformVectorBuffer, offsetof(MyUniforms, viewMatrix), &view, sizeof(glm::mat4));
 
 
     WGPUTextureView nextTexture = getNextSurfaceTextureView();
@@ -88,12 +90,22 @@ void Renderer::render()
 	
     wgpuRenderPassEncoderSetPipeline(renderPass, mPipeline);
 
-    wgpuRenderPassEncoderSetVertexBuffer(renderPass, 0, mVertexBuffer, 0, wgpuBufferGetSize(mVertexBuffer));
+    // electron 
+    wgpuRenderPassEncoderSetVertexBuffer(renderPass, 0, mElectronVertexBuffer, 0, wgpuBufferGetSize(mElectronVertexBuffer));
+    wgpuRenderPassEncoderSetBindGroup(renderPass, 0, mElectronBindGroup, 0, nullptr);
+	wgpuRenderPassEncoderDraw(renderPass, mElectronVertexCount, 1, 0, 0);
 
-    wgpuRenderPassEncoderSetBindGroup(renderPass, 0, mBindGroup, 0, nullptr);
+    // field
+    wgpuRenderPassEncoderSetVertexBuffer(renderPass, 0, mFieldVertexBuffer, 0, wgpuBufferGetSize(mFieldVertexBuffer));
+    wgpuRenderPassEncoderSetBindGroup(renderPass, 0, mFieldBindGroup, 0, nullptr);
+    wgpuRenderPassEncoderDraw(renderPass, mFieldVertexCount, 1, 0, 0);
 
-	wgpuRenderPassEncoderDraw(renderPass, mVertexCount, 1, 0, 0);
-
+    // vector
+    wgpuRenderPassEncoderSetVertexBuffer(renderPass, 0, mVectorVertexBuffer, 0, wgpuBufferGetSize(mVectorVertexBuffer));
+    wgpuRenderPassEncoderSetBindGroup(renderPass, 0, mVectorBindGroup, 0, nullptr);
+    wgpuRenderPassEncoderDraw(renderPass, mVectorVertexCount, 1, 0, 0);
+    
+    
     updateGui(renderPass);
 
     wgpuRenderPassEncoderEnd(renderPass);
@@ -119,16 +131,30 @@ void Renderer::terminate()
     ImGui_ImplWGPU_Shutdown();
 
     // terminate bind groups
-    wgpuBindGroupRelease(mBindGroup);
+    wgpuBindGroupRelease(mElectronBindGroup);
+    wgpuBindGroupRelease(mFieldBindGroup);
+    wgpuBindGroupRelease(mVectorBindGroup);
 
     // terminate uniforms
-    wgpuBufferDestroy(mUniformBuffer);
-    wgpuBufferRelease(mUniformBuffer);
+    wgpuBufferDestroy(mUniformElectronBuffer);
+    wgpuBufferRelease(mUniformElectronBuffer);
+    wgpuBufferDestroy(mUniformFieldBuffer);
+    wgpuBufferRelease(mUniformFieldBuffer);
+    wgpuBufferDestroy(mUniformVectorBuffer);
+    wgpuBufferRelease(mUniformVectorBuffer);
 
     // terminate geometry
-    wgpuBufferDestroy(mVertexBuffer);
-    wgpuBufferRelease(mVertexBuffer);
-    mVertexCount = 0;
+    wgpuBufferDestroy(mElectronVertexBuffer);
+    wgpuBufferRelease(mElectronVertexBuffer);
+    mElectronVertexCount = 0;
+
+    wgpuBufferDestroy(mFieldVertexBuffer);
+    wgpuBufferRelease(mFieldVertexBuffer);
+    mFieldVertexCount = 0;
+
+    wgpuBufferDestroy(mVectorVertexBuffer);
+    wgpuBufferRelease(mVectorVertexBuffer);
+    mVectorVertexCount = 0;
 
     // terminate render pipeline
     wgpuRenderPipelineRelease(mPipeline);
@@ -403,61 +429,93 @@ void Renderer::initRenderPipeline()
     std::cout << "[INFO] Render pipeline: " << mPipeline << std::endl;
 
     if(mPipeline == nullptr)
-        throw std::runtime_error("failed create render pipeline");
-
+        std::cerr << "failed create render pipeline" << '\n';
 }
 
 void Renderer::initGeometry()
 {
     std::vector<ResourceManager::VertexAttributes> vertexData;
-    std::vector<uint16_t> indexData;
 
-	bool success = ResourceManager::loadGeometryFromObj("C:/Dev/eletromag/application/resources/fourareen.obj", vertexData);
+	bool success = ResourceManager::loadGeometryFromObj("C:/Dev/eletromag/application/resources/electron.obj", vertexData);
     if(!success)
-        throw std::runtime_error("[ERROR] could not load geometry");
+        std::cerr << "[ERROR] could not load geometry" << '\n';
 
-    mVertexCount = static_cast<uint32_t>(vertexData.size());
-	mIndexCount = static_cast<uint32_t>(indexData.size());
+    mElectronVertexCount = static_cast<uint32_t>(vertexData.size());
 
-	// vertex buffer
+	// electron vertex buffer
     WGPUBufferDescriptor bufferDesc{};
-	bufferDesc.label = "vertex buffer";
+	bufferDesc.label = "electron vertex buffer";
     bufferDesc.size = vertexData.size() * sizeof(ResourceManager::VertexAttributes);
 	bufferDesc.usage = WGPUBufferUsage_CopyDst | WGPUBufferUsage_Vertex;
 	bufferDesc.mappedAtCreation = false;
-    mVertexBuffer = wgpuDeviceCreateBuffer(mDevice, &bufferDesc);
-	wgpuQueueWriteBuffer(mQueue, mVertexBuffer, 0, vertexData.data(), bufferDesc.size);
+    mElectronVertexBuffer = wgpuDeviceCreateBuffer(mDevice, &bufferDesc);
+	wgpuQueueWriteBuffer(mQueue, mElectronVertexBuffer, 0, vertexData.data(), bufferDesc.size);
+    vertexData.clear();
+
+    // field vertex buffer
+    success = ResourceManager::loadGeometryFromObj("C:/Dev/eletromag/application/resources/field.obj", vertexData);
+    if(!success)
+        std::cerr << "[ERROR] could not load geometry" << '\n';
+
+    mFieldVertexCount = static_cast<uint32_t>(vertexData.size());
+
+    bufferDesc.label = "field vertex buffer";
+    bufferDesc.size = vertexData.size() * sizeof(ResourceManager::VertexAttributes);
+    mFieldVertexBuffer = wgpuDeviceCreateBuffer(mDevice, &bufferDesc);
+    wgpuQueueWriteBuffer(mQueue, mFieldVertexBuffer, 0, vertexData.data(), bufferDesc.size);
+    vertexData.clear();
+
+    // vector vertex buffer
+    success = ResourceManager::loadGeometryFromObj("C:/Dev/eletromag/application/resources/vector.obj", vertexData);
+    if(!success)
+        std::cerr << "[ERROR] could not load geometry" << '\n';
+
+    mVectorVertexCount = static_cast<uint32_t>(vertexData.size());
+
+    bufferDesc.label = "vector vertex buffer";
+    bufferDesc.size = vertexData.size() * sizeof(ResourceManager::VertexAttributes);
+    mVectorVertexBuffer = wgpuDeviceCreateBuffer(mDevice, &bufferDesc);
+    wgpuQueueWriteBuffer(mQueue, mVectorVertexBuffer, 0, vertexData.data(), bufferDesc.size);
 
 }
 
 void Renderer::initUniforms()
 {
 
-    // Create uniform buffer
+    // Create electron uniform buffer
 	WGPUBufferDescriptor bufferDesc{};
 	bufferDesc.size = sizeof(MyUniforms);
 	bufferDesc.usage = WGPUBufferUsage_CopyDst | WGPUBufferUsage_Uniform;
 	bufferDesc.mappedAtCreation = false;
-	mUniformBuffer = wgpuDeviceCreateBuffer(mDevice, &bufferDesc);
-
+	mUniformElectronBuffer = wgpuDeviceCreateBuffer(mDevice, &bufferDesc);
+	mUniformFieldBuffer = wgpuDeviceCreateBuffer(mDevice, &bufferDesc);
+	mUniformVectorBuffer = wgpuDeviceCreateBuffer(mDevice, &bufferDesc);
 
     mUniforms.modelMatrix = glm::mat4x4(1.0f);
     mUniforms.viewMatrix = mMainCamera.getViewMatrix();
     mUniforms.projectionMatrix = glm::perspective(45 * PI / 180, 640.0f / 480.0f, 0.01f, 100.0f);
     mUniforms.time = 1.0f;
-	mUniforms.color = { 0.0f, 1.0f, 0.4f, 1.0f };
-    wgpuQueueWriteBuffer(mQueue, mUniformBuffer, 0, &mUniforms, sizeof(MyUniforms));
+	mUniforms.color = { 0.0f, 0.0f, 1.0f, 1.0f };
 
-    if(mUniformBuffer == nullptr)
-        throw std::runtime_error("failed to init uniform buffer");
+
+    wgpuQueueWriteBuffer(mQueue, mUniformElectronBuffer, 0, &mUniforms, sizeof(MyUniforms));
+
+	mUniforms.color = { 1.0f, 0.0f, 0.0f, 1.0f };
+    wgpuQueueWriteBuffer(mQueue, mUniformFieldBuffer, 0, &mUniforms, sizeof(MyUniforms));
+
+    mUniforms.color = { 0.0f, 1.0f, 0.0f, 1.0f };
+    wgpuQueueWriteBuffer(mQueue, mUniformVectorBuffer, 0, &mUniforms, sizeof(MyUniforms));
+
+    if(mUniformElectronBuffer == nullptr || mUniformVectorBuffer == nullptr || mUniformFieldBuffer == nullptr)
+        std::cerr << "failed to init uniform buffer" << '\n';
 }
 
 void Renderer::initBindGroup()
 {
-
+    // electron bind group
     WGPUBindGroupEntry bindings{};
     bindings.binding = 0;
-    bindings.buffer = mUniformBuffer;
+    bindings.buffer = mUniformElectronBuffer;
     bindings.offset = 0;
     bindings.size = sizeof(MyUniforms);
 
@@ -465,10 +523,18 @@ void Renderer::initBindGroup()
     bindGroupDesc.layout = mBindGroupLayout;
     bindGroupDesc.entryCount = 1;
     bindGroupDesc.entries = &bindings;
-    mBindGroup = wgpuDeviceCreateBindGroup(mDevice, &bindGroupDesc);
+    mElectronBindGroup = wgpuDeviceCreateBindGroup(mDevice, &bindGroupDesc);
 
-    if(mBindGroup == nullptr)
-        throw std::runtime_error("failed to init bind group");
+    bindings.buffer = mUniformFieldBuffer;
+    bindGroupDesc.entries = &bindings;
+    mFieldBindGroup = wgpuDeviceCreateBindGroup(mDevice, &bindGroupDesc);
+
+    bindings.buffer = mUniformVectorBuffer;
+    bindGroupDesc.entries = &bindings;
+    mVectorBindGroup = wgpuDeviceCreateBindGroup(mDevice, &bindGroupDesc);
+
+    if(mUniformElectronBuffer == nullptr || mVectorBindGroup == nullptr || mFieldBindGroup == nullptr)
+        std::cerr << "failed to init bind group" << '\n';
 }
 
 void Renderer::initGui()
@@ -498,27 +564,65 @@ void Renderer::updateGui(WGPURenderPassEncoder renderPass)
     ImGui::NewFrame();
 
     // aux data
-    static float position[3] = {0.0f, 0.0f, 0.0f};
-    static float rotation[3] = {0.0f, 0.0f, 0.0f};
+    static float electronPosition[3] = {0.0f, 0.0f, 0.0f};
+    static float electronRotation[3] = {0.0f, 0.0f, 0.0f};
+    static float electronScale[3] = {0.1f, 0.1f, 0.1f};
 
-    ImGui::Begin("Object Properties");                                
+    static float fieldPosition[3] = {0.0f, 0.0f, 0.0f};
+    static float fieldRotation[3] = {0.0f, 0.0f, 0.0f};
+    static float fieldScale[3] = {0.1f, 0.1f, 0.1f};
 
+    static float vectorPosition[3] = {0.0f, 0.0f, 0.0f};
+    static float vectorRotation[3] = {0.0f, 0.0f, 0.0f};
+    static float vectorScale[3] = {0.1f, 0.1f, 0.1f};
 
+    ImGui::Begin("Objetos Cena");                                
+
+    ImGui::Text("Carga: ");
     // inputs
-    ImGui::DragFloat3("Position", position, 0.1f, -100.0f, 100.0f);
-    ImGui::DragFloat3("Rotation", rotation, 0.1f, -360.0f, 360.0f);
-    ImGui::ColorEdit3("Color", (float*)&mUniforms.color);
-
+    ImGui::DragFloat3("Position##1", electronPosition, 0.1f, -100.0f, 100.0f);
+    ImGui::DragFloat3("Rotation##1", electronRotation, 0.1f, -360.0f, 360.0f);
+    ImGui::DragFloat3("Scale##1", electronScale, 0.1f, -360.0f, 360.0f);
 
     // buffer update
-    glm::mat4 model(1.0f);
-    model = glm::translate(model, glm::vec3(position[0], position[1], position[2]));
-    model = glm::rotate(model, glm::radians(rotation[0]), glm::vec3(1.0f, 0.0f, 0.0f));
-    model = glm::rotate(model, glm::radians(rotation[1]), glm::vec3(0.0f, 1.0f, 0.0f));
-    model = glm::rotate(model, glm::radians(rotation[2]), glm::vec3(0.0f, 0.0f, 1.0f));
-    
-    wgpuQueueWriteBuffer(mQueue, mUniformBuffer, offsetof(MyUniforms, modelMatrix), &model, sizeof(glm::mat4));
-    wgpuQueueWriteBuffer(mQueue, mUniformBuffer, offsetof(MyUniforms, color), &mUniforms.color, sizeof(glm::vec4));
+    glm::mat4 electronModel(1.0f);
+    electronModel = glm::translate(electronModel, glm::vec3(electronPosition[0], electronPosition[1], electronPosition[2]));
+    electronModel = glm::rotate(electronModel, glm::radians(electronRotation[0]), glm::vec3(1.0f, 0.0f, 0.0f));
+    electronModel = glm::rotate(electronModel, glm::radians(electronRotation[1]), glm::vec3(0.0f, 1.0f, 0.0f));
+    electronModel = glm::rotate(electronModel, glm::radians(electronRotation[2]), glm::vec3(0.0f, 0.0f, 1.0f));
+    electronModel = glm::scale(electronModel, glm::vec3(electronScale[0], electronScale[1], electronScale[2]));
+    wgpuQueueWriteBuffer(mQueue, mUniformElectronBuffer, offsetof(MyUniforms, modelMatrix), &electronModel, sizeof(glm::mat4));
+
+    ImGui::Text("Campo Magnético: ");
+    // inputs
+    ImGui::DragFloat3("Position##2", fieldPosition, 0.1f, -100.0f, 100.0f);
+    ImGui::DragFloat3("Rotation##2", fieldRotation, 0.1f, -360.0f, 360.0f);
+    ImGui::DragFloat3("Scale##2", fieldScale, 0.1f, -360.0f, 360.0f);
+
+    // buffer update
+    glm::mat4 fieldModel(1.0f);
+    fieldModel = glm::translate(fieldModel, glm::vec3(fieldPosition[0], fieldPosition[1], fieldPosition[2]));
+    fieldModel = glm::rotate(fieldModel, glm::radians(fieldRotation[0]), glm::vec3(1.0f, 0.0f, 0.0f));
+    fieldModel = glm::rotate(fieldModel, glm::radians(fieldRotation[1]), glm::vec3(0.0f, 1.0f, 0.0f));
+    fieldModel = glm::rotate(fieldModel, glm::radians(fieldRotation[2]), glm::vec3(0.0f, 0.0f, 1.0f));
+    fieldModel = glm::scale(fieldModel, glm::vec3(fieldScale[0], fieldScale[1], fieldScale[2]));
+    wgpuQueueWriteBuffer(mQueue, mUniformFieldBuffer, offsetof(MyUniforms, modelMatrix), &fieldModel, sizeof(glm::mat4));
+
+    ImGui::Text("Força Magnética: ");
+    // inputs
+    ImGui::DragFloat3("Position##3", vectorPosition, 0.1f, -100.0f, 100.0f);
+    ImGui::DragFloat3("Rotation##3", vectorRotation, 0.1f, -360.0f, 360.0f);
+    ImGui::DragFloat3("Scale##3", vectorScale, 0.1f, -360.0f, 360.0f);
+
+    // buffer update
+    glm::mat4 vectorModel(1.0f);
+    vectorModel = glm::translate(vectorModel, glm::vec3(vectorPosition[0], vectorPosition[1], vectorPosition[2]));
+    vectorModel = glm::rotate(vectorModel, glm::radians(vectorRotation[0]), glm::vec3(1.0f, 0.0f, 0.0f));
+    vectorModel = glm::rotate(vectorModel, glm::radians(vectorRotation[1]), glm::vec3(0.0f, 1.0f, 0.0f));
+    vectorModel = glm::rotate(vectorModel, glm::radians(vectorRotation[2]), glm::vec3(0.0f, 0.0f, 1.0f));
+    vectorModel = glm::scale(vectorModel, glm::vec3(vectorScale[0], vectorScale[1], vectorScale[2]));
+    wgpuQueueWriteBuffer(mQueue, mUniformVectorBuffer, offsetof(MyUniforms, modelMatrix), &vectorModel, sizeof(glm::mat4));
+
 
     ImGuiIO& io = ImGui::GetIO();
     ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
