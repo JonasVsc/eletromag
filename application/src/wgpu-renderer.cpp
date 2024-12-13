@@ -98,11 +98,9 @@ void Renderer::render()
 
     wgpuRenderPassEncoderSetVertexBuffer(renderPass, 0, mVertexBuffer, 0, wgpuBufferGetSize(mVertexBuffer));
 
-	wgpuRenderPassEncoderSetIndexBuffer(renderPass, mIndexBuffer, WGPUIndexFormat_Uint16, 0, wgpuBufferGetSize(mIndexBuffer));
-
     wgpuRenderPassEncoderSetBindGroup(renderPass, 0, mBindGroup, 0, nullptr);
 
-	wgpuRenderPassEncoderDrawIndexed(renderPass, mIndexCount, 1, 0, 0, 0);
+	wgpuRenderPassEncoderDraw(renderPass, mVertexCount, 1, 0, 0);
 
     updateGui(renderPass);
 
@@ -207,7 +205,7 @@ void Renderer::initDevice()
     WGPURequiredLimits requiredLimits{};
     requiredLimits.limits.maxVertexAttributes = 4;
 	requiredLimits.limits.maxVertexBuffers = 1;
-	requiredLimits.limits.maxBufferSize = 16 * sizeof(ResourceManager::VertexAttributes);
+	requiredLimits.limits.maxBufferSize = 10000 * sizeof(ResourceManager::VertexAttributes);
 	requiredLimits.limits.maxVertexBufferArrayStride = sizeof(ResourceManager::VertexAttributes);
 	requiredLimits.limits.minStorageBufferOffsetAlignment = supportedLimits.limits.minStorageBufferOffsetAlignment;
 	requiredLimits.limits.minUniformBufferOffsetAlignment = supportedLimits.limits.minUniformBufferOffsetAlignment;
@@ -415,31 +413,24 @@ void Renderer::initRenderPipeline()
 
 void Renderer::initGeometry()
 {
-    std::vector<float> vertexData;
+    std::vector<ResourceManager::VertexAttributes> vertexData;
     std::vector<uint16_t> indexData;
 
-	bool success = ResourceManager::loadGeometry("C:/Dev/eletromag/application/resources/pyramid.txt", vertexData, indexData, 3);
+	bool success = ResourceManager::loadGeometryFromObj("C:/Dev/eletromag/application/resources/fourareen.obj", vertexData);
     if(!success)
         throw std::runtime_error("[ERROR] could not load geometry");
 
-    mVertexCount = static_cast<uint32_t>(vertexData.size() / 4);
+    mVertexCount = static_cast<uint32_t>(vertexData.size());
 	mIndexCount = static_cast<uint32_t>(indexData.size());
 
 	// vertex buffer
     WGPUBufferDescriptor bufferDesc{};
 	bufferDesc.label = "vertex buffer";
-    bufferDesc.size = vertexData.size() * sizeof(float);
+    bufferDesc.size = vertexData.size() * sizeof(ResourceManager::VertexAttributes);
 	bufferDesc.usage = WGPUBufferUsage_CopyDst | WGPUBufferUsage_Vertex;
 	bufferDesc.mappedAtCreation = false;
     mVertexBuffer = wgpuDeviceCreateBuffer(mDevice, &bufferDesc);
 	wgpuQueueWriteBuffer(mQueue, mVertexBuffer, 0, vertexData.data(), bufferDesc.size);
-
-    // index buffer
-    bufferDesc.size = indexData.size() * sizeof(uint16_t);
-	bufferDesc.size = (bufferDesc.size + 3) & ~3; // round up to the next multiple of 4
-	bufferDesc.usage = WGPUBufferUsage_CopyDst | WGPUBufferUsage_Index;
-    mIndexBuffer = wgpuDeviceCreateBuffer(mDevice, &bufferDesc);
-	wgpuQueueWriteBuffer(mQueue, mIndexBuffer, 0, indexData.data(), bufferDesc.size);
 
 }
 
