@@ -42,19 +42,11 @@ void Renderer::render()
 
     processInput();
 
-    glm::mat4 model(1.0f);
-    model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-    wgpuQueueWriteBuffer(mQueue, mUniformBuffer, offsetof(MyUniforms, modelMatrix), &model, sizeof(glm::mat4));
-
     // update camera
     glm::mat4 view(1.0f);
     view = mMainCamera.getViewMatrix();
     wgpuQueueWriteBuffer(mQueue, mUniformBuffer, offsetof(MyUniforms, viewMatrix), &view, sizeof(glm::mat4));
 
-    float time = static_cast<float>(glfwGetTime());
-	wgpuQueueWriteBuffer(mQueue, mUniformBuffer, offsetof(MyUniforms, time), &time, sizeof(float));
-
-    wgpuQueueWriteBuffer(mQueue, mUniformBuffer, offsetof(MyUniforms, color), &mUniforms.color, sizeof(glm::vec4));
 
     WGPUTextureView nextTexture = getNextSurfaceTextureView();
     if(!nextTexture)
@@ -505,15 +497,28 @@ void Renderer::updateGui(WGPURenderPassEncoder renderPass)
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
 
-
-    // [...] Build our UI
-    // Build our UI
-    static float f = 0.0f;
-    static int counter = 0;
+    // aux data
+    static float position[3] = {0.0f, 0.0f, 0.0f};
+    static float rotation[3] = {0.0f, 0.0f, 0.0f};
 
     ImGui::Begin("Object Properties");                                
 
-    ImGui::ColorEdit3("Color", (float*)&mUniforms.color);       // Edit 3 floats representing a color
+
+    // inputs
+    ImGui::DragFloat3("Position", position, 0.1f, -100.0f, 100.0f);
+    ImGui::DragFloat3("Rotation", rotation, 0.1f, -360.0f, 360.0f);
+    ImGui::ColorEdit3("Color", (float*)&mUniforms.color);
+
+
+    // buffer update
+    glm::mat4 model(1.0f);
+    model = glm::translate(model, glm::vec3(position[0], position[1], position[2]));
+    model = glm::rotate(model, glm::radians(rotation[0]), glm::vec3(1.0f, 0.0f, 0.0f));
+    model = glm::rotate(model, glm::radians(rotation[1]), glm::vec3(0.0f, 1.0f, 0.0f));
+    model = glm::rotate(model, glm::radians(rotation[2]), glm::vec3(0.0f, 0.0f, 1.0f));
+    
+    wgpuQueueWriteBuffer(mQueue, mUniformBuffer, offsetof(MyUniforms, modelMatrix), &model, sizeof(glm::mat4));
+    wgpuQueueWriteBuffer(mQueue, mUniformBuffer, offsetof(MyUniforms, color), &mUniforms.color, sizeof(glm::vec4));
 
     ImGuiIO& io = ImGui::GetIO();
     ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
