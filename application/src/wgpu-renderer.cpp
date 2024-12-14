@@ -564,39 +564,36 @@ void Renderer::updateGui(WGPURenderPassEncoder renderPass)
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
 
-    // aux data
-
     // ELECTRON
     static float electronMass = 0.0f;
     static float electronVelocity = 0.0f;
-    static float electronDirection[3] = {-1.0f, 0.0f, 0.0f};
-    static float electronPosition[3] = {0.0f, 0.0f, 0.0f}; // debug
-    static float electronRotation[3] = {0.0f, -90.0f, 0.0f}; // debug
-    static float electronScale[3] = {1.0f, 1.0f, 1.0f}; // debug
+    static float electronDirection[3] = {0.0f, 0.0f, 1.0f};
+    static float electronPosition[3] = {0.0f, 0.0f, 0.0f}; 
+    static float electronRotation[3] = {0.0f, -90.0f, 0.0f}; 
+    static float electronScale[3] = {1.0f, 1.0f, 1.0f}; 
 
     // MAGNECTIC FIELD
     static float fieldIntensity = 0.0f;
-    static float fieldDirection[3] = {0.0f, 0.0f, 1.0f};
-    static float fieldPosition[3] = {0.0f, 0.0f, 0.0f}; // debug
-    static float fieldRotation[3] = {0.0f, 90.0f, 0.0f}; // debug
-    static float fieldScale[3] = {1.0f, 1.0f, 1.0f}; // debug
+    static float fieldDirection[3] = {1.0f, 0.0f, 0.0f};
+    static float fieldPosition[3] = {0.0f, 0.0f, 0.0f};
+    static float fieldRotation[3] = {0.0f, 90.0f, 0.0f};
+    static float fieldScale[3] = {1.0f, 1.0f, 1.0f}; 
 
     // MAGNECTIC STRENGTH
     static float fmStrength = 0.0f;
     static float fmDirection[3] = {0.0f, 1.0f, 0.0f};
-    static float fmPosition[3] = {0.0f, 0.0f, 0.0f}; // debug
-    static float fmRotation[3] = {0.0f, -90.0f, 0.0f}; // debug
-    static float fmScale[3] = {1.0f, 1.0f, 1.0f}; // debug
+    static float fmPosition[3] = {0.0f, 0.0f, 0.0f}; 
+    static float fmRotation[3] = {0.0f, -90.0f, 0.0f}; 
+    static float fmScale[3] = {1.0f, 1.0f, 1.0f}; 
+
 
     ImGui::Begin("Objetos Cena");                                
-    ImGui::Text("Carga: ");
-    ImGui::InputFloat("Massa (C)##1", &electronMass, 0.0f, 0.0f, "%.12f");
-    ImGui::InputFloat("Velocidade (m/s^2)##1", &electronVelocity, 0.0f, 0.0f, "%.12f");
-    ImGui::InputFloat3("Direção##1", electronDirection);
-    // ImGui::DragFloat3("Position (DEBUG)##1", electronPosition, 0.1f, -100.0f, 100.0f); // debug
-    // ImGui::DragFloat3("Rotation (DEBUG)##1", electronRotation, 0.1f, -360.0f, 360.0f); // debug
-    // ImGui::DragFloat3("Scale (DEBUG)##1", electronScale, 0.1f, -360.0f, 360.0f);       // debug
 
+    static bool isEletron = false;
+    ImGui::Text("Carga Elétrica: ");
+    if (ImGui::Button(isEletron ? "Elétron" : "Próton"))
+        isEletron = !isEletron;
+    ImGui::InputFloat3("Direção##1", electronDirection);
     glm::mat4 electronModel(1.0f);
     electronModel = glm::translate(electronModel, glm::vec3(electronPosition[0], electronPosition[1], electronPosition[2]));
     electronModel = glm::rotate(electronModel, glm::radians(electronRotation[0]), glm::vec3(1.0f, 0.0f, 0.0f));
@@ -605,12 +602,7 @@ void Renderer::updateGui(WGPURenderPassEncoder renderPass)
     electronModel = glm::scale(electronModel, glm::vec3(electronScale[0], electronScale[1], electronScale[2]));
 
     ImGui::Text("Campo Magnético: ");
-    ImGui::InputFloat("Intensidade (T)##1", &fieldIntensity, 0.0f, 0.0f, "%.12f");
     ImGui::InputFloat3("Direção##2", fieldDirection);
-    // ImGui::DragFloat3("Position (DEBUG)##2", fieldPosition, 0.1f, -100.0f, 100.0f); // debug
-    // ImGui::DragFloat3("Rotation (DEBUG)##2", fieldRotation, 0.1f, -360.0f, 360.0f); // debug
-    // ImGui::DragFloat3("Scale (DEBUG)##2", fieldScale, 0.1f, -360.0f, 360.0f);       // debug
-
     glm::mat4 fieldModel(1.0f);
     fieldModel = glm::translate(fieldModel, glm::vec3(fieldPosition[0], fieldPosition[1], fieldPosition[2]));
     fieldModel = glm::rotate(fieldModel, glm::radians(fieldRotation[0]), glm::vec3(1.0f, 0.0f, 0.0f));
@@ -619,12 +611,7 @@ void Renderer::updateGui(WGPURenderPassEncoder renderPass)
     fieldModel = glm::scale(fieldModel, glm::vec3(fieldScale[0], fieldScale[1], fieldScale[2]));
 
     ImGui::Text("Força Magnética: ");
-    ImGui::InputFloat("Força (N)##1", &fmStrength, 0.0f, 0.0f, "%.12f");
     ImGui::InputFloat3("Direção##3", fmDirection);
-    // ImGui::DragFloat3("Position##3", fmPosition, 0.1f, -100.0f, 100.0f); // debug
-    // ImGui::DragFloat3("Rotation##3", fmRotation, 0.1f, -360.0f, 360.0f); // debug
-    // ImGui::DragFloat3("Scale##3", fmScale, 0.1f, -360.0f, 360.0f);       // debug
-
     glm::mat4 fmModel(1.0f);
     fmModel = glm::translate(fmModel, glm::vec3(fmPosition[0], fmPosition[1], fmPosition[2]));
     fmModel = glm::rotate(fmModel, glm::radians(fmRotation[0]), glm::vec3(1.0f, 0.0f, 0.0f));
@@ -632,7 +619,6 @@ void Renderer::updateGui(WGPURenderPassEncoder renderPass)
     fmModel = glm::rotate(fmModel, glm::radians(fmRotation[2]), glm::vec3(0.0f, 0.0f, 1.0f));
     fmModel = glm::scale(fmModel, glm::vec3(fmScale[0], fmScale[1], fmScale[2]));
 
-    // rotate to target direction
     glm::vec3 electronPos = glm::vec3(electronPosition[0], electronPosition[1], electronPosition[2]);
     glm::vec3 electronTarget = glm::vec3(electronDirection[0], electronDirection[1], electronDirection[2]);
     electronModel = rotateToTarget(electronModel, electronPos, electronTarget);
@@ -654,21 +640,39 @@ void Renderer::updateGui(WGPURenderPassEncoder renderPass)
     wgpuQueueWriteBuffer(mQueue, mUniformFMBuffer, offsetof(MyUniforms, modelMatrix), &fmModel, sizeof(glm::mat4));
     wgpuQueueWriteBuffer(mQueue, mUniformFMBuffer, offsetof(MyUniforms, direction), &fmTarget, sizeof(glm::vec3));
 
-
-    ImGui::End();
-
-
-    ImGui::Begin("INFO");
-    ImGui::Text("Carga Móvel: %.12f\nVelocidade: %.12f\nDireção: X %.3f Y %.3f Z %.3f\n\n", electronMass, electronVelocity, electronDirection[0], electronDirection[1], electronDirection[2]);
-    ImGui::Text("Campo Magnético: %.12f\nDireção: X %.3f Y %.3f Z %.3f\n\n", fieldIntensity, fieldDirection[0], fieldDirection[1], fieldDirection[2]);
-    ImGui::Text("Força Magnética: %.12f\nDireção: X %.3f Y %.3f Z %.3f\n\n", fmStrength, fmDirection[0], fmDirection[1], fmDirection[2]);
-    if(ImGui::Button("Calcular FM"))
+    if(ImGui::Button("Calcular Carga Elétrica"))
     {
-        std::cout << "Calculando Força Magnética" << '\n';
+        electronTarget = glm::vec3(glm::normalize(glm::cross(fieldTarget, fmTarget)));
+        if(isEletron)
+            electronTarget *= -1;
+        electronModel = rotateToTarget(electronModel, electronPos, electronTarget);
 
-        // change fm direction and calculate module
+        electronDirection[0] = electronTarget.x;
+        electronDirection[1] = electronTarget.y;
+        electronDirection[2] = electronTarget.z;
 
-        fmTarget = glm::vec3(glm::cross(electronTarget, fieldTarget));
+        wgpuQueueWriteBuffer(mQueue, mUniformElectronBuffer, offsetof(MyUniforms, modelMatrix), &electronModel, sizeof(glm::mat4));
+        wgpuQueueWriteBuffer(mQueue, mUniformElectronBuffer, offsetof(MyUniforms, direction), &electronTarget, sizeof(glm::vec3));
+    }
+    if(ImGui::Button("Calcular Campo Magnético"))
+    {
+        if(isEletron)
+            electronTarget *= -1;
+        fieldTarget = glm::vec3(glm::normalize(glm::cross(fmTarget, electronTarget)));
+        fieldModel = rotateToTarget(fieldModel, fieldPos, fieldTarget);
+
+        fieldDirection[0] = fieldTarget.x;
+        fieldDirection[1] = fieldTarget.y;
+        fieldDirection[2] = fieldTarget.z;
+
+        wgpuQueueWriteBuffer(mQueue, mUniformFieldBuffer, offsetof(MyUniforms, modelMatrix), &fieldModel, sizeof(glm::mat4));
+        wgpuQueueWriteBuffer(mQueue, mUniformFieldBuffer, offsetof(MyUniforms, direction), &fieldTarget, sizeof(glm::vec3));
+    }
+    if(ImGui::Button("Calcular Força Magnética"))
+    {
+        if(isEletron)
+            electronTarget *= -1;
+        fmTarget = glm::vec3(glm::normalize(glm::cross(electronTarget, fieldTarget)));
         fmModel = rotateToTarget(fmModel, fmPos, fmTarget);
 
         fmDirection[0] = fmTarget.x;
@@ -678,18 +682,10 @@ void Renderer::updateGui(WGPURenderPassEncoder renderPass)
         wgpuQueueWriteBuffer(mQueue, mUniformFMBuffer, offsetof(MyUniforms, modelMatrix), &fmModel, sizeof(glm::mat4));
         wgpuQueueWriteBuffer(mQueue, mUniformFMBuffer, offsetof(MyUniforms, direction), &fmTarget, sizeof(glm::vec3));
     }
-
-
-
-    ImGuiIO& io = ImGui::GetIO();
-    ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
     ImGui::End();
 
-    // Draw the UI
     ImGui::EndFrame();
-    // Convert the UI defined above into low-level drawing commands
     ImGui::Render();
-    // Execute the low-level drawing commands on the WebGPU backend
     ImGui_ImplWGPU_RenderDrawData(ImGui::GetDrawData(), renderPass);
 }
 
