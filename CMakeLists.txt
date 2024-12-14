@@ -34,6 +34,12 @@ add_executable(ElectroApp
     "application/src/camera.h"
     "application/src/camera.cpp"
 
+    "application/src/layer.h"
+    "application/src/layer.cpp"
+
+    "application/src/layer-stack.h"
+    "application/src/layer-stack.cpp"
+
 )
 
 add_subdirectory("application/vendor/glm")
