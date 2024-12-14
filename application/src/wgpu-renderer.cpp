@@ -578,7 +578,7 @@ void Renderer::updateGui(WGPURenderPassEncoder renderPass)
     static float fieldIntensity = 0.0f;
     static float fieldDirection[3] = {0.0f, 0.0f, 1.0f};
     static float fieldPosition[3] = {0.0f, 0.0f, 0.0f}; // debug
-    static float fieldRotation[3] = {0.0f, 0.0f, 0.0f}; // debug
+    static float fieldRotation[3] = {0.0f, -90.0f, 0.0f}; // debug
     static float fieldScale[3] = {1.0f, 1.0f, 1.0f}; // debug
 
     // MAGNECTIC STRENGTH
