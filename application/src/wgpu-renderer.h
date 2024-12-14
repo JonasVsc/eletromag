@@ -125,7 +125,7 @@ private:
 
     WGPUBuffer mUniformElectronBuffer;
     WGPUBuffer mUniformFieldBuffer;
-    WGPUBuffer mUniformVectorBuffer;
+    WGPUBuffer mUniformFMBuffer;
 
     WGPUBindGroup mElectronBindGroup;
     WGPUBindGroup mFieldBindGroup;
