@@ -14,6 +14,8 @@ public:
 
     virtual void onDettach() {}
 
+    virtual void onUpdate() {}
+
     inline std::string getDebugName() { return mDebugName; }
 
 protected:

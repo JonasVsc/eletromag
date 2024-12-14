@@ -33,7 +33,6 @@ public:
 
     void init();
 
-
     void terminate();
 
     void render();

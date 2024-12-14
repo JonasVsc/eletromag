@@ -20,7 +20,7 @@ void Application::run()
 {
     while (true)
     {
-        mRenderer.render();
+        // mRenderer.render();
 
         mWindow.update();
         
@@ -32,4 +32,16 @@ void Application::terminate()
 {
     mWindow.terminate();
     mRenderer.terminate();
+}
+
+void Application::pushLayer(Layer* layer)
+{
+    mLayerStack.pushLayer(layer);
+    layer->onAttach();
+}
+
+void Application::pushOverlay(Layer* overlay)
+{
+    mLayerStack.pushOverlay(overlay);
+    overlay->onAttach();
 }
