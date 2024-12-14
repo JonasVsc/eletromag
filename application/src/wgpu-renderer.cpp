@@ -494,8 +494,10 @@ void Renderer::initUniforms()
     mUniforms.modelMatrix = glm::mat4x4(1.0f);
     mUniforms.viewMatrix = mMainCamera.getViewMatrix();
     mUniforms.projectionMatrix = glm::perspective(45 * PI / 180, 640.0f / 480.0f, 0.01f, 100.0f);
-    mUniforms.time = 1.0f;
 	mUniforms.color = { 0.0f, 0.0f, 1.0f, 1.0f };
+    mUniforms.direction = { 0.0f, 0.0f, 0.0f};
+    mUniforms.intensity = 0.0f;
+    mUniforms.mass = 0.0f;
 
 
     wgpuQueueWriteBuffer(mQueue, mUniformElectronBuffer, 0, &mUniforms, sizeof(MyUniforms));
@@ -558,31 +560,48 @@ void Renderer::initGui()
 
 void Renderer::updateGui(WGPURenderPassEncoder renderPass)
 {
-    // Start the Dear ImGui frame
     ImGui_ImplWGPU_NewFrame();
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
 
     // aux data
-    static float electronPosition[3] = {0.0f, 0.0f, -2.3f};
-    static float electronRotation[3] = {0.0f, 0.0f, 0.0f};
-    static float electronScale[3] = {0.1f, 0.1f, 0.1f};
+    static float electronPosition[3] = {0.0f, 0.0f, -2.3f}; // debug
+    static float electronRotation[3] = {0.0f, 0.0f, 0.0f}; // debug
+    static float electronScale[3] = {0.1f, 0.1f, 0.1f}; // debug
 
-    static float fieldPosition[3] = {0.0f, -1.3f, -2.3f};
-    static float fieldRotation[3] = {90.0f, 0.0f, 0.0f};
-    static float fieldScale[3] = {0.2f, 0.1f, 0.1f};
+    // ELECTRON
+    static float electronMass = 0.0f;
+    static float electronVelocity = 0.0f;
+    static float electronDirection[3] = {0.0f, 0.0f, 0.0f};
 
-    static float vectorPosition[3] = {0.8f, 0.0f, -2.3f};
-    static float vectorRotation[3] = {0.0f, 90.0f, 0.0f};
-    static float vectorScale[3] = {0.1f, 0.1f, 0.1f};
+    // MAGNECTIC FIELD
+    static float fieldIntensity = 0.0f;
+    static float fieldDirection[3] = {0.0f, 0.0f, 0.0f};
+
+    static float fieldPosition[3] = {0.0f, -1.3f, -2.3f}; // debug
+    static float fieldRotation[3] = {90.0f, 0.0f, 0.0f}; // debug
+    static float fieldScale[3] = {0.2f, 0.1f, 0.1f}; // debug
+
+    // MAGNECTIC STRENGTH
+    static float fmStrength = 0.0f;
+    static float fmDirection[3] = {0.0f, 0.0f, 0.0f};
+
+    static float vectorPosition[3] = {0.8f, 0.0f, -2.3f}; // debug
+    static float vectorRotation[3] = {0.0f, 90.0f, 0.0f}; // debug
+    static float vectorScale[3] = {0.1f, 0.1f, 0.1f}; // debug
 
     ImGui::Begin("Objetos Cena");                                
 
     ImGui::Text("Carga: ");
     // inputs
-    ImGui::DragFloat3("Position##1", electronPosition, 0.1f, -100.0f, 100.0f);
-    ImGui::DragFloat3("Rotation##1", electronRotation, 0.1f, -360.0f, 360.0f);
-    ImGui::DragFloat3("Scale##1", electronScale, 0.1f, -360.0f, 360.0f);
+    ImGui::InputFloat("Massa (C)##1", &electronMass, 0.0f, 0.0f, "%.12f");
+    ImGui::InputFloat("Velocidade (m/s^2)##1", &electronVelocity, 0.0f, 0.0f, "%.12f");
+    ImGui::InputFloat3("Direção##1", electronDirection);
+
+    // ImGui::DragFloat3("Position (DEBUG)##1", electronPosition, 0.1f, -100.0f, 100.0f); // debug
+    // ImGui::DragFloat3("Rotation (DEBUG)##1", electronRotation, 0.1f, -360.0f, 360.0f); // debug
+    // ImGui::DragFloat3("Scale (DEBUG)##1", electronScale, 0.1f, -360.0f, 360.0f);       // debug
+
 
     // buffer update
     glm::mat4 electronModel(1.0f);
@@ -595,9 +614,12 @@ void Renderer::updateGui(WGPURenderPassEncoder renderPass)
 
     ImGui::Text("Campo Magnético: ");
     // inputs
-    ImGui::DragFloat3("Position##2", fieldPosition, 0.1f, -100.0f, 100.0f);
-    ImGui::DragFloat3("Rotation##2", fieldRotation, 0.1f, -360.0f, 360.0f);
-    ImGui::DragFloat3("Scale##2", fieldScale, 0.1f, -360.0f, 360.0f);
+    ImGui::InputFloat("Intensidade (T)##1", &fieldIntensity, 0.0f, 0.0f, "%.12f");
+    ImGui::InputFloat3("Direção##2", fieldDirection);
+
+    // ImGui::DragFloat3("Position (DEBUG)##2", fieldPosition, 0.1f, -100.0f, 100.0f); // debug
+    // ImGui::DragFloat3("Rotation (DEBUG)##2", fieldRotation, 0.1f, -360.0f, 360.0f); // debug
+    // ImGui::DragFloat3("Scale (DEBUG)##2", fieldScale, 0.1f, -360.0f, 360.0f);       // debug
 
     // buffer update
     glm::mat4 fieldModel(1.0f);
@@ -610,9 +632,12 @@ void Renderer::updateGui(WGPURenderPassEncoder renderPass)
 
     ImGui::Text("Força Magnética: ");
     // inputs
-    ImGui::DragFloat3("Position##3", vectorPosition, 0.1f, -100.0f, 100.0f);
-    ImGui::DragFloat3("Rotation##3", vectorRotation, 0.1f, -360.0f, 360.0f);
-    ImGui::DragFloat3("Scale##3", vectorScale, 0.1f, -360.0f, 360.0f);
+    ImGui::InputFloat("Força (N)##1", &fmStrength, 0.0f, 0.0f, "%.12f");
+    ImGui::InputFloat3("Direção##3", fmDirection);
+
+    // ImGui::DragFloat3("Position##3", vectorPosition, 0.1f, -100.0f, 100.0f); // debug
+    // ImGui::DragFloat3("Rotation##3", vectorRotation, 0.1f, -360.0f, 360.0f); // debug
+    // ImGui::DragFloat3("Scale##3", vectorScale, 0.1f, -360.0f, 360.0f);       // debug
 
     // buffer update
     glm::mat4 vectorModel(1.0f);
@@ -624,8 +649,44 @@ void Renderer::updateGui(WGPURenderPassEncoder renderPass)
     wgpuQueueWriteBuffer(mQueue, mUniformVectorBuffer, offsetof(MyUniforms, modelMatrix), &vectorModel, sizeof(glm::mat4));
 
 
+    // CALCULANDO FM
+
+    /*
+    Fm = q * (v X B)
+    
+
+
+    */
+
+   
+
+
     ImGuiIO& io = ImGui::GetIO();
     ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
+    ImGui::End();
+
+    ImGui::Begin("INFO");
+    ImGui::Text("Carga Móvel: %.12f\nVelocidade: %.12f\nDireção: X %.3f Y %.3f Z %.3f\n\n", electronMass, electronVelocity, electronDirection[0], electronDirection[1], electronDirection[2]);
+
+    ImGui::Text("Campo Magnético: %.12f\nDireção: X %.3f Y %.3f Z %.3f\n\n", fieldIntensity, fieldDirection[0], fieldDirection[1], fieldDirection[2]);
+
+    ImGui::Text("Força Magnética: %.12f\nDireção: X %.3f Y %.3f Z %.3f\n\n", fmStrength, fmDirection[0], fmDirection[1], fmDirection[2]);
+
+    if(ImGui::Button("Calcular Velocidade"))
+    {
+        std::cout << "Calculando Velocidade" << '\n';
+    }
+
+    if(ImGui::Button("Calcular Campo Magnetico"))
+    {
+        std::cout << "Calculando Campo Magnetico" << '\n';
+    }
+
+    if(ImGui::Button("Calcular FM"))
+    {
+        std::cout << "Calculando FM" << '\n';
+    }
+
     ImGui::End();
 
     // Draw the UI

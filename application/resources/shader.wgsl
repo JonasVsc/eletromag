@@ -15,7 +15,9 @@ struct MyUniforms {
     viewMatrix: mat4x4f,
     modelMatrix: mat4x4f,
     color: vec4f,
-    time: f32,
+    direction: vec3f,
+    intensity: f32,
+    mass: f32,
 };
 
 @group(0) @binding(0) var<uniform> uMyUniforms: MyUniforms;

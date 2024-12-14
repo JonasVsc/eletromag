@@ -1,0 +1,16 @@
+
+Carga Móvel
+
+- Carga / Massa ( Elétron / Pótron ( Muda direção vetor velocidade ) ) 
+
+- velocidade
+    - Módulo
+    - Direção e Sentido
+
+Campo Magnético
+ - Módulo
+ - Direção e Sentido
+
+ Força Magnética
+    - Módulo
+    - Direção e sentido
