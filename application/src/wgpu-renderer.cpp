@@ -564,16 +564,16 @@ void Renderer::updateGui(WGPURenderPassEncoder renderPass)
     ImGui::NewFrame();
 
     // aux data
-    static float electronPosition[3] = {0.0f, 0.0f, 0.0f};
+    static float electronPosition[3] = {0.0f, 0.0f, -2.3f};
     static float electronRotation[3] = {0.0f, 0.0f, 0.0f};
     static float electronScale[3] = {0.1f, 0.1f, 0.1f};
 
-    static float fieldPosition[3] = {0.0f, 0.0f, 0.0f};
-    static float fieldRotation[3] = {0.0f, 0.0f, 0.0f};
-    static float fieldScale[3] = {0.1f, 0.1f, 0.1f};
+    static float fieldPosition[3] = {0.0f, -1.3f, -2.3f};
+    static float fieldRotation[3] = {90.0f, 0.0f, 0.0f};
+    static float fieldScale[3] = {0.2f, 0.1f, 0.1f};
 
-    static float vectorPosition[3] = {0.0f, 0.0f, 0.0f};
-    static float vectorRotation[3] = {0.0f, 0.0f, 0.0f};
+    static float vectorPosition[3] = {0.8f, 0.0f, -2.3f};
+    static float vectorRotation[3] = {0.0f, 90.0f, 0.0f};
     static float vectorScale[3] = {0.1f, 0.1f, 0.1f};
 
     ImGui::Begin("Objetos Cena");                                

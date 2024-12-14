@@ -61,6 +61,7 @@ private:
     // utility temporary
     WGPUTextureView getNextSurfaceTextureView();
 
+
     void framebufferSizeCallback(int newWidth, int newHeight);
 
     // events
