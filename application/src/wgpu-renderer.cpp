@@ -547,7 +547,27 @@ void Renderer::initGui()
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
     ImGui::GetIO();
-    ImGui::StyleColorsDark();
+
+    // style
+    ImGuiStyle& style = ImGui::GetStyle();
+    ImVec4 customColor = ImVec4(0.1f, 0.5f, 0.8f, 1.0f); // Azul
+    style.Colors[ImGuiCol_Button] = customColor;
+    style.Colors[ImGuiCol_ButtonHovered] = ImVec4(0.2f, 0.6f, 0.9f, 1.0f);
+    style.Colors[ImGuiCol_ButtonActive] = ImVec4(0.0f, 0.4f, 0.7f, 1.0f);
+    style.WindowPadding = ImVec2(10.0f, 10.0f);  
+    style.FramePadding = ImVec2(5.0f, 5.0f);     
+    style.ItemSpacing  = ImVec2(8.0f, 4.0f);     
+    style.ScrollbarSize = 15.0f;                 
+    style.WindowRounding = 5.0f;    // Bordas arredondadas das janelas
+    style.FrameRounding = 4.0f;     // Bordas dos elementos
+    style.PopupRounding = 3.0f;     // Bordas de popups
+    ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(10, 10));
+    ImGuiIO& io = ImGui::GetIO();
+    io.Fonts->AddFontFromFileTTF("C:/Dev/eletromag/application/resources/RobotoMono-VariableFont_wght.ttf", 16.0f);
+
+
+
+
     // Setup Platform/Renderer backends
     ImGui_ImplGlfw_InitForOther(window, true);
     ImGui_ImplWGPU_InitInfo init_info;
@@ -586,14 +606,16 @@ void Renderer::updateGui(WGPURenderPassEncoder renderPass)
     static float fmRotation[3] = {0.0f, -90.0f, 0.0f}; 
     static float fmScale[3] = {1.0f, 1.0f, 1.0f}; 
 
-
-    ImGui::Begin("Objetos Cena");                                
-
+    ImGui::SetNextWindowSize(ImVec2(300, 460)); 
+    ImGui::SetNextWindowPos(ImVec2(0, 0));  
+    ImGui::Begin("Propriedades");                                
     static bool isEletron = false;
     ImGui::Text("Carga Elétrica: ");
+    ImGui::Separator();
     if (ImGui::Button(isEletron ? "Elétron" : "Próton"))
         isEletron = !isEletron;
-    ImGui::InputFloat3("Direção##1", electronDirection);
+    ImGui::DragFloat3("##Direção1", electronDirection);
+    ImGui::Spacing();
     glm::mat4 electronModel(1.0f);
     electronModel = glm::translate(electronModel, glm::vec3(electronPosition[0], electronPosition[1], electronPosition[2]));
     electronModel = glm::rotate(electronModel, glm::radians(electronRotation[0]), glm::vec3(1.0f, 0.0f, 0.0f));
@@ -602,7 +624,9 @@ void Renderer::updateGui(WGPURenderPassEncoder renderPass)
     electronModel = glm::scale(electronModel, glm::vec3(electronScale[0], electronScale[1], electronScale[2]));
 
     ImGui::Text("Campo Magnético: ");
-    ImGui::InputFloat3("Direção##2", fieldDirection);
+    ImGui::Separator();
+    ImGui::DragFloat3("##Direção2", fieldDirection);
+    ImGui::Spacing();
     glm::mat4 fieldModel(1.0f);
     fieldModel = glm::translate(fieldModel, glm::vec3(fieldPosition[0], fieldPosition[1], fieldPosition[2]));
     fieldModel = glm::rotate(fieldModel, glm::radians(fieldRotation[0]), glm::vec3(1.0f, 0.0f, 0.0f));
@@ -611,7 +635,9 @@ void Renderer::updateGui(WGPURenderPassEncoder renderPass)
     fieldModel = glm::scale(fieldModel, glm::vec3(fieldScale[0], fieldScale[1], fieldScale[2]));
 
     ImGui::Text("Força Magnética: ");
-    ImGui::InputFloat3("Direção##3", fmDirection);
+    ImGui::Separator();
+    ImGui::DragFloat3("##Direção3", fmDirection);
+    ImGui::Spacing();
     glm::mat4 fmModel(1.0f);
     fmModel = glm::translate(fmModel, glm::vec3(fmPosition[0], fmPosition[1], fmPosition[2]));
     fmModel = glm::rotate(fmModel, glm::radians(fmRotation[0]), glm::vec3(1.0f, 0.0f, 0.0f));
@@ -640,7 +666,7 @@ void Renderer::updateGui(WGPURenderPassEncoder renderPass)
     wgpuQueueWriteBuffer(mQueue, mUniformFMBuffer, offsetof(MyUniforms, modelMatrix), &fmModel, sizeof(glm::mat4));
     wgpuQueueWriteBuffer(mQueue, mUniformFMBuffer, offsetof(MyUniforms, direction), &fmTarget, sizeof(glm::vec3));
 
-    if(ImGui::Button("Calcular Carga Elétrica"))
+    if(ImGui::Button("Calcular Carga Elétrica", ImVec2(ImGui::GetContentRegionAvail().x, 35.0f)))
     {
         electronTarget = glm::vec3(glm::normalize(glm::cross(fieldTarget, fmTarget)));
         if(isEletron)
@@ -654,7 +680,7 @@ void Renderer::updateGui(WGPURenderPassEncoder renderPass)
         wgpuQueueWriteBuffer(mQueue, mUniformElectronBuffer, offsetof(MyUniforms, modelMatrix), &electronModel, sizeof(glm::mat4));
         wgpuQueueWriteBuffer(mQueue, mUniformElectronBuffer, offsetof(MyUniforms, direction), &electronTarget, sizeof(glm::vec3));
     }
-    if(ImGui::Button("Calcular Campo Magnético"))
+    if(ImGui::Button("Calcular Campo Magnético", ImVec2(ImGui::GetContentRegionAvail().x, 35.0f)))
     {
         if(isEletron)
             electronTarget *= -1;
@@ -668,7 +694,7 @@ void Renderer::updateGui(WGPURenderPassEncoder renderPass)
         wgpuQueueWriteBuffer(mQueue, mUniformFieldBuffer, offsetof(MyUniforms, modelMatrix), &fieldModel, sizeof(glm::mat4));
         wgpuQueueWriteBuffer(mQueue, mUniformFieldBuffer, offsetof(MyUniforms, direction), &fieldTarget, sizeof(glm::vec3));
     }
-    if(ImGui::Button("Calcular Força Magnética"))
+    if(ImGui::Button("Calcular Força Magnética", ImVec2(ImGui::GetContentRegionAvail().x, 35.0f)))
     {
         if(isEletron)
             electronTarget *= -1;
