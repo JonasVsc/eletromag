@@ -466,7 +466,7 @@ void Renderer::initGeometry()
     vertexData.clear();
 
     // vector vertex buffer
-    success = ResourceManager::loadGeometryFromObj("C:/Dev/eletromag/application/resources/vector.obj", vertexData);
+    success = ResourceManager::loadGeometryFromObj("C:/Dev/eletromag/application/resources/arrow.obj", vertexData);
     if(!success)
         std::cerr << "[ERROR] could not load geometry" << '\n';
 
@@ -565,45 +565,39 @@ void Renderer::updateGui(WGPURenderPassEncoder renderPass)
     ImGui::NewFrame();
 
     // aux data
-    static float electronPosition[3] = {0.0f, 0.0f, -2.3f}; // debug
-    static float electronRotation[3] = {0.0f, 0.0f, 0.0f}; // debug
-    static float electronScale[3] = {0.1f, 0.1f, 0.1f}; // debug
 
     // ELECTRON
     static float electronMass = 0.0f;
     static float electronVelocity = 0.0f;
-    static float electronDirection[3] = {0.0f, 0.0f, 0.0f};
+    static float electronDirection[3] = {0.0f, 1.0f, 0.0f};
+    static float electronPosition[3] = {0.0f, 0.0f, 0.0f}; // debug
+    static float electronRotation[3] = {0.0f, -90.0f, 0.0f}; // debug
+    static float electronScale[3] = {1.0f, 1.0f, 1.0f}; // debug
 
     // MAGNECTIC FIELD
     static float fieldIntensity = 0.0f;
-    static float fieldDirection[3] = {0.0f, 0.0f, 0.0f};
-
-    static float fieldPosition[3] = {0.0f, -1.3f, -2.3f}; // debug
-    static float fieldRotation[3] = {90.0f, 0.0f, 0.0f}; // debug
-    static float fieldScale[3] = {0.2f, 0.1f, 0.1f}; // debug
+    static float fieldDirection[3] = {0.0f, 0.0f, 1.0f};
+    static float fieldPosition[3] = {0.0f, 0.0f, 0.0f}; // debug
+    static float fieldRotation[3] = {0.0f, 0.0f, 0.0f}; // debug
+    static float fieldScale[3] = {1.0f, 1.0f, 1.0f}; // debug
 
     // MAGNECTIC STRENGTH
     static float fmStrength = 0.0f;
     static float fmDirection[3] = {0.0f, 0.0f, 0.0f};
-
-    static float vectorPosition[3] = {0.8f, 0.0f, -2.3f}; // debug
-    static float vectorRotation[3] = {0.0f, 90.0f, 0.0f}; // debug
-    static float vectorScale[3] = {0.1f, 0.1f, 0.1f}; // debug
+    static float fmPosition[3] = {0.0f, 0.0f, 0.0f}; // debug
+    static float fmRotation[3] = {0.0f, -90.0f, 0.0f}; // debug
+    static float fmScale[3] = {1.0f, 1.0f, 1.0f}; // debug
 
     ImGui::Begin("Objetos Cena");                                
 
     ImGui::Text("Carga: ");
-    // inputs
     ImGui::InputFloat("Massa (C)##1", &electronMass, 0.0f, 0.0f, "%.12f");
     ImGui::InputFloat("Velocidade (m/s^2)##1", &electronVelocity, 0.0f, 0.0f, "%.12f");
     ImGui::InputFloat3("Direção##1", electronDirection);
+    ImGui::DragFloat3("Position (DEBUG)##1", electronPosition, 0.1f, -100.0f, 100.0f); // debug
+    ImGui::DragFloat3("Rotation (DEBUG)##1", electronRotation, 0.1f, -360.0f, 360.0f); // debug
+    ImGui::DragFloat3("Scale (DEBUG)##1", electronScale, 0.1f, -360.0f, 360.0f);       // debug
 
-    // ImGui::DragFloat3("Position (DEBUG)##1", electronPosition, 0.1f, -100.0f, 100.0f); // debug
-    // ImGui::DragFloat3("Rotation (DEBUG)##1", electronRotation, 0.1f, -360.0f, 360.0f); // debug
-    // ImGui::DragFloat3("Scale (DEBUG)##1", electronScale, 0.1f, -360.0f, 360.0f);       // debug
-
-
-    // buffer update
     glm::mat4 electronModel(1.0f);
     electronModel = glm::translate(electronModel, glm::vec3(electronPosition[0], electronPosition[1], electronPosition[2]));
     electronModel = glm::rotate(electronModel, glm::radians(electronRotation[0]), glm::vec3(1.0f, 0.0f, 0.0f));
@@ -613,15 +607,12 @@ void Renderer::updateGui(WGPURenderPassEncoder renderPass)
     wgpuQueueWriteBuffer(mQueue, mUniformElectronBuffer, offsetof(MyUniforms, modelMatrix), &electronModel, sizeof(glm::mat4));
 
     ImGui::Text("Campo Magnético: ");
-    // inputs
     ImGui::InputFloat("Intensidade (T)##1", &fieldIntensity, 0.0f, 0.0f, "%.12f");
     ImGui::InputFloat3("Direção##2", fieldDirection);
+    ImGui::DragFloat3("Position (DEBUG)##2", fieldPosition, 0.1f, -100.0f, 100.0f); // debug
+    ImGui::DragFloat3("Rotation (DEBUG)##2", fieldRotation, 0.1f, -360.0f, 360.0f); // debug
+    ImGui::DragFloat3("Scale (DEBUG)##2", fieldScale, 0.1f, -360.0f, 360.0f);       // debug
 
-    // ImGui::DragFloat3("Position (DEBUG)##2", fieldPosition, 0.1f, -100.0f, 100.0f); // debug
-    // ImGui::DragFloat3("Rotation (DEBUG)##2", fieldRotation, 0.1f, -360.0f, 360.0f); // debug
-    // ImGui::DragFloat3("Scale (DEBUG)##2", fieldScale, 0.1f, -360.0f, 360.0f);       // debug
-
-    // buffer update
     glm::mat4 fieldModel(1.0f);
     fieldModel = glm::translate(fieldModel, glm::vec3(fieldPosition[0], fieldPosition[1], fieldPosition[2]));
     fieldModel = glm::rotate(fieldModel, glm::radians(fieldRotation[0]), glm::vec3(1.0f, 0.0f, 0.0f));
@@ -631,39 +622,38 @@ void Renderer::updateGui(WGPURenderPassEncoder renderPass)
     wgpuQueueWriteBuffer(mQueue, mUniformFieldBuffer, offsetof(MyUniforms, modelMatrix), &fieldModel, sizeof(glm::mat4));
 
     ImGui::Text("Força Magnética: ");
-    // inputs
     ImGui::InputFloat("Força (N)##1", &fmStrength, 0.0f, 0.0f, "%.12f");
     ImGui::InputFloat3("Direção##3", fmDirection);
+    ImGui::DragFloat3("Position##3", fmPosition, 0.1f, -100.0f, 100.0f); // debug
+    ImGui::DragFloat3("Rotation##3", fmRotation, 0.1f, -360.0f, 360.0f); // debug
+    ImGui::DragFloat3("Scale##3", fmScale, 0.1f, -360.0f, 360.0f);       // debug
 
-    // ImGui::DragFloat3("Position##3", vectorPosition, 0.1f, -100.0f, 100.0f); // debug
-    // ImGui::DragFloat3("Rotation##3", vectorRotation, 0.1f, -360.0f, 360.0f); // debug
-    // ImGui::DragFloat3("Scale##3", vectorScale, 0.1f, -360.0f, 360.0f);       // debug
+    glm::mat4 fmModel(1.0f);
+    fmModel = glm::translate(fmModel, glm::vec3(fmPosition[0], fmPosition[1], fmPosition[2]));
+    fmModel = glm::rotate(fmModel, glm::radians(fmRotation[0]), glm::vec3(1.0f, 0.0f, 0.0f));
+    fmModel = glm::rotate(fmModel, glm::radians(fmRotation[1]), glm::vec3(0.0f, 1.0f, 0.0f));
+    fmModel = glm::rotate(fmModel, glm::radians(fmRotation[2]), glm::vec3(0.0f, 0.0f, 1.0f));
+    fmModel = glm::scale(fmModel, glm::vec3(fmScale[0], fmScale[1], fmScale[2]));
 
-    // buffer update
-    glm::mat4 vectorModel(1.0f);
-    vectorModel = glm::translate(vectorModel, glm::vec3(vectorPosition[0], vectorPosition[1], vectorPosition[2]));
-    vectorModel = glm::rotate(vectorModel, glm::radians(vectorRotation[0]), glm::vec3(1.0f, 0.0f, 0.0f));
-    vectorModel = glm::rotate(vectorModel, glm::radians(vectorRotation[1]), glm::vec3(0.0f, 1.0f, 0.0f));
-    vectorModel = glm::rotate(vectorModel, glm::radians(vectorRotation[2]), glm::vec3(0.0f, 0.0f, 1.0f));
-    vectorModel = glm::scale(vectorModel, glm::vec3(vectorScale[0], vectorScale[1], vectorScale[2]));
-    wgpuQueueWriteBuffer(mQueue, mUniformVectorBuffer, offsetof(MyUniforms, modelMatrix), &vectorModel, sizeof(glm::mat4));
-
-
-    // CALCULANDO FM
-
-    /*
-    Fm = q * (v X B)
-    
-
-
-    */
-
-   
-
+    // calculate
+    glm::vec3 fmPos = glm::vec3(fmPosition[0], fmPosition[1], fmPosition[2]);
+    glm::vec3 target = glm::vec3(fieldDirection[0], fieldDirection[1], fieldDirection[2]);
+    fmModel = rotateToTarget(fmModel, fmPos, target);
+    wgpuQueueWriteBuffer(mQueue, mUniformVectorBuffer, offsetof(MyUniforms, modelMatrix), &fmModel, sizeof(glm::mat4));
 
     ImGuiIO& io = ImGui::GetIO();
     ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
     ImGui::End();
+
+    /*
+    Apontar vetor de acordo com a direção ( unitária )
+
+    1. normalizar vetor direção
+    */
+
+
+    
+
 
     ImGui::Begin("INFO");
     ImGui::Text("Carga Móvel: %.12f\nVelocidade: %.12f\nDireção: X %.3f Y %.3f Z %.3f\n\n", electronMass, electronVelocity, electronDirection[0], electronDirection[1], electronDirection[2]);
@@ -701,6 +691,40 @@ void Renderer::updateGui(WGPURenderPassEncoder renderPass)
 ////////////////////////////////////////////////////////////////////////////
 // Utility Methods /////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////
+
+glm::mat4 Renderer::rotateToTarget(glm::mat4 modelMatrix, glm::vec3 currentPosition, glm::vec3 targetPosition)
+{
+    // Calcular a direção para o alvo (vetor direção em relação à posição atual)
+    glm::vec3 direction = glm::normalize(targetPosition - currentPosition);
+
+    // Criar a matriz de rotação para alinhar o objeto com a direção do alvo
+    glm::mat4 rotationMatrix = glm::mat4(1.0f); // Matriz identidade
+
+    // Definir o vetor "up" (eixo Y positivo)
+    glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f);  // "Cima" é o eixo Y positivo
+
+    // Caso o vetor direção seja quase paralelo ao vetor 'up', usamos um vetor alternativo para evitar problemas de singularidade
+    if (glm::length(glm::cross(up, direction)) < 0.001f) {
+        up = glm::vec3(1.0f, 0.0f, 0.0f);  // Usar o eixo X como up se a direção for quase paralela ao Y
+    }
+
+    // Calcular o eixo "right" (eixo X positivo)
+    glm::vec3 right = glm::normalize(glm::cross(up, direction));  // Produto vetorial para o eixo X
+    up = glm::normalize(glm::cross(direction, right));             // Eixo Y ajustado
+
+    // Agora criamos a matriz de rotação com base nos eixos calculados
+    rotationMatrix[0] = glm::vec4(right, 0.0f);  // Eixo X
+    rotationMatrix[1] = glm::vec4(up, 0.0f);     // Eixo Y
+    rotationMatrix[2] = glm::vec4(-direction, 0.0f); // Eixo Z (invertido, pois Z é para fora da tela)
+
+    // Manter a parte de translação intacta, preservando a posição
+    modelMatrix[3] = glm::vec4(currentPosition, 1.0f);
+
+    // Multiplicar a rotação com a parte de rotação da modelMatrix
+    modelMatrix = rotationMatrix * modelMatrix;
+
+    return modelMatrix;
+}
 
 WGPUTextureView Renderer::getNextSurfaceTextureView()
 {

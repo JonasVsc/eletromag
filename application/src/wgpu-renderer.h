@@ -66,6 +66,7 @@ private:
     // utility temporary
     WGPUTextureView getNextSurfaceTextureView();
 
+    glm::mat4 rotateToTarget(glm::mat4 modelMatrix, glm::vec3 currentPosition, glm::vec3 targetPosition);
 
     void framebufferSizeCallback(int newWidth, int newHeight);
 
