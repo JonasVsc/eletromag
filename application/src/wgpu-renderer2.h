@@ -1,12 +1,15 @@
 #pragma once
 
 #include "wgpu-pipeline.h"
+#include "layer-stack.h"
 
 #include <emscripten.h>
 #include <webgpu/webgpu.h>
 
 #include <glm/glm.hpp>
 #include <glm/ext.hpp>
+
+
 
 struct MyUniforms {
     glm::mat4x4 projectionMatrix;
@@ -29,7 +32,7 @@ public:
 
     void init();
 
-    void render();
+    void render(LayerStack& layerStack);
 
     void terminate();
 

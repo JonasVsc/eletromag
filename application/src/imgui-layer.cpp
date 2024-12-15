@@ -24,16 +24,12 @@ void ImGuiLayer::onAttach()
     Renderer2& renderer = app.getRenderer();
     GLFWwindow* window = static_cast<GLFWwindow*>(app.getWindow().getNativeWindow());
 
-
-
-     // Setup Dear ImGui context
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
     ImGui::GetIO();
 
-    // style
     ImGuiStyle& style = ImGui::GetStyle();
-    ImVec4 customColor = ImVec4(0.1f, 0.5f, 0.8f, 1.0f); // Azul
+    ImVec4 customColor = ImVec4(0.1f, 0.5f, 0.8f, 1.0f);
     style.Colors[ImGuiCol_Button] = customColor;
     style.Colors[ImGuiCol_ButtonHovered] = ImVec4(0.2f, 0.6f, 0.9f, 1.0f);
     style.Colors[ImGuiCol_ButtonActive] = ImVec4(0.0f, 0.4f, 0.7f, 1.0f);
@@ -41,15 +37,13 @@ void ImGuiLayer::onAttach()
     style.FramePadding = ImVec2(5.0f, 5.0f);     
     style.ItemSpacing  = ImVec2(8.0f, 4.0f);     
     style.ScrollbarSize = 15.0f;                 
-    style.WindowRounding = 5.0f;    // Bordas arredondadas das janelas
-    style.FrameRounding = 4.0f;     // Bordas dos elementos
-    style.PopupRounding = 3.0f;     // Bordas de popups
+    style.WindowRounding = 5.0f;    
+    style.FrameRounding = 4.0f;     
+    style.PopupRounding = 3.0f;     
     ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(10, 10));
     ImGuiIO& io = ImGui::GetIO();
     io.Fonts->AddFontFromFileTTF("C:/Dev/eletromag/application/resources/RobotoMono-VariableFont_wght.ttf", 16.0f);
 
-
-    // Setup Platform/Renderer backends
     ImGui_ImplGlfw_InitForOther(window, true);
     ImGui_ImplWGPU_InitInfo init_info;
     init_info.Device = renderer.getDevice();
@@ -66,7 +60,17 @@ void ImGuiLayer::onDetach()
     ImGui_ImplWGPU_Shutdown();
 }
 
-void ImGuiLayer::onUpdate()
+void ImGuiLayer::onUpdate(WGPURenderPassEncoder renderPass)
 {
-    
+    ImGui_ImplWGPU_NewFrame();
+    ImGui_ImplGlfw_NewFrame();
+    ImGui::NewFrame();
+    ImGui::Begin("Teste");                                
+    ImGuiIO& io = ImGui::GetIO();
+    ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
+    ImGui::End();
+
+    ImGui::EndFrame();
+    ImGui::Render();
+    ImGui_ImplWGPU_RenderDrawData(ImGui::GetDrawData(), renderPass);
 }

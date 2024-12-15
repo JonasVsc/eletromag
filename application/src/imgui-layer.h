@@ -13,6 +13,6 @@ public:
 
     void onDetach();
 
-    void onUpdate();
+    void onUpdate(WGPURenderPassEncoder renderPass);
     
 };

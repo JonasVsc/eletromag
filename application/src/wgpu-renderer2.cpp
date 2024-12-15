@@ -6,7 +6,6 @@
 #include "resource-manager.h"
 
 
-
 Renderer2* Renderer2::sInstance = nullptr;
 
 ////////////////////////////////////////////////////////////////////////////
@@ -22,7 +21,7 @@ void Renderer2::init()
     initDepthBuffer();
 }
 
-void Renderer2::render()
+void Renderer2::render(LayerStack& layerStack)
 {
     WGPUTextureView nextTexture = getNextSurfaceTextureView();
     if(!nextTexture)
@@ -64,6 +63,9 @@ void Renderer2::render()
     wgpuRenderPassEncoderSetPipeline(renderPass, pipeline.getRenderPipeline());
 
     // draw
+
+    for (Layer* layer : layerStack)
+            layer->onUpdate(renderPass);
 
     wgpuRenderPassEncoderEnd(renderPass);
     wgpuRenderPassEncoderRelease(renderPass);

@@ -19,13 +19,14 @@ void Application::init()
 
 void Application::run()
 {
+
     while (true)
     {
-        mRenderer.render();
+        mRenderer.render(mLayerStack);
 
         mWindow.update();
         
-        emscripten_sleep(10);
+        emscripten_sleep(10); // wait 10ms for browser
     }
 }
 

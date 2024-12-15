@@ -2,6 +2,9 @@
 
 #include <iostream>
 
+#include <webgpu/webgpu.h>
+
+
 class Layer
 {
 
@@ -14,7 +17,7 @@ public:
 
     virtual void onDettach() {}
 
-    virtual void onUpdate() {}
+    virtual void onUpdate(WGPURenderPassEncoder renderPass) {}
 
     inline std::string getDebugName() { return mDebugName; }
 
