@@ -32,13 +32,15 @@ public:
 
     void init();
 
-    void render(LayerStack& layerStack);
+    void render(std::vector<class Object>& objects, LayerStack& layerStack);
 
     void terminate();
 
     static inline Renderer2& get() { return *sInstance; }
 
     inline WGPUDevice getDevice() { return mDevice; }
+
+    inline WGPUQueue getQueue() { return mQueue; }
     
     inline WGPUTextureFormat getSwapChainFormat() { return mSwapChainFormat; }
 
@@ -70,5 +72,4 @@ private:
     WGPUTextureFormat mDepthTextureFormat = WGPUTextureFormat_Depth24Plus;
 
     static Renderer2* sInstance;
-
 };

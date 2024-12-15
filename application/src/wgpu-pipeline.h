@@ -18,6 +18,8 @@ public:
 
     inline WGPURenderPipeline getRenderPipeline() { return mRenderPipeline; }
 
+    inline WGPUBindGroupLayout getBindGroupLayout() { return mBindGroupLayout; }
+
 private:
 
     void initAndLoadShaders();

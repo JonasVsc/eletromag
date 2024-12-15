@@ -2,6 +2,8 @@
 
 #include <emscripten.h>
 
+#include "electron.h"
+
 Application* Application::sInstance = nullptr;
 
 Application::Application()
@@ -20,9 +22,15 @@ void Application::init()
 void Application::run()
 {
 
+    Object obj;
+    obj.configure("C:/Dev/eletromag/application/resources/sphere_with_vector.obj");
+
+    std::vector<Object> objects;
+    objects.push_back(obj);
+
     while (true)
     {
-        mRenderer.render(mLayerStack);
+        mRenderer.render(objects, mLayerStack);
 
         mWindow.update();
         

@@ -4,7 +4,7 @@
 #include "glfw3webgpu.h"
 #include "webgpu-utils.h"
 #include "resource-manager.h"
-
+#include "object.h"
 
 Renderer2* Renderer2::sInstance = nullptr;
 
@@ -21,7 +21,7 @@ void Renderer2::init()
     initDepthBuffer();
 }
 
-void Renderer2::render(LayerStack& layerStack)
+void Renderer2::render(std::vector<Object>& objects, LayerStack& layerStack)
 {
     WGPUTextureView nextTexture = getNextSurfaceTextureView();
     if(!nextTexture)
@@ -64,8 +64,13 @@ void Renderer2::render(LayerStack& layerStack)
 
     // draw
 
+    for (Object& obj : objects)
+        obj.draw(renderPass);
+
     for (Layer* layer : layerStack)
             layer->onUpdate(renderPass);
+
+    
 
     wgpuRenderPassEncoderEnd(renderPass);
     wgpuRenderPassEncoderRelease(renderPass);

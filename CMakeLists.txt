@@ -45,6 +45,9 @@ add_executable(ElectroApp
     
     "application/src/wgpu-renderer2.h"
     "application/src/wgpu-renderer2.cpp"
+
+    "application/src/object.h"
+    "application/src/electron.h"
 )
 
 add_subdirectory("application/vendor/glm")
