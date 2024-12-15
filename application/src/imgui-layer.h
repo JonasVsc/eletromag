@@ -14,5 +14,11 @@ public:
     void onDetach();
 
     void onUpdate(WGPURenderPassEncoder renderPass);
+
+private:
+
+    void mainGUI();
+    void fpsGUI();
+    void sceneGUI();
     
 };

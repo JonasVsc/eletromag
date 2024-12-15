@@ -20,7 +20,6 @@ void Object::initRenderPipeline()
 {
     Renderer2& renderer = Application::get().getRenderer();
 
-    // Carrega o módulo de shader
     mShaderModule = ResourceManager::loadShaderModule("C:/Dev/eletromag/application/resources/shader.wgsl", renderer.getDevice());
     if (!mShaderModule) {
         std::cerr << "[ERROR] Failed to load shader module" << '\n';
@@ -28,10 +27,9 @@ void Object::initRenderPipeline()
 
     WGPURenderPipelineDescriptor pipelineDesc{};
 
-    // Definição de layout de vértices
     std::vector<WGPUVertexAttribute> vertexAttribs(3);
     vertexAttribs[0].shaderLocation = 0;
-    vertexAttribs[0].format = WGPUVertexFormat_Float32x3;  // Vetor 3D para a posição
+    vertexAttribs[0].format = WGPUVertexFormat_Float32x3;  
     vertexAttribs[0].offset = offsetof(ResourceManager::VertexAttributes, position);
 
     vertexAttribs[1].shaderLocation = 1;
@@ -53,24 +51,22 @@ void Object::initRenderPipeline()
     pipelineDesc.vertex.module = mShaderModule;
     pipelineDesc.vertex.entryPoint = "vs_main";
 
-    // Configuração do estágio de fragmento
     WGPUFragmentState fragmentState = {};
     fragmentState.module = mShaderModule;
-    fragmentState.entryPoint = "fs_main";  // Função de entrada do shader de fragmentos
+    fragmentState.entryPoint = "fs_main"; 
 
     WGPUColorTargetState colorTarget = {};
-    colorTarget.format = renderer.getSwapChainFormat();  // O formato do alvo de cor (swap chain)
+    colorTarget.format = renderer.getSwapChainFormat();
     colorTarget.writeMask = WGPUColorWriteMask_All;
     fragmentState.targetCount = 1;
     fragmentState.targets = &colorTarget;
 
     pipelineDesc.fragment = &fragmentState;
 
-    // Configuração do Depth e Stencil Buffer
     WGPUDepthStencilState depthStencilState{};
-    depthStencilState.format = renderer.getDepthTextureFormat();  // Formato do Depth Buffer
-    depthStencilState.depthWriteEnabled = true;  // Ativa o write no depth buffer
-    depthStencilState.depthCompare = WGPUCompareFunction_Less;  // Teste de profundidade: Menor valor é mais próximo
+    depthStencilState.format = renderer.getDepthTextureFormat();
+    depthStencilState.depthWriteEnabled = true; 
+    depthStencilState.depthCompare = WGPUCompareFunction_Less;  
     depthStencilState.stencilReadMask = 0xFF;
     depthStencilState.stencilWriteMask = 0xFF;
     depthStencilState.stencilFront.compare = WGPUCompareFunction_Always;
@@ -102,7 +98,6 @@ void Object::initRenderPipeline()
     mBindGroupLayout = wgpuDeviceCreateBindGroupLayout(renderer.getDevice(), &bindGroupLayoutDesc);
 
 
-    // Criando a pipeline com a configuração
     WGPUPipelineLayoutDescriptor layoutDesc{};
     layoutDesc.bindGroupLayoutCount = 1;
     layoutDesc.bindGroupLayouts = &mBindGroupLayout;
@@ -123,7 +118,7 @@ void Object::initUniformData()
 
     mUniform.modelMatrix = glm::mat4x4(1.0f);
     mUniform.viewMatrix = camera.getViewMatrix();
-    mUniform.projectionMatrix = glm::perspective(45 * PI / 180, 640.0f / 480.0f, 0.01f, 100.0f);
+    mUniform.projectionMatrix = glm::perspective(glm::radians(camera.fov), camera.aspectRatio, camera.nearPlane, camera.farPlane);
     mUniform.color = { 0.0f, 0.0f, 1.0f, 1.0f };
     mUniform.direction = { 0.0f, 1.0f, 0.0f };
     mUniform.intensity = 0.0f;

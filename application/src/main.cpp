@@ -15,10 +15,27 @@ int main()
         Scene teste("Cena de teste");
 
         app.setCurrentScene(teste);
-        Object obj1("Objeto de teste 1", "C:/Dev/eletromag/application/resources/sphere_with_vector.obj");
-        obj1.setPosition(glm::vec3(0.0f, 50.0f, 0.0f));
-        obj1.setColor(glm::vec4(1.0f, 0.0f, 0.0f, 1.0f));
+        Object obj1("Sphere + Vector", "C:/Dev/eletromag/application/resources/sphere_with_vector.obj");
+        Object obj2("Vector", "C:/Dev/eletromag/application/resources/arrow.obj");
+        Object obj3("Electron", "C:/Dev/eletromag/application/resources/electron.obj");
+        Object obj4("Field", "C:/Dev/eletromag/application/resources/field.obj");
+
+        obj1.setPosition(glm::vec3(0.0f, 0.0f, 0.0f));
+        obj1.setColor(glm::vec4(0.0f, 0.0f, 1.0f, 1.0f));
+
+        obj2.setPosition(glm::vec3(15.0f, 0.0f, -15.0f));
+        obj2.setColor(glm::vec4(0.0f, 1.0f, 0.0f, 1.0f));
+
+        obj3.setPosition(glm::vec3(30.0f, 0.0f, -30.0f));
+        obj3.setColor(glm::vec4(0.2f, 0.6f, 1.0f, 1.0f));
+
+        obj4.setPosition(glm::vec3(-45.0f, 0.0f, -45.0f));
+        obj4.setColor(glm::vec4(1.0f, 0.0f, 0.0f, 1.0f));
+
         app.mCurrentScene->addObject(obj1);
+        app.mCurrentScene->addObject(obj2);
+        app.mCurrentScene->addObject(obj3);
+        app.mCurrentScene->addObject(obj4);
       
 
         app.pushLayer(new ImGuiLayer());

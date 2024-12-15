@@ -62,30 +62,88 @@ void ImGuiLayer::onDetach()
 
 void ImGuiLayer::onUpdate(WGPURenderPassEncoder renderPass)
 {
-    Scene* scene = Application::get().mCurrentScene;
-    std::string sceneName = scene->getDebugName();
-    const char* scene_c = sceneName.c_str();
-
-    
-
     ImGui_ImplWGPU_NewFrame();
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
-    ImGui::Begin("Detalhes");                                
-    ImGuiIO& io = ImGui::GetIO();
-    ImGui::Text("Current Scene: %s", scene_c);
-    ImGui::Text("Objetos:");
-    std::vector<const char*> objName;
-    for(auto& obj : scene->mObjects)
-    {
-        auto debugNameStr = obj.getDebugName();
-        auto debugName = debugNameStr.c_str();
-        ImGui::Text("%s", debugName);
-    }
-    ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
-    ImGui::End();
+
+    sceneGUI();
+    mainGUI();
+    fpsGUI();
 
     ImGui::EndFrame();
     ImGui::Render();
     ImGui_ImplWGPU_RenderDrawData(ImGui::GetDrawData(), renderPass);
 }
+
+void ImGuiLayer::mainGUI()
+{
+    Scene* scene = Application::get().mCurrentScene;
+
+    ImGui::SetNextWindowSize(ImVec2(300, 720), ImGuiCond_Once); 
+    ImGui::SetNextWindowPos(ImVec2(0, 200));
+    ImGui::SetNextWindowSizeConstraints(ImVec2(300, 720), ImVec2(300, 720));
+    ImGui::Begin("Objetos");                                
+    std::vector<const char*> objName;
+
+    static float positions[3] = {0.0f, 0.0f, 0.0f};
+
+    for(auto& obj : scene->mObjects)
+    {
+
+        auto objLabel = obj.getDebugName();
+        if(ImGui::TreeNode(objLabel.c_str()))
+        {
+
+
+            auto Id = "##" + objLabel;
+            ImGui::Text("Position:");
+            ImGui::DragFloat3((Id + "Position").c_str(), positions);
+            ImGui::Text("Rotation:");
+            ImGui::DragFloat3(Id.c_str(), positions);
+            ImGui::Text("Scale:");
+            ImGui::DragFloat3(Id.c_str(), positions);
+            ImGui::TreePop();
+
+        }
+    }
+
+    
+    ImGui::End();
+}
+
+void ImGuiLayer::sceneGUI()
+{
+    ImGui::SetNextWindowSize(ImVec2(300, 720), ImGuiCond_Once); 
+    ImGui::SetNextWindowPos(ImVec2(0, 0));
+    ImGui::SetNextWindowSizeConstraints(ImVec2(300, 200), ImVec2(300, 200));
+    ImGui::Begin("Cena");
+
+    if (ImGui::BeginCombo("##Scene", "Cena Teste")) {
+        if (ImGui::Selectable("Cena 1")) {
+
+        }
+        if (ImGui::Selectable("Cena 2")) {
+
+        }
+        if (ImGui::Selectable("Cena 3")) {
+
+        }
+        ImGui::EndCombo();
+    }
+    ImGui::End();
+}
+
+void ImGuiLayer::fpsGUI()
+{
+    ImVec2 windowPos = ImVec2(ImGui::GetIO().DisplaySize.x - 100, 0);
+    ImVec2 windowSize = ImVec2(100, 30); 
+
+    ImGui::SetNextWindowPos(windowPos);
+    ImGui::SetNextWindowSize(windowSize);
+    ImGui::SetNextWindowBgAlpha(0.0f);  
+    ImGui::Begin("FPS Window", nullptr, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoInputs);
+    float fps = ImGui::GetIO().Framerate;
+    ImGui::Text("FPS: %.f", fps);
+    ImGui::End();
+}
+
