@@ -1,7 +1,7 @@
 #pragma once
 
 #include "application.h"
-#include "resource-manager.h"
+#include "utils/resource-manager.h"
 
 #include <webgpu/webgpu.h>
 #include <glm/glm.hpp>

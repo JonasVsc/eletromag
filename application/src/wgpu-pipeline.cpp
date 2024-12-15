@@ -1,9 +1,6 @@
 #include "wgpu-pipeline.h"
 
-#include "resource-manager.h"
-
-#include <iostream>
-
+#include "utils/resource-manager.h"
 #include "wgpu-renderer2.h"
 
 

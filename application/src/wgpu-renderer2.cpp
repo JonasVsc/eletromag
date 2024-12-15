@@ -1,9 +1,9 @@
 #include "wgpu-renderer2.h"
 
 #include "application.h"
-#include "glfw3webgpu.h"
-#include "webgpu-utils.h"
-#include "resource-manager.h"
+#include "utils/glfw3webgpu.h"
+#include "utils/webgpu-utils.h"
+#include "utils/resource-manager.h"
 #include "object.h"
 
 Renderer2* Renderer2::sInstance = nullptr;
