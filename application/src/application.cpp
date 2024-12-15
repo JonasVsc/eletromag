@@ -2,9 +2,15 @@
 
 #include <emscripten.h>
 
-#include "electron.h"
+#include "object.h"
 
 Application* Application::sInstance = nullptr;
+double Application::deltaTime = 0.0f;
+double Application::lastFrame = 0.0f;
+
+////////////////////////////////////////////////////////////////////////////
+// Public Methods /////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////
 
 Application::Application()
 {
@@ -30,6 +36,8 @@ void Application::run()
 
     while (true)
     {
+        calcDeltaTime();
+
         mRenderer.render(objects, mLayerStack);
 
         mWindow.update();
@@ -54,4 +62,14 @@ void Application::pushOverlay(Layer* overlay)
 {
     mLayerStack.pushOverlay(overlay);
     overlay->onAttach();
+}
+
+////////////////////////////////////////////////////////////////////////////
+// Private Methods /////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
+
+void Application::calcDeltaTime()
+{
+    deltaTime = glfwGetTime() - lastFrame;
+	lastFrame = glfwGetTime();
 }

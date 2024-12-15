@@ -22,6 +22,7 @@ public:
     {
         Pipeline& pipeline = Application::get().getPipeline();
         Renderer2& renderer = Application::get().getRenderer();
+        Camera& camera = Application::get().getMainCamera();
 
         std::vector<ResourceManager::VertexAttributes> vertexData;
         bool success = ResourceManager::loadGeometryFromObj(path, vertexData);
@@ -41,7 +42,7 @@ public:
         // uniform buffer
         // --------------
         mUniform.modelMatrix = glm::mat4x4(1.0f);
-        mUniform.viewMatrix = glm::mat4x4(1.0f); // get main camera
+        mUniform.viewMatrix = camera.getViewMatrix();
         mUniform.projectionMatrix = glm::perspective(45 * PI / 180, 640.0f / 480.0f, 0.01f, 100.0f);
         mUniform.color = { 0.0f, 0.0f, 1.0f, 1.0f };
         mUniform.direction = { 0.0f, 0.0f, 0.0f};
@@ -75,13 +76,23 @@ public:
 
     virtual void draw(WGPURenderPassEncoder renderPass)
     {
+        update();
+
+
         wgpuRenderPassEncoderSetVertexBuffer(renderPass, 0, mVertexBuffer, 0, wgpuBufferGetSize(mVertexBuffer));
         wgpuRenderPassEncoderSetBindGroup(renderPass, 0, mBindGroup, 0, nullptr);
         wgpuRenderPassEncoderDraw(renderPass, mVertexCount, 1, 0, 0);
     }
 
-    virtual void update(float deltaTime) 
+    virtual void update() 
     {
+        // update camera
+        Camera& camera = Application::get().getMainCamera();
+        Renderer2& renderer = Application::get().getRenderer();
+        glm::mat4 view(1.0f);
+        view = camera.getViewMatrix();
+
+        wgpuQueueWriteBuffer(renderer.getQueue(), mUniformBuffer, offsetof(MyUniforms, viewMatrix), &view, sizeof(glm::mat4));
 
     }
 

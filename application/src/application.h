@@ -3,6 +3,7 @@
 #include "window.h"
 #include "wgpu-renderer2.h"
 #include "wgpu-pipeline.h"
+#include "camera.h"
 
 #include "layer.h"
 #include "layer-stack.h"
@@ -29,6 +30,8 @@ public:
 
     inline Pipeline& getPipeline() { return mPipeline; }
 
+    inline Camera& getMainCamera() { return mMainCamera; }
+
     static inline Application& get() { return *sInstance; }
 
 private:
@@ -43,7 +46,16 @@ private:
 
     LayerStack mLayerStack;
 
+    Camera mMainCamera;
+
+public:
+
+    static double deltaTime;
+    static double lastFrame;
+
 private:
+
+    static void calcDeltaTime();
 
     static Application* sInstance;
 };

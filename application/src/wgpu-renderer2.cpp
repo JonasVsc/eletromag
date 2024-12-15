@@ -23,6 +23,8 @@ void Renderer2::init()
 
 void Renderer2::render(std::vector<Object>& objects, LayerStack& layerStack)
 {
+    processCameraMovement();
+
     WGPUTextureView nextTexture = getNextSurfaceTextureView();
     if(!nextTexture)
         std::cerr << "[ERROR] Failed to acquire next swap chain texture" << '\n';
@@ -122,14 +124,14 @@ void Renderer2::initDevice()
     {
         Renderer2* renderer = static_cast<Renderer2*>(glfwGetWindowUserPointer(window));
         if (renderer) {
-            // renderer->processMouseMovement(xpos, ypos);
+            renderer->processMouseMovement(xpos, ypos);
         }
     });
     glfwSetMouseButtonCallback(window, [](GLFWwindow* window, int button, int action, int mods)
     {
         Renderer2* renderer = static_cast<Renderer2*>(glfwGetWindowUserPointer(window));
         if (renderer) {
-            // renderer->processMouseButtonCallback(button, action, mods);
+            renderer->processMouseButtonCallback(button, action, mods);
         }
     });
 
@@ -266,4 +268,101 @@ WGPUTextureView Renderer2::getNextSurfaceTextureView()
 	return targetView;
 }
 
+void Renderer2::processCameraMovement()
+{
+    float speed = 5.5f * Application::deltaTime;
 
+    Application& app = Application::get();
+    Camera& camera = app.getMainCamera();
+    GLFWwindow* window = static_cast<GLFWwindow*>(app.getWindow().getNativeWindow());
+
+    // Camera Movement
+	if (glfwGetKey(window, GLFW_KEY_W) && GLFW_PRESS)
+	{
+		camera.mPosition += speed * camera.mFront;
+	}
+	if (glfwGetKey(window, GLFW_KEY_S) && GLFW_PRESS)
+	{
+		camera.mPosition -= speed * camera.mFront;
+	}
+	if (glfwGetKey(window, GLFW_KEY_A) && GLFW_PRESS)
+	{
+		camera.mPosition -= speed * glm::normalize(glm::cross(camera.mFront, camera.mUp));
+	}
+	if (glfwGetKey(window, GLFW_KEY_D) && GLFW_PRESS)
+	{
+		camera.mPosition += speed * glm::normalize(glm::cross(camera.mFront, camera.mUp));
+	}
+	if (glfwGetKey(window,GLFW_KEY_SPACE) && GLFW_PRESS)
+	{
+		camera.mPosition += speed * camera.mUp;
+	}
+	if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) && GLFW_PRESS)
+	{
+		camera.mPosition -= speed * camera.mUp;
+	}
+}
+
+void Renderer2::processMouseMovement(double xposIn, double yposIn)
+{
+    Camera& camera = Application::get().getMainCamera();
+
+    float xpos = static_cast<float>(xposIn);
+	float ypos = static_cast<float>(yposIn);
+    if(camera.rightbuttonPressed)
+    {
+
+        if (camera.firstMouse)
+        {
+            camera.lastX = xpos;
+            camera.lastY = ypos;
+            camera.firstMouse = false;
+        }
+
+        float xoffset = xpos - camera.lastX;
+        float yoffset = camera.lastY - ypos; // reversed since y-coordinates go from bottom to top
+        camera.lastX = xpos;
+        camera.lastY = ypos;
+
+        float sensitivity = 0.1f; // change this value to your liking
+        xoffset *= sensitivity;
+        yoffset *= sensitivity;
+
+        camera.yaw += xoffset;
+        camera.pitch += yoffset;
+
+        // make sure that when pitch is out of bounds, screen doesn't get flipped
+        if (camera.pitch > 89.0f)
+            camera.pitch = 89.0f;
+        if (camera.pitch < -89.0f)
+            camera.pitch = -89.0f;
+
+        glm::vec3 front;
+        front.x = cos(glm::radians(camera.yaw)) * cos(glm::radians(camera.pitch));
+        front.y = sin(glm::radians(camera.pitch));
+        front.z = sin(glm::radians(camera.yaw)) * cos(glm::radians(camera.pitch));
+        camera.mFront = glm::normalize(front);
+    }
+}
+
+void Renderer2::processMouseButtonCallback(int button, int action, int mods)
+{
+    Application& app = Application::get();
+    GLFWwindow* window = static_cast<GLFWwindow*>(app.getWindow().getNativeWindow());
+    Camera& camera = app.getMainCamera();
+
+    if (button == GLFW_MOUSE_BUTTON_RIGHT) 
+    {
+        if (action == GLFW_PRESS) 
+        {
+            camera.rightbuttonPressed = true;
+            glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);  // Esconde o cursor
+        }
+        if (action == GLFW_RELEASE) 
+        {
+            camera.rightbuttonPressed = false;
+            camera.firstMouse = true;
+            glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);  // Mostra o cursor
+        }
+    }
+}

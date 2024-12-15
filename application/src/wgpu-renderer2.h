@@ -58,6 +58,12 @@ private:
 
     WGPUTextureView getNextSurfaceTextureView();
 
+    void processCameraMovement();
+
+    void processMouseMovement(double xposIn, double yposIn);
+
+    void processMouseButtonCallback(int button, int action, int mods);
+
 private:
 
     WGPUDevice mDevice;
