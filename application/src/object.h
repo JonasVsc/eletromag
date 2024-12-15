@@ -16,13 +16,26 @@ public:
 
     Object()
     {
+        loadDefault();
     };
+
+    virtual void loadDefault()
+    {
+        Camera& camera = Application::get().getMainCamera();
+
+        mUniform.modelMatrix = glm::mat4x4(1.0f);
+        mUniform.viewMatrix = camera.getViewMatrix();
+        mUniform.projectionMatrix = glm::perspective(45 * PI / 180, 640.0f / 480.0f, 0.01f, 100.0f);
+        mUniform.color = { 0.0f, 0.0f, 1.0f, 1.0f };
+        mUniform.direction = { 0.0f, 0.0f, 0.0f};
+        mUniform.intensity = 0.0f;
+        mUniform.mass = 0.0f;
+    }
 
     virtual void configure(const std::filesystem::path& path) 
     {
         Pipeline& pipeline = Application::get().getPipeline();
         Renderer2& renderer = Application::get().getRenderer();
-        Camera& camera = Application::get().getMainCamera();
 
         std::vector<ResourceManager::VertexAttributes> vertexData;
         bool success = ResourceManager::loadGeometryFromObj(path, vertexData);
@@ -41,13 +54,7 @@ public:
 
         // uniform buffer
         // --------------
-        mUniform.modelMatrix = glm::mat4x4(1.0f);
-        mUniform.viewMatrix = camera.getViewMatrix();
-        mUniform.projectionMatrix = glm::perspective(45 * PI / 180, 640.0f / 480.0f, 0.01f, 100.0f);
-        mUniform.color = { 0.0f, 0.0f, 1.0f, 1.0f };
-        mUniform.direction = { 0.0f, 0.0f, 0.0f};
-        mUniform.intensity = 0.0f;
-        mUniform.mass = 0.0f;
+        
         
         bufferDesc.size = sizeof(MyUniforms);
         bufferDesc.usage = WGPUBufferUsage_CopyDst | WGPUBufferUsage_Uniform;

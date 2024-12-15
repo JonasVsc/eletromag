@@ -53,6 +53,8 @@ public:
     static double deltaTime;
     static double lastFrame;
 
+    static std::vector<Object> sSceneObjects;
+
 private:
 
     static void calcDeltaTime();

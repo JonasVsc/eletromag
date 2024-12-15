@@ -5,6 +5,7 @@
 #include <iostream>
 
 #include "imgui-layer.h"
+#include "scene-layer.h"
 
 int main() 
 {
@@ -14,6 +15,7 @@ int main()
         app.init();
 
         app.pushLayer(new ImGuiLayer());
+        app.pushLayer(new SceneLayer());
 
         auto callback = [](void* arg) 
         {

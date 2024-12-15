@@ -40,6 +40,9 @@ add_executable(ElectroApp
     "application/src/imgui-layer.h"
     "application/src/imgui-layer.cpp"
 
+    "application/src/scene-layer.h"
+    "application/src/scene-layer.cpp"
+
     "application/src/wgpu-pipeline.h"
     "application/src/wgpu-pipeline.cpp"
     
@@ -47,7 +50,6 @@ add_executable(ElectroApp
     "application/src/wgpu-renderer2.cpp"
 
     "application/src/object.h"
-    "application/src/electron.h"
 )
 
 add_subdirectory("application/vendor/glm")

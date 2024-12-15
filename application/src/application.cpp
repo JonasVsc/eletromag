@@ -5,6 +5,8 @@
 #include "object.h"
 
 Application* Application::sInstance = nullptr;
+std::vector<Object> Application::sSceneObjects;
+
 double Application::deltaTime = 0.0f;
 double Application::lastFrame = 0.0f;
 
@@ -27,18 +29,11 @@ void Application::init()
 
 void Application::run()
 {
-
-    Object obj;
-    obj.configure("C:/Dev/eletromag/application/resources/sphere_with_vector.obj");
-
-    std::vector<Object> objects;
-    objects.push_back(obj);
-
     while (true)
     {
         calcDeltaTime();
 
-        mRenderer.render(objects, mLayerStack);
+        mRenderer.render(sSceneObjects, mLayerStack);
 
         mWindow.update();
         
