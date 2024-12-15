@@ -62,11 +62,26 @@ void ImGuiLayer::onDetach()
 
 void ImGuiLayer::onUpdate(WGPURenderPassEncoder renderPass)
 {
+    Scene* scene = Application::get().mCurrentScene;
+    std::string sceneName = scene->getDebugName();
+    const char* scene_c = sceneName.c_str();
+
+    
+
     ImGui_ImplWGPU_NewFrame();
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
-    ImGui::Begin("Teste");                                
+    ImGui::Begin("Detalhes");                                
     ImGuiIO& io = ImGui::GetIO();
+    ImGui::Text("Current Scene: %s", scene_c);
+    ImGui::Text("Objetos:");
+    std::vector<const char*> objName;
+    for(auto& obj : scene->mObjects)
+    {
+        auto debugNameStr = obj.getDebugName();
+        auto debugName = debugNameStr.c_str();
+        ImGui::Text("%s", debugName);
+    }
     ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
     ImGui::End();
 

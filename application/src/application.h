@@ -2,11 +2,11 @@
 
 #include "window.h"
 #include "wgpu-renderer2.h"
-#include "wgpu-pipeline.h"
+#include "layer-stack.h"
 #include "camera.h"
 
-#include "layer.h"
-#include "layer-stack.h"
+#include <string>
+#include <unordered_map>
 
 class Application
 {
@@ -24,13 +24,15 @@ public:
 
     void pushOverlay(Layer* overlay);
 
+    void selectScene(const std::string sceneName);
+
     inline Window& getWindow() { return mWindow; }
 
     inline Renderer2& getRenderer() { return mRenderer; }
 
-    inline Pipeline& getPipeline() { return mPipeline; }
-
     inline Camera& getMainCamera() { return mMainCamera; }
+
+    void setCurrentScene(Scene& scene);
 
     static inline Application& get() { return *sInstance; }
 
@@ -39,8 +41,6 @@ private:
     Window mWindow;
 
     Renderer2 mRenderer;
-
-    Pipeline mPipeline;
 
     bool running;
 
@@ -53,7 +53,8 @@ public:
     static double deltaTime;
     static double lastFrame;
 
-    static std::vector<Object> sSceneObjects;
+    std::unordered_map<std::string, Scene> mScenes;
+    Scene* mCurrentScene;
 
 private:
 

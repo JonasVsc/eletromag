@@ -1,5 +1,6 @@
 #include "wgpu-renderer2.h"
 
+#include "definitions.h"
 #include "application.h"
 #include "utils/glfw3webgpu.h"
 #include "utils/webgpu-utils.h"
@@ -21,7 +22,7 @@ void Renderer2::init()
     initDepthBuffer();
 }
 
-void Renderer2::render(std::vector<Object>& objects, LayerStack& layerStack)
+void Renderer2::render(Scene& scene, LayerStack& layerStack)
 {
     processCameraMovement();
 
@@ -58,17 +59,30 @@ void Renderer2::render(std::vector<Object>& objects, LayerStack& layerStack)
     renderPassDesc.depthStencilAttachment = &depthStencilAttachment;
 
     WGPURenderPassEncoder renderPass = wgpuCommandEncoderBeginRenderPass(commandEncoder, &renderPassDesc);
+
+    Camera& camera = Application::get().getMainCamera();
+
+    // update camera
+    glm::mat4 view(1.0f);
+    view = camera.getViewMatrix();
     
-    Application& app = Application::get();
-    Pipeline& pipeline = app.getPipeline();
+    // draw scene
+    // ----------
+    for (Object& obj : scene.mObjects)
+    {
+        wgpuQueueWriteBuffer(mQueue, obj.getUniformBuffer(), offsetof(MyUniforms, viewMatrix), &view, sizeof(glm::mat4));
 
-    wgpuRenderPassEncoderSetPipeline(renderPass, pipeline.getRenderPipeline());
+        wgpuRenderPassEncoderSetPipeline(renderPass, obj.getRenderPipeline());
 
-    // draw
+        wgpuRenderPassEncoderSetBindGroup(renderPass, 0, obj.getBindGroup(), 0, nullptr);
 
-    for (Object& obj : objects)
-        obj.draw(renderPass);
+        wgpuRenderPassEncoderSetVertexBuffer(renderPass, 0, obj.getVertexBuffer(), 0, wgpuBufferGetSize(obj.getVertexBuffer()));
 
+        wgpuRenderPassEncoderDraw(renderPass, obj.getVertexCount(), 1, 0, 0);
+    }
+
+    // update layers
+    // -------------
     for (Layer* layer : layerStack)
             layer->onUpdate(renderPass);
 
@@ -84,6 +98,12 @@ void Renderer2::render(std::vector<Object>& objects, LayerStack& layerStack)
     wgpuTextureViewRelease(nextTexture);
 
 }
+
+void Renderer2::renderScene(const Scene& scene, WGPURenderPassEncoder renderPass)
+{
+    
+}
+
 
 
 void Renderer2::terminate()

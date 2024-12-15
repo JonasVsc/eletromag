@@ -1,11 +1,7 @@
 #include "application.h"
 
-#include <emscripten.h>
-
-#include "object.h"
 
 Application* Application::sInstance = nullptr;
-std::vector<Object> Application::sSceneObjects;
 
 double Application::deltaTime = 0.0f;
 double Application::lastFrame = 0.0f;
@@ -15,6 +11,7 @@ double Application::lastFrame = 0.0f;
 ///////////////////////////////////////////////////////////////////////////
 
 Application::Application()
+    : mCurrentScene(new Scene("Default"))
 {
     sInstance = this;
 	mWindow.create(1280, 720, "WebGPU");
@@ -24,7 +21,6 @@ void Application::init()
 {
     mWindow.init();
     mRenderer.init();
-    mPipeline.init();
 }
 
 void Application::run()
@@ -33,10 +29,10 @@ void Application::run()
     {
         calcDeltaTime();
 
-        mRenderer.render(sSceneObjects, mLayerStack);
+        mRenderer.render(*mCurrentScene, mLayerStack);
 
         mWindow.update();
-        
+
         emscripten_sleep(10); // wait 10ms for browser
     }
 }
@@ -58,6 +54,28 @@ void Application::pushOverlay(Layer* overlay)
     mLayerStack.pushOverlay(overlay);
     overlay->onAttach();
 }
+
+void Application::selectScene(const std::string sceneName)
+{
+    auto it = mScenes.find(sceneName);
+    if (it != mScenes.end())
+    {
+        Scene& scene = it->second;
+        mCurrentScene = &it->second;
+        std::cout << "[INFO] Cena selecionada: " << sceneName << '\n';
+    }
+    else
+    {
+        std::cerr << "[ERROR] " << sceneName << " not found" << '\n';
+    }
+}
+
+ void Application::setCurrentScene(Scene& scene) 
+ { 
+    mCurrentScene = &scene; 
+ }
+
+
 
 ////////////////////////////////////////////////////////////////////////////
 // Private Methods /////////////////////////////////////////////////////////
