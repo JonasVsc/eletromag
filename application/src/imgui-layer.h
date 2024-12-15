@@ -17,8 +17,8 @@ public:
 
 private:
 
-    void mainGUI();
     void fpsGUI();
     void sceneGUI();
+    void objectTreeGUI();
     
 };

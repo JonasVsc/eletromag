@@ -6,6 +6,9 @@
 #include <backends/imgui_impl_wgpu.h>
 #include <backends/imgui_impl_glfw.h>
 
+#include <optional>
+
+
 ImGuiLayer::ImGuiLayer()
     : Layer("ImGuiLayer")
 {
@@ -55,7 +58,6 @@ void ImGuiLayer::onAttach()
 
 void ImGuiLayer::onDetach()
 {
-    // terminate gui
     ImGui_ImplGlfw_Shutdown();
     ImGui_ImplWGPU_Shutdown();
 }
@@ -66,8 +68,8 @@ void ImGuiLayer::onUpdate(WGPURenderPassEncoder renderPass)
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
 
+    objectTreeGUI();
     sceneGUI();
-    mainGUI();
     fpsGUI();
 
     ImGui::EndFrame();
@@ -75,67 +77,108 @@ void ImGuiLayer::onUpdate(WGPURenderPassEncoder renderPass)
     ImGui_ImplWGPU_RenderDrawData(ImGui::GetDrawData(), renderPass);
 }
 
-void ImGuiLayer::mainGUI()
-{
-    Scene* scene = Application::get().mCurrentScene;
-
-    ImGui::SetNextWindowSize(ImVec2(300, 720), ImGuiCond_Once); 
-    ImGui::SetNextWindowPos(ImVec2(0, 200));
-    ImGui::SetNextWindowSizeConstraints(ImVec2(300, 720), ImVec2(300, 720));
-    ImGui::Begin("Objetos");                                
-    std::vector<const char*> objName;
-
-    static float positions[3] = {0.0f, 0.0f, 0.0f};
-
-    for(auto& obj : scene->mObjects)
-    {
-
-        auto objLabel = obj.getDebugName();
-        if(ImGui::TreeNode(objLabel.c_str()))
-        {
-
-
-            auto Id = "##" + objLabel;
-            ImGui::Text("Position:");
-            ImGui::DragFloat3((Id + "Position").c_str(), positions);
-            ImGui::Text("Rotation:");
-            ImGui::DragFloat3(Id.c_str(), positions);
-            ImGui::Text("Scale:");
-            ImGui::DragFloat3(Id.c_str(), positions);
-            ImGui::TreePop();
-
-        }
-    }
-
-    
-    ImGui::End();
-}
-
 void ImGuiLayer::sceneGUI()
 {
     ImGui::SetNextWindowSize(ImVec2(300, 720), ImGuiCond_Once); 
     ImGui::SetNextWindowPos(ImVec2(0, 0));
     ImGui::SetNextWindowSizeConstraints(ImVec2(300, 200), ImVec2(300, 200));
-    ImGui::Begin("Cena");
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0)); 
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f); 
 
-    if (ImGui::BeginCombo("##Scene", "Cena Teste")) {
-        if (ImGui::Selectable("Cena 1")) {
+    ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0, 0, 0, 0)); 
 
-        }
-        if (ImGui::Selectable("Cena 2")) {
+    ImGui::Begin("Cena", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse);
 
-        }
-        if (ImGui::Selectable("Cena 3")) {
+    auto& scenes = Application::get().mScenes;
+    ImGui::PopStyleVar(3); 
+    ImGui::PopStyleColor(1);  
+    
 
+    if (ImGui::BeginCombo("##Scene", Application::get().mCurrentScene->getDebugName().c_str())) {
+        for(auto it = scenes.begin(); it != scenes.end(); it++)
+        {
+            if (ImGui::Selectable(it->first.c_str())) {
+                Application::get().setCurrentScene(it->second);
+            }
         }
         ImGui::EndCombo();
     }
     ImGui::End();
+    
 }
+
+void ImGuiLayer::objectTreeGUI()
+{
+    static Scene* previousScene = nullptr;
+    Scene* scene = Application::get().mCurrentScene;
+
+    ImGui::SetNextWindowSize(ImVec2(300, 720), ImGuiCond_Once); 
+    ImGui::SetNextWindowPos(ImVec2(ImGui::GetIO().DisplaySize.x - 300, 0));
+    ImGui::SetNextWindowSizeConstraints(ImVec2(300, 720), ImVec2(300, 720));
+    ImGui::Begin("Objetos", nullptr, ImGuiWindowFlags_NoTitleBar);
+
+    float listBoxHeight = ImGui::GetTextLineHeightWithSpacing() * 5; 
+    ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(4.0f, 2.0f));
+
+    static int selected = -1;
+    if(scene != previousScene)
+    {
+        selected = -1;
+        previousScene = scene;
+    }
+    ImGui::Text("Objetos");
+    if(ImGui::BeginListBox(("##" + scene->getDebugName()).c_str(), ImVec2(-1, listBoxHeight))) 
+    {
+        for(size_t i = 0; i < scene->mObjects.size(); i++)
+        {
+            const bool isSelected = (selected == i);
+            if(ImGui::Selectable(scene->mObjects.at(i).getDebugName().c_str(), isSelected))
+            {
+                selected = i;
+                std::cout << "Selecionado: " << scene->mObjects.at(selected).getDebugName() << std::endl;
+            }
+        }
+
+        ImGui::EndListBox();
+    }
+    ImGui::PopStyleVar(1);
+
+
+    if(selected != -1)
+    {
+        auto& obj = scene->mObjects.at(selected);
+        auto objLabel = obj.getDebugName();
+        ImGui::Text("Propriedades");
+        ImGui::SetNextItemOpen(true, ImGuiCond_Once);
+
+        if(ImGui::TreeNode("Transform"))
+        {
+            auto Id = "##" + objLabel;
+            ImGui::Text("Position:");
+            ImGui::DragFloat3((Id + "Position").c_str(), obj.mPosition, 0.1);
+            ImGui::Text("Rotation:");
+            ImGui::DragFloat3((Id + "Rotation").c_str(), obj.mRotation, 0.1);
+            ImGui::Text("Scale:");
+            ImGui::DragFloat3((Id + "Scale").c_str(), obj.mScale, 0.1);
+            ImGui::TreePop();
+        }
+        if(ImGui::TreeNode("Material"))
+        {
+            auto Id = "##" + objLabel;
+            ImGui::Text("Color:");
+            ImGui::ColorEdit4((Id + "Color").c_str(), (float*)&obj.mColor);
+            ImGui::TreePop();
+        }
+    }
+
+    ImGui::End();
+}
+
 
 void ImGuiLayer::fpsGUI()
 {
-    ImVec2 windowPos = ImVec2(ImGui::GetIO().DisplaySize.x - 100, 0);
+    ImVec2 windowPos = ImVec2(0, ImGui::GetIO().DisplaySize.y - 30);
     ImVec2 windowSize = ImVec2(100, 30); 
 
     ImGui::SetNextWindowPos(windowPos);

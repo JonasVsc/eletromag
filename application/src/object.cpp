@@ -123,6 +123,7 @@ void Object::initUniformData()
     mUniform.direction = { 0.0f, 1.0f, 0.0f };
     mUniform.intensity = 0.0f;
     mUniform.mass = 0.0f;
+
 }
 
 
@@ -172,16 +173,41 @@ void Object::initBuffers(const std::filesystem::path& path)
         std::cerr << "[ERROR] Failed to init bind group" << '\n';
 }
 
-void Object::setPosition(const glm::vec3& pos)
+void Object::update()
 {
     Renderer2& renderer = Application::get().getRenderer();
-    mUniform.modelMatrix = glm::translate(mUniform.modelMatrix, pos);
-    wgpuQueueWriteBuffer(renderer.getQueue(), mUniformBuffer, offsetof(MyUniforms, modelMatrix), &mUniform.modelMatrix, sizeof(glm::mat4));
+    Camera& camera = Application::get().getMainCamera();
+
+    // update viewMatrix
+    glm::mat4 view(1.0f);
+    view = camera.getViewMatrix();
+    wgpuQueueWriteBuffer(renderer.getQueue(), getUniformBuffer(), offsetof(MyUniforms, viewMatrix), &view, sizeof(glm::mat4));
+
+    // update modelMatrix
+    glm::mat4 model(1.0f);
+    model = glm::translate(model, glm::vec3(mPosition[0], mPosition[1], mPosition[2]));
+    model = glm::rotate(model, glm::radians(mRotation[0]), glm::vec3(1.0f, 0.0f, 0.0f));
+    model = glm::rotate(model, glm::radians(mRotation[1]), glm::vec3(0.0f, 1.0f, 0.0f));
+    model = glm::rotate(model, glm::radians(mRotation[2]), glm::vec3(0.0f, 0.0f, 1.0f));
+    model = glm::scale(model, glm::vec3(mScale[0], mScale[1], mScale[2]));
+    wgpuQueueWriteBuffer(renderer.getQueue(), getUniformBuffer(), offsetof(MyUniforms, modelMatrix), &model, sizeof(glm::mat4));
+
+    // update color
+    wgpuQueueWriteBuffer(renderer.getQueue(), getUniformBuffer(), offsetof(MyUniforms, color), &mColor, sizeof(glm::vec4));
 }
 
-void Object::setColor(const glm::vec4& color)
+
+void Object::setPosition(float x, float y, float z)
 {
-    Renderer2& renderer = Application::get().getRenderer();
-    mUniform.color = color;
-    wgpuQueueWriteBuffer(renderer.getQueue(), mUniformBuffer, offsetof(MyUniforms, color), &mUniform.color, sizeof(glm::vec4));
+    mPosition[0] = x;
+    mPosition[1] = y;
+    mPosition[2] = z;
+}
+
+void Object::setColor(float r, float g, float b, float a)
+{
+    mColor[0] = r;
+    mColor[1] = g;
+    mColor[2] = b;
+    mColor[3] = a;
 }

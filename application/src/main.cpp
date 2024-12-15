@@ -12,30 +12,45 @@ int main()
         Application app;
         app.init();
 
-        Scene teste("Cena de teste");
-
-        app.setCurrentScene(teste);
+        Scene scene1("Tópico 1");
         Object obj1("Sphere + Vector", "C:/Dev/eletromag/application/resources/sphere_with_vector.obj");
         Object obj2("Vector", "C:/Dev/eletromag/application/resources/arrow.obj");
         Object obj3("Electron", "C:/Dev/eletromag/application/resources/electron.obj");
         Object obj4("Field", "C:/Dev/eletromag/application/resources/field.obj");
 
-        obj1.setPosition(glm::vec3(0.0f, 0.0f, 0.0f));
-        obj1.setColor(glm::vec4(0.0f, 0.0f, 1.0f, 1.0f));
+        obj1.setPosition(0.0f, 0.0f, 0.0f);
+        obj1.setColor(0.0f, 0.0f, 1.0f, 1.0f);
+        obj2.setPosition(15.0f, 0.0f, -15.0f);
+        obj2.setColor(0.0f, 1.0f, 0.0f, 1.0f);
+        obj3.setPosition(30.0f, 0.0f, -30.0f);
+        obj3.setColor(0.2f, 0.6f, 1.0f, 1.0f);
+        obj4.setPosition(-45.0f, 0.0f, -45.0f);
+        obj4.setColor(1.0f, 0.0f, 0.0f, 1.0f);
 
-        obj2.setPosition(glm::vec3(15.0f, 0.0f, -15.0f));
-        obj2.setColor(glm::vec4(0.0f, 1.0f, 0.0f, 1.0f));
+        scene1.addObject(obj1);
+        scene1.addObject(obj2);
+        scene1.addObject(obj3);
+        scene1.addObject(obj4);
 
-        obj3.setPosition(glm::vec3(30.0f, 0.0f, -30.0f));
-        obj3.setColor(glm::vec4(0.2f, 0.6f, 1.0f, 1.0f));
+        app.insertScene(scene1);
 
-        obj4.setPosition(glm::vec3(-45.0f, 0.0f, -45.0f));
-        obj4.setColor(glm::vec4(1.0f, 0.0f, 0.0f, 1.0f));
+        Scene scene2("Tópico 2");
 
-        app.mCurrentScene->addObject(obj1);
-        app.mCurrentScene->addObject(obj2);
-        app.mCurrentScene->addObject(obj3);
-        app.mCurrentScene->addObject(obj4);
+        obj1.setPosition(0.0f, 0.0f, 0.0f);
+        obj1.setColor(0.0f, 0.0f, 0.0f, 1.0f);
+        obj2.setPosition(15.0f, 0.0f, -5.0f);
+        obj2.setColor(0.0f, 1.0f, 0.0f, 1.0f);
+        obj3.setPosition(12.0f, 0.0f, -3.0f);
+        obj3.setColor(0.2f, 0.1f, 1.0f, 1.0f);
+        obj4.setPosition(-4.0f, 2.0f, -4.0f);
+        obj4.setColor(1.0f, 0.0f, 1.0f, 1.0f);
+
+        scene2.addObject(obj1);
+        scene2.addObject(obj2);
+        scene2.addObject(obj3);
+        scene2.addObject(obj4);
+        
+        app.insertScene(scene2);
       
 
         app.pushLayer(new ImGuiLayer());

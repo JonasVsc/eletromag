@@ -70,7 +70,7 @@ void Renderer2::render(Scene& scene, LayerStack& layerStack)
     // ----------
     for (Object& obj : scene.mObjects)
     {
-        wgpuQueueWriteBuffer(mQueue, obj.getUniformBuffer(), offsetof(MyUniforms, viewMatrix), &view, sizeof(glm::mat4));
+        obj.update();
 
         wgpuRenderPassEncoderSetPipeline(renderPass, obj.getRenderPipeline());
 
@@ -290,7 +290,7 @@ WGPUTextureView Renderer2::getNextSurfaceTextureView()
 
 void Renderer2::processCameraMovement()
 {
-    float speed = 5.5f * Application::deltaTime;
+    float speed = 7.5f * Application::deltaTime;
 
     Application& app = Application::get();
     Camera& camera = app.getMainCamera();

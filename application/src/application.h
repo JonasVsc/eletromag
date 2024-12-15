@@ -34,6 +34,8 @@ public:
 
     void setCurrentScene(Scene& scene);
 
+    void insertScene(const Scene& scene);
+
     static inline Application& get() { return *sInstance; }
 
 private:

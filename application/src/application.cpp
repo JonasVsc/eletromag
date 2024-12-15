@@ -70,10 +70,15 @@ void Application::selectScene(const std::string sceneName)
     }
 }
 
- void Application::setCurrentScene(Scene& scene) 
- { 
-    mCurrentScene = &scene; 
- }
+void Application::setCurrentScene(Scene& scene) 
+{ 
+mCurrentScene = &scene; 
+}
+
+void Application::insertScene(const Scene& scene)
+{
+    mScenes.insert(std::make_pair(scene.mDebugName, scene));
+}
 
 
 
