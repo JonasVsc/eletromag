@@ -20,8 +20,62 @@ void Renderer2::init()
     initDevice();
     initSwapChain();
     initDepthBuffer();
-    mPipeline.init();
 }
+
+void Renderer2::render()
+{
+    WGPUTextureView nextTexture = getNextSurfaceTextureView();
+    if(!nextTexture)
+        std::cerr << "[ERROR] Failed to acquire next swap chain texture" << '\n';
+    
+    WGPUCommandEncoder commandEncoder = wgpuDeviceCreateCommandEncoder(mDevice, nullptr);
+    if(!commandEncoder)
+        std::cerr << "[ERROR] Failed to create Command Encoder" << '\n';    
+
+    WGPURenderPassDescriptor renderPassDesc{};
+
+    WGPURenderPassColorAttachment renderPassColorAttachment{};
+    renderPassColorAttachment.view = nextTexture;
+    renderPassColorAttachment.loadOp = WGPULoadOp_Clear;
+	renderPassColorAttachment.storeOp = WGPUStoreOp_Store;
+    renderPassColorAttachment.clearValue = WGPUColor{ 0.3, 0.3, 1.0, 1.0 };
+    renderPassColorAttachment.depthSlice = WGPU_DEPTH_SLICE_UNDEFINED;
+	renderPassDesc.colorAttachmentCount = 1;
+	renderPassDesc.colorAttachments = &renderPassColorAttachment;
+
+    WGPURenderPassDepthStencilAttachment depthStencilAttachment{};
+    depthStencilAttachment.view = mDepthTextureView;
+	depthStencilAttachment.depthClearValue = 1.0f;
+	depthStencilAttachment.depthLoadOp = WGPULoadOp_Clear;
+	depthStencilAttachment.depthStoreOp = WGPUStoreOp_Store;
+	depthStencilAttachment.depthReadOnly = false;
+	depthStencilAttachment.stencilClearValue = 0;
+	depthStencilAttachment.stencilLoadOp = WGPULoadOp_Undefined;
+	depthStencilAttachment.stencilStoreOp = WGPUStoreOp_Undefined;
+	depthStencilAttachment.stencilReadOnly = true;
+
+    renderPassDesc.depthStencilAttachment = &depthStencilAttachment;
+
+    WGPURenderPassEncoder renderPass = wgpuCommandEncoderBeginRenderPass(commandEncoder, &renderPassDesc);
+    
+    Application& app = Application::get();
+    Pipeline& pipeline = app.getPipeline();
+
+    wgpuRenderPassEncoderSetPipeline(renderPass, pipeline.getRenderPipeline());
+
+    // draw
+
+    wgpuRenderPassEncoderEnd(renderPass);
+    wgpuRenderPassEncoderRelease(renderPass);
+
+    WGPUCommandBuffer commandBuffer = wgpuCommandEncoderFinish(commandEncoder, nullptr);
+    wgpuCommandEncoderRelease(commandEncoder);
+
+    wgpuQueueSubmit(mQueue, 1, &commandBuffer);
+    wgpuTextureViewRelease(nextTexture);
+
+}
+
 
 void Renderer2::terminate()
 {
@@ -178,4 +232,31 @@ WGPURequiredLimits Renderer2::checkAdapterCapabilities(WGPUAdapter adapter)
 	requiredLimits.limits.maxSamplersPerShaderStage = 1;
     return requiredLimits;
 }
+
+WGPUTextureView Renderer2::getNextSurfaceTextureView()
+{
+    
+
+	WGPUSurfaceTexture surfaceTexture;
+	wgpuSurfaceGetCurrentTexture(mSurface, &surfaceTexture);
+	if (surfaceTexture.status != WGPUSurfaceGetCurrentTextureStatus_Success)
+		return nullptr;
+
+	WGPUTextureViewDescriptor viewDescriptor;
+	viewDescriptor.nextInChain = nullptr;
+	viewDescriptor.label = "Surface texture view";
+	viewDescriptor.format = wgpuTextureGetFormat(surfaceTexture.texture);
+	viewDescriptor.dimension = WGPUTextureViewDimension_2D;
+	viewDescriptor.baseMipLevel = 0;
+	viewDescriptor.mipLevelCount = 1;
+	viewDescriptor.baseArrayLayer = 0;
+	viewDescriptor.arrayLayerCount = 1;
+	viewDescriptor.aspect = WGPUTextureAspect_All;
+	WGPUTextureView targetView = wgpuTextureCreateView(surfaceTexture.texture, &viewDescriptor);
+
+	wgpuTextureRelease(surfaceTexture.texture);
+
+	return targetView;
+}
+
 

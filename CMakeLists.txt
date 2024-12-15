@@ -37,6 +37,9 @@ add_executable(ElectroApp
     "application/src/layer-stack.h"
     "application/src/layer-stack.cpp"
 
+    "application/src/imgui-layer.h"
+    "application/src/imgui-layer.cpp"
+
     "application/src/wgpu-pipeline.h"
     "application/src/wgpu-pipeline.cpp"
     

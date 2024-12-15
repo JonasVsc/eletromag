@@ -16,6 +16,8 @@ public:
 
     void terminate();
 
+    inline WGPURenderPipeline getRenderPipeline() { return mRenderPipeline; }
+
 private:
 
     void initAndLoadShaders();

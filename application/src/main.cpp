@@ -4,12 +4,16 @@
 #include <exception>
 #include <iostream>
 
+#include "imgui-layer.h"
+
 int main() 
 {
     try 
     {
         Application app;
         app.init();
+
+        app.pushLayer(new ImGuiLayer());
 
         auto callback = [](void* arg) 
         {

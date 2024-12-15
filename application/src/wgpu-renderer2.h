@@ -29,6 +29,8 @@ public:
 
     void init();
 
+    void render();
+
     void terminate();
 
     static inline Renderer2& get() { return *sInstance; }
@@ -47,11 +49,9 @@ private:
 
     void initDepthBuffer();
 
-    // function checkDeviceCapabilities
-    // input adapter
-    // return WGPURequiredLimits
-
     static WGPURequiredLimits checkAdapterCapabilities(WGPUAdapter adapter);
+
+    WGPUTextureView getNextSurfaceTextureView();
 
 private:
 
@@ -65,8 +65,6 @@ private:
     WGPUTexture mDepthDexture;
     WGPUTextureView mDepthTextureView;
     WGPUTextureFormat mDepthTextureFormat = WGPUTextureFormat_Depth24Plus;
-
-    Pipeline mPipeline;
 
     static Renderer2* sInstance;
 

@@ -14,12 +14,15 @@ void Application::init()
 {
     mWindow.init();
     mRenderer.init();
+    mPipeline.init();
 }
 
 void Application::run()
 {
     while (true)
     {
+        mRenderer.render();
+
         mWindow.update();
         
         emscripten_sleep(10);
