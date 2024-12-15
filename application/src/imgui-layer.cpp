@@ -21,8 +21,6 @@ ImGuiLayer::~ImGuiLayer()
 
 void ImGuiLayer::onAttach()
 {
-    std::cout << "ImGuiLayer Attached!" << '\n';
-
     Application& app = Application::get();
     Renderer2& renderer = app.getRenderer();
     GLFWwindow* window = static_cast<GLFWwindow*>(app.getWindow().getNativeWindow());
@@ -136,7 +134,6 @@ void ImGuiLayer::objectTreeGUI()
             if(ImGui::Selectable(scene->mObjects.at(i).getDebugName().c_str(), isSelected))
             {
                 selected = i;
-                std::cout << "Selecionado: " << scene->mObjects.at(selected).getDebugName() << std::endl;
             }
         }
 

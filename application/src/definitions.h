@@ -18,4 +18,3 @@ struct MyUniforms {
 static_assert(sizeof(MyUniforms) % 16 == 0);
 
 constexpr float PI = 3.14159265358979323846f;
-

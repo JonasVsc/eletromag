@@ -5,6 +5,8 @@
 #include <iostream>
 #include "imgui-layer.h"
 
+#include "definitions.h"
+
 int main() 
 {
     try 
@@ -12,45 +14,24 @@ int main()
         Application app;
         app.init();
 
+        Object eletron("Eletron", "C:/Dev/eletromag/application/resources/sphere_with_vector.obj");
+        eletron.setPosition(0.0f, 0.0f, 0.0f);
+        eletron.setColor(0.0f, 0.0f, 1.0f, 1.0f);
+        
+        Object vector("Vector", "C:/Dev/eletromag/application/resources/arrow.obj");
+        vector.setPosition(0.0f, 0.0f, 0.0f);
+        vector.setColor(0.0f, 1.0f, 0.0f, 1.0f);
+
+        Object field("Magnectic Field", "C:/Dev/eletromag/application/resources/field.obj");
+        field.setPosition(0.0f, 0.0f, 0.0f);
+        field.setColor(1.0f, 0.0f, 0.0f, 1.0f);
+
         Scene scene1("Tópico 1");
-        Object obj1("Sphere + Vector", "C:/Dev/eletromag/application/resources/sphere_with_vector.obj");
-        Object obj2("Vector", "C:/Dev/eletromag/application/resources/arrow.obj");
-        Object obj3("Electron", "C:/Dev/eletromag/application/resources/electron.obj");
-        Object obj4("Field", "C:/Dev/eletromag/application/resources/field.obj");
-
-        obj1.setPosition(0.0f, 0.0f, 0.0f);
-        obj1.setColor(0.0f, 0.0f, 1.0f, 1.0f);
-        obj2.setPosition(15.0f, 0.0f, -15.0f);
-        obj2.setColor(0.0f, 1.0f, 0.0f, 1.0f);
-        obj3.setPosition(30.0f, 0.0f, -30.0f);
-        obj3.setColor(0.2f, 0.6f, 1.0f, 1.0f);
-        obj4.setPosition(-45.0f, 0.0f, -45.0f);
-        obj4.setColor(1.0f, 0.0f, 0.0f, 1.0f);
-
-        scene1.addObject(obj1);
-        scene1.addObject(obj2);
-        scene1.addObject(obj3);
-        scene1.addObject(obj4);
-
+        scene1.addObject(eletron);
+        scene1.addObject(vector);
+        scene1.addObject(field);
         app.insertScene(scene1);
 
-        Scene scene2("Tópico 2");
-
-        obj1.setPosition(0.0f, 0.0f, 0.0f);
-        obj1.setColor(0.0f, 0.0f, 0.0f, 1.0f);
-        obj2.setPosition(15.0f, 0.0f, -5.0f);
-        obj2.setColor(0.0f, 1.0f, 0.0f, 1.0f);
-        obj3.setPosition(12.0f, 0.0f, -3.0f);
-        obj3.setColor(0.2f, 0.1f, 1.0f, 1.0f);
-        obj4.setPosition(-4.0f, 2.0f, -4.0f);
-        obj4.setColor(1.0f, 0.0f, 1.0f, 1.0f);
-
-        scene2.addObject(obj1);
-        scene2.addObject(obj2);
-        scene2.addObject(obj3);
-        scene2.addObject(obj4);
-        
-        app.insertScene(scene2);
       
 
         app.pushLayer(new ImGuiLayer());

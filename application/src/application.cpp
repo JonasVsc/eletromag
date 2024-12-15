@@ -11,7 +11,7 @@ double Application::lastFrame = 0.0f;
 ///////////////////////////////////////////////////////////////////////////
 
 Application::Application()
-    : mCurrentScene(new Scene("Default"))
+    : mCurrentScene(new Scene("None"))
 {
     sInstance = this;
 	mWindow.create(1280, 720, "WebGPU");
