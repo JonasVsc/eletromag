@@ -20,7 +20,7 @@ struct MyUniforms {
 		float intensity;
         float mass;
 		float _pad1[2];
-	};
+};
 
 
 

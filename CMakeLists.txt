@@ -16,12 +16,6 @@ add_executable(ElectroApp
     "application/src/window.h"
     "application/src/window.cpp"
 
-    "application/src/wgpu-renderer.h"
-    "application/src/wgpu-renderer.cpp"
-
-    "application/src/wgpu-renderer2.h"
-    "application/src/wgpu-renderer2.cpp"
-
     "application/src/resource-manager.h"
     "application/src/resource-manager.cpp"
 
@@ -42,6 +36,12 @@ add_executable(ElectroApp
 
     "application/src/layer-stack.h"
     "application/src/layer-stack.cpp"
+
+    "application/src/wgpu-pipeline.h"
+    "application/src/wgpu-pipeline.cpp"
+    
+    "application/src/wgpu-renderer2.h"
+    "application/src/wgpu-renderer2.cpp"
 )
 
 add_subdirectory("application/vendor/glm")

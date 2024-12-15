@@ -24,14 +24,14 @@ constexpr float PI = 3.14159265358979323846f;
 
 void Renderer::init()
 {
-    initDevice();
-    initSwapChain();
-    initDepthBuffer();
+    initDevice(); // mantain
+    initSwapChain(); // mantain
+    initDepthBuffer(); // mantain
     initRenderPipeline();
     initGeometry();
-    initUniforms();
-    initBindGroup();
-    initGui();
+    initUniforms(); // mantain
+    initBindGroup(); // mantain
+    initGui(); // mantain but i will remove
 }
 
 void Renderer::render()
@@ -316,11 +316,14 @@ void Renderer::initDepthBuffer()
 
 void Renderer::initRenderPipeline()
 {
+    // INIT SHADER MODULES
     mShaderModule = ResourceManager::loadShaderModule("C:/Dev/eletromag/application/resources/shader.wgsl", mDevice);
     if(mShaderModule == nullptr)
         throw std::runtime_error("failed to load shader module.");
 
     WGPURenderPipelineDescriptor pipelineDesc{};
+
+    // INIT VERTEX ATTRIBUTES
 
     std::vector<WGPUVertexAttribute> vertexAttribs(3);
 
@@ -378,6 +381,8 @@ void Renderer::initRenderPipeline()
     fragmentState.targetCount = 1;
     fragmentState.targets = &colorTarget;
     
+    // INIT DEPTH STENCIL
+
     WGPUDepthStencilState depthStencilState{};
     depthStencilState.format = mDepthTextureFormat;
     depthStencilState.depthWriteEnabled = true;

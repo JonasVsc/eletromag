@@ -5,17 +5,30 @@
 #include "webgpu-utils.h"
 #include "resource-manager.h"
 
+
+
+Renderer2* Renderer2::sInstance = nullptr;
+
 ////////////////////////////////////////////////////////////////////////////
 // Public Methods //////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////
 
 void Renderer2::init()
 {
+    sInstance = this;
+
     initDevice();
+    initSwapChain();
+    initDepthBuffer();
+    mPipeline.init();
 }
 
 void Renderer2::terminate()
 {
+    // terminate swapChain
+    // -------------------
+    wgpuSwapChainRelease(mSwapChain);
+
     // terminate device
     // ----------------
     wgpuQueueRelease(mQueue);
@@ -89,6 +102,59 @@ void Renderer2::initDevice()
     mQueue = wgpuDeviceGetQueue(mDevice);
     wgpuAdapterRelease(adapter);
 }
+
+void Renderer2::initSwapChain()
+{
+    Application& app = Application::get();
+    GLFWwindow* window = static_cast<GLFWwindow*>(app.getWindow().getNativeWindow());
+	int width, height;
+	glfwGetFramebufferSize(window, &width, &height);
+
+	WGPUSwapChainDescriptor swapChainDesc;
+	swapChainDesc.width = static_cast<uint32_t>(width);
+	swapChainDesc.height = static_cast<uint32_t>(height);
+	swapChainDesc.usage = WGPUTextureUsage_RenderAttachment;
+	swapChainDesc.format = mSwapChainFormat;
+	swapChainDesc.presentMode = WGPUPresentMode_Fifo;
+	mSwapChain = wgpuDeviceCreateSwapChain(mDevice, mSurface, &swapChainDesc);
+	std::cout << "[INFO] Swapchain: " << mSwapChain << std::endl;
+}
+
+void Renderer2::initDepthBuffer()
+{
+    WGPUTextureDescriptor depthTextureDesc{};
+    depthTextureDesc.dimension = WGPUTextureDimension_2D;
+    depthTextureDesc.format = mDepthTextureFormat;
+    depthTextureDesc.mipLevelCount = 1;
+    depthTextureDesc.sampleCount = 1;
+    depthTextureDesc.size = { 1280, 720, 1 };
+    depthTextureDesc.usage = WGPUTextureUsage_RenderAttachment;
+    depthTextureDesc.viewFormatCount = 1;
+    depthTextureDesc.viewFormats = &mDepthTextureFormat;
+    mDepthDexture = wgpuDeviceCreateTexture(mDevice, &depthTextureDesc);
+	std::cout << "[INFO] Depth texture: " << mDepthDexture << std::endl;
+
+    WGPUTextureViewDescriptor depthTextureViewDesc{};
+    depthTextureViewDesc.aspect = WGPUTextureAspect_DepthOnly;
+	depthTextureViewDesc.baseArrayLayer = 0;
+	depthTextureViewDesc.arrayLayerCount = 1;
+	depthTextureViewDesc.baseMipLevel = 0;
+	depthTextureViewDesc.mipLevelCount = 1;
+	depthTextureViewDesc.dimension = WGPUTextureViewDimension_2D;
+	depthTextureViewDesc.format = mDepthTextureFormat;
+    mDepthTextureView = wgpuTextureCreateView(mDepthDexture, &depthTextureViewDesc);
+	std::cout << "[INFO] Depth texture view: " << mDepthTextureView << std::endl;
+
+    if(mDepthTextureView == nullptr)
+        throw std::runtime_error("[ERROR] failed to create depth texture view");
+}
+
+
+
+////////////////////////////////////////////////////////////////////////////
+// Utility Methods /////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
+
 
 WGPURequiredLimits Renderer2::checkAdapterCapabilities(WGPUAdapter adapter)
 {
