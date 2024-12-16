@@ -125,7 +125,6 @@ void ImGuiLayer::objectTreeGUI()
         selected = -1;
         previousScene = scene;
     }
-    ImGui::Text("Objetos");
     if(ImGui::BeginListBox(("##" + scene->getDebugName()).c_str(), ImVec2(-1, listBoxHeight))) 
     {
         for(size_t i = 0; i < scene->mObjects.size(); i++)

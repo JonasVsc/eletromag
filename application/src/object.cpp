@@ -202,7 +202,6 @@ void Object::physicsUpdate()
         return;
 
     // physics update
-    std::cout << "using physics!" << '\n';   
 }
 
 
