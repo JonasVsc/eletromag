@@ -1,10 +1,12 @@
 #pragma once
 
 #include "definitions.h"
+#include "physics.h"
 
 #include <webgpu/webgpu.h>
 #include <filesystem>
 #include <iostream>
+
 
 class Object
 {

@@ -48,6 +48,9 @@ add_executable(ElectroApp
 
     "application/src/scene.h"
     "application/src/scene.cpp"
+
+    "application/src/physics.h"
+    "application/src/physics.cpp"
 )
 
 add_subdirectory("application/vendor/glm")
