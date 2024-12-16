@@ -7,6 +7,8 @@
 
 #include "definitions.h"
 
+#include "eletron.h"
+
 int main() 
 {
     try 
@@ -14,26 +16,9 @@ int main()
         Application app;
         app.init();
 
-        Object eletron("Eletron", "C:/Dev/eletromag/application/resources/sphere_with_vector.obj");
-        eletron.setPosition(0.0f, 0.0f, 0.0f);
-        eletron.setColor(0.0f, 0.0f, 1.0f, 1.0f);
-        
-        Object vector("Vector", "C:/Dev/eletromag/application/resources/arrow.obj");
-        vector.setPosition(0.0f, 0.0f, 0.0f);
-        vector.setColor(0.0f, 1.0f, 0.0f, 1.0f);
-
-        Object field("Magnectic Field", "C:/Dev/eletromag/application/resources/field.obj");
-        field.setPosition(0.0f, 0.0f, 0.0f);
-        field.setColor(1.0f, 0.0f, 0.0f, 1.0f);
-
-        Scene topico1("Tópico 1");
-        topico1.addObject(eletron);
-        topico1.addObject(vector);
-        topico1.addObject(field);
-        app.insertScene(topico1);
-
         Scene teste1("TESTE 1");
-        teste1.addObject(eletron);
+
+        teste1.addObject(new Charge("Charge", "C:/Dev/eletromag/application/resources/sphere_with_vector.obj"));
         app.insertScene(teste1);
 
       

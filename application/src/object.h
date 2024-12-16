@@ -56,7 +56,7 @@ public:
     float mInitialVelocityDirection[3] {0.0f, 0.0f, 0.0f};
     float mInitialVelocity = 0.0f;
 
-private:
+protected:
 
     WGPUShaderModule mShaderModule;
 

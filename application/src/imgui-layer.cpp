@@ -130,7 +130,7 @@ void ImGuiLayer::objectTreeGUI()
         for(size_t i = 0; i < scene->mObjects.size(); i++)
         {
             const bool isSelected = (selected == i);
-            if(ImGui::Selectable(scene->mObjects.at(i).getDebugName().c_str(), isSelected))
+            if(ImGui::Selectable(scene->mObjects.at(i)->getDebugName().c_str(), isSelected))
             {
                 selected = i;
             }
@@ -144,15 +144,15 @@ void ImGuiLayer::objectTreeGUI()
     if(selected != -1)
     {
         auto& obj = scene->mObjects.at(selected);
-        auto objLabel = obj.getDebugName();
+        auto objLabel = obj->getDebugName();
         auto Id = "##" + objLabel;
 
         ImGui::Text("Propriedades");
         ImGui::SetNextItemOpen(true, ImGuiCond_Once);
 
-        float(&position)[3] = !Application::get().mRunningSimulation ? obj.mInitialPosition : obj.mPosition;
-        float(&rotation)[3] = !Application::get().mRunningSimulation ? obj.mInitialRotation : obj.mRotation;
-        float(&scale)[3] = !Application::get().mRunningSimulation ? obj.mInitialScale : obj.mScale;
+        float(&position)[3] = !Application::get().mRunningSimulation ? obj->mInitialPosition : obj->mPosition;
+        float(&rotation)[3] = !Application::get().mRunningSimulation ? obj->mInitialRotation : obj->mRotation;
+        float(&scale)[3] = !Application::get().mRunningSimulation ? obj->mInitialScale : obj->mScale;
 
         if(ImGui::TreeNode("Transform"))
         {
@@ -168,15 +168,15 @@ void ImGuiLayer::objectTreeGUI()
         if(ImGui::TreeNode("Material"))
         {
             ImGui::Text("Color:");
-            ImGui::ColorEdit4((Id + "Color").c_str(), (float*)&obj.mInitialColor);
+            ImGui::ColorEdit4((Id + "Color").c_str(), (float*)&obj->mInitialColor);
             ImGui::TreePop();
         }
 
         if(ImGui::TreeNode("Physics"))
         {
             ImGui::Text("Velocity:");
-            ImGui::DragFloat((Id + "Scale").c_str(), (float*)&obj.mInitialVelocity, 0.1);
-            ImGui::DragFloat3((Id + "Scale").c_str(), obj.mInitialVelocityDirection, 0.1);
+            ImGui::DragFloat((Id + "Scale").c_str(), (float*)&obj->mInitialVelocity, 0.1);
+            ImGui::DragFloat3((Id + "Scale").c_str(), obj->mInitialVelocityDirection, 0.1);
 
             ImGui::TreePop();
         }

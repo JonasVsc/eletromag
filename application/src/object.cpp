@@ -229,6 +229,7 @@ void Object::physicsUpdate()
     }
 
     // physics update
+    std::cout << "physics update object!" << '\n';
 }
 
 

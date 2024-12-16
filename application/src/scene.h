@@ -16,13 +16,13 @@ public:
 
     virtual ~Scene() = default;
 
-    void addObject(Object& obj);
+    void addObject(Object* obj);
 
     virtual void load() {};
 
     inline std::string getDebugName() { return mDebugName; }
 
-    std::vector<Object> mObjects;
+    std::vector<Object*> mObjects;
 
     std::string mDebugName;
 
