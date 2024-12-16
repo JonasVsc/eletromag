@@ -8,6 +8,9 @@
 
 #include <array>
 
+#include "eletron.h"
+#include "field.h"
+
 
 ImGuiLayer::ImGuiLayer()
     : Layer("ImGuiLayer")
@@ -154,34 +157,75 @@ void ImGuiLayer::objectTreeGUI()
         float(&rotation)[3] = !Application::get().mRunningSimulation ? obj->mInitialRotation : obj->mRotation;
         float(&scale)[3] = !Application::get().mRunningSimulation ? obj->mInitialScale : obj->mScale;
 
-        if(ImGui::TreeNode("Transform"))
+        switch (obj->getType())
         {
-            ImGui::Text("Position:");
-            ImGui::DragFloat3((Id + "Position").c_str(), position, 0.1);
-            ImGui::Text("Rotation:");
-            ImGui::DragFloat3((Id + "Rotation").c_str(), rotation, 0.1);
-            ImGui::Text("Scale:");
-            ImGui::DragFloat3((Id + "Scale").c_str(), scale, 0.1);
-            ImGui::TreePop();
-        }
+            case Object::Type::Eletron:
+            {
+                if(ImGui::TreeNode("Transform"))
+                {
+                    ImGui::Text("Position:");
+                    ImGui::DragFloat3((Id + "Position").c_str(), position, 0.1);
+                    ImGui::Text("Rotation:");
+                    ImGui::DragFloat3((Id + "Rotation").c_str(), rotation, 0.1);
+                    ImGui::Text("Scale:");
+                    ImGui::DragFloat3((Id + "Scale").c_str(), scale, 0.1);
+                    ImGui::TreePop();
+                }
+                if(ImGui::TreeNode("Physics"))
+                {
+                    ImGui::Text("Velocity Speed (m/s):");
+                    ImGui::DragFloat((Id + "Scale").c_str(), (float*)&obj->mInitialVelocity, 0.1);
+                    ImGui::Text("Direction:");
+                    ImGui::DragFloat3((Id + "Scale").c_str(), obj->mInitialVelocityDirection, 0.1);
+                    static bool dummy = false;
+                    if(ImGui::Checkbox("Show debug vector", &dummy))
+                    {
+                        // TODO: show and hide velocity direction vector
+                    }
 
-        if(ImGui::TreeNode("Material"))
-        {
-            ImGui::Text("Color:");
-            ImGui::ColorEdit4((Id + "Color").c_str(), (float*)&obj->mInitialColor);
-            ImGui::TreePop();
-        }
+                    ImGui::TreePop();
+                }
+                break;
+            }
+            case Object::Type::Field:
+            {
+                if(ImGui::TreeNode("Transform"))
+                {
+                    ImGui::Text("Position:");
+                    ImGui::DragFloat3((Id + "Position").c_str(), position, 0.1);
+                    ImGui::Text("Rotation:");
+                    ImGui::DragFloat3((Id + "Rotation").c_str(), rotation, 0.1);
+                    ImGui::Text("Scale:");
+                    ImGui::DragFloat3((Id + "Scale").c_str(), scale, 0.1);
+                    ImGui::TreePop();
+                }
+                if(ImGui::TreeNode("Physics"))
+                {
+                    Field* field = reinterpret_cast<Field*>(obj);
+                    ImGui::Text("Intensity (T):");
+                    ImGui::DragFloat((Id + "Scale").c_str(), (float*)&field->mIntensity, 0.1);
+                    ImGui::DragFloat3((Id + "Scale").c_str(), obj->mInitialVelocityDirection, 0.1);
 
-        if(ImGui::TreeNode("Physics"))
-        {
-            ImGui::Text("Velocity:");
-            ImGui::DragFloat((Id + "Scale").c_str(), (float*)&obj->mInitialVelocity, 0.1);
-            ImGui::DragFloat3((Id + "Scale").c_str(), obj->mInitialVelocityDirection, 0.1);
-
-            ImGui::TreePop();
+                    ImGui::TreePop();
+                }
+                break;
+            }
+            case Object::Type::None:
+            {
+                if(ImGui::TreeNode("Transform"))
+                {
+                    ImGui::Text("Position:");
+                    ImGui::DragFloat3((Id + "Position").c_str(), position, 0.1);
+                    ImGui::Text("Rotation:");
+                    ImGui::DragFloat3((Id + "Rotation").c_str(), rotation, 0.1);
+                    ImGui::Text("Scale:");
+                    ImGui::DragFloat3((Id + "Scale").c_str(), scale, 0.1);
+                    ImGui::TreePop();
+                }
+                break;
+            }
         }
     }
-
     ImGui::End();
 }
 

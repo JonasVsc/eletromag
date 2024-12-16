@@ -12,6 +12,10 @@ class Object
 {
 public:
 
+    enum class Type { Field, Eletron, None };
+
+    virtual Type getType() const { return Type::None; }
+
     Object(std::string debugName, const std::filesystem::path& path);
 
     void initRenderPipeline();

@@ -9,6 +9,8 @@ class Charge : public Object
 
 public:
 
+    Type getType() const override { return Type::Eletron; }
+
     Charge(std::string debugName, const std::filesystem::path& path)
         : Object(debugName, path)
     {

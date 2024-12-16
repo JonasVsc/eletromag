@@ -10,6 +10,8 @@ public:
 
     float mIntensity;
 
+    Type getType() const override { return Type::Field; }
+
     Field(std::string debugName, const std::filesystem::path& path)
         : Object(debugName, path)
     {
