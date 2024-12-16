@@ -18,9 +18,11 @@ public:
 
     void initBuffers(const std::filesystem::path& path);
 
+    void reset();
+
     void update();
 
-    void physicsUpdate();
+    virtual void physicsUpdate();
 
     void setPosition(float x, float y, float z);
 
@@ -45,6 +47,15 @@ public:
     float mVelocityDirection[3] {0.0f, 0.0f, 0.0f};
     float mVelocity = 0.0f;
 
+    float mInitialPosition[3] {0.0f, 0.0f, 0.0f};
+    float mInitialRotation[3] {0.0f, 0.0f, 0.0f};
+    float mInitialScale[3] {1.0f, 1.0f, 1.0f};
+
+    float mInitialColor[4] {0.5f, 0.5f, 0.5f, 1.0f};
+
+    float mInitialVelocityDirection[3] {0.0f, 0.0f, 0.0f};
+    float mInitialVelocity = 0.0f;
+
 private:
 
     WGPUShaderModule mShaderModule;
@@ -65,5 +76,6 @@ private:
 
     std::string mDebugName;
 
+    
 
 };

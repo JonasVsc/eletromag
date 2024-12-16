@@ -6,7 +6,7 @@
 #include <backends/imgui_impl_wgpu.h>
 #include <backends/imgui_impl_glfw.h>
 
-#include <optional>
+#include <array>
 
 
 ImGuiLayer::ImGuiLayer()
@@ -150,29 +150,33 @@ void ImGuiLayer::objectTreeGUI()
         ImGui::Text("Propriedades");
         ImGui::SetNextItemOpen(true, ImGuiCond_Once);
 
+        float(&position)[3] = !Application::get().mRunningSimulation ? obj.mInitialPosition : obj.mPosition;
+        float(&rotation)[3] = !Application::get().mRunningSimulation ? obj.mInitialRotation : obj.mRotation;
+        float(&scale)[3] = !Application::get().mRunningSimulation ? obj.mInitialScale : obj.mScale;
+
         if(ImGui::TreeNode("Transform"))
         {
             ImGui::Text("Position:");
-            ImGui::DragFloat3((Id + "Position").c_str(), obj.mPosition, 0.1);
+            ImGui::DragFloat3((Id + "Position").c_str(), position, 0.1);
             ImGui::Text("Rotation:");
-            ImGui::DragFloat3((Id + "Rotation").c_str(), obj.mRotation, 0.1);
+            ImGui::DragFloat3((Id + "Rotation").c_str(), rotation, 0.1);
             ImGui::Text("Scale:");
-            ImGui::DragFloat3((Id + "Scale").c_str(), obj.mScale, 0.1);
+            ImGui::DragFloat3((Id + "Scale").c_str(), scale, 0.1);
             ImGui::TreePop();
         }
 
         if(ImGui::TreeNode("Material"))
         {
             ImGui::Text("Color:");
-            ImGui::ColorEdit4((Id + "Color").c_str(), (float*)&obj.mColor);
+            ImGui::ColorEdit4((Id + "Color").c_str(), (float*)&obj.mInitialColor);
             ImGui::TreePop();
         }
 
         if(ImGui::TreeNode("Physics"))
         {
             ImGui::Text("Velocity:");
-            ImGui::DragFloat((Id + "Scale").c_str(), (float*)&obj.mVelocity, 0.1);
-            ImGui::DragFloat3((Id + "Scale").c_str(), obj.mVelocityDirection, 0.1);
+            ImGui::DragFloat((Id + "Scale").c_str(), (float*)&obj.mInitialVelocity, 0.1);
+            ImGui::DragFloat3((Id + "Scale").c_str(), obj.mInitialVelocityDirection, 0.1);
 
             ImGui::TreePop();
         }

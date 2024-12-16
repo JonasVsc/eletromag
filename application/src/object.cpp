@@ -120,9 +120,6 @@ void Object::initUniformData()
     mUniform.viewMatrix = camera.getViewMatrix();
     mUniform.projectionMatrix = glm::perspective(glm::radians(camera.fov), camera.aspectRatio, camera.nearPlane, camera.farPlane);
     mUniform.color = { 0.0f, 0.0f, 1.0f, 1.0f };
-    mUniform.direction = { 0.0f, 1.0f, 0.0f };
-    mUniform.intensity = 0.0f;
-    mUniform.mass = 0.0f;
 
 }
 
@@ -173,6 +170,33 @@ void Object::initBuffers(const std::filesystem::path& path)
         std::cerr << "[ERROR] Failed to init bind group" << '\n';
 }
 
+void Object::reset()
+{
+    mPosition[0] = mInitialPosition[0];
+    mPosition[1] = mInitialPosition[1];
+    mPosition[2] = mInitialPosition[2];
+
+    mColor[0] = mInitialColor[0];
+    mColor[1] = mInitialColor[1];
+    mColor[2] = mInitialColor[2];
+    mColor[3] = mInitialColor[3];
+
+    mRotation[0] = mInitialRotation[0];
+    mRotation[1] = mInitialRotation[1];
+    mRotation[2] = mInitialRotation[2];
+
+    mScale[0] = mInitialScale[0];
+    mScale[1] = mInitialScale[1];
+    mScale[2] = mInitialScale[2];
+
+    mVelocity = mInitialVelocity;
+
+    mVelocityDirection[0] = mInitialVelocityDirection[0];
+    mVelocityDirection[1] = mInitialVelocityDirection[1];
+    mVelocityDirection[2] = mInitialVelocityDirection[2];
+
+}
+
 void Object::update()
 {
     Renderer2& renderer = Application::get().getRenderer();
@@ -198,8 +222,11 @@ void Object::update()
 
 void Object::physicsUpdate()
 {
-    if(!Application::get().mRunningSimulation)
+    if(!Application::get().mRunningSimulation) // idle
+    {
+        reset();
         return;
+    }
 
     // physics update
 }
@@ -207,15 +234,15 @@ void Object::physicsUpdate()
 
 void Object::setPosition(float x, float y, float z)
 {
-    mPosition[0] = x;
-    mPosition[1] = y;
-    mPosition[2] = z;
+    mInitialPosition[0] = mPosition[0] = x;
+    mInitialPosition[1] = mPosition[1] = y;
+    mInitialPosition[2] = mPosition[2] = z;
 }
 
 void Object::setColor(float r, float g, float b, float a)
 {
-    mColor[0] = r;
-    mColor[1] = g;
-    mColor[2] = b;
-    mColor[3] = a;
+    mInitialColor[0] = mColor[0] = r;
+    mInitialColor[1] = mColor[1] = g;
+    mInitialColor[2] = mColor[2] = b;
+    mInitialColor[3] = mColor[3] = a;
 }
