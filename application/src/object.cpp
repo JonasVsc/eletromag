@@ -222,14 +222,15 @@ void Object::update()
 
 void Object::physicsUpdate()
 {
+    // Stuff you want to run in idle mode
+
     if(!Application::get().mRunningSimulation) // idle
     {
         reset();
         return;
     }
-
-    // physics update
-    std::cout << "physics update object!" << '\n';
+    // Stuff you want to run only in running mode
+    
 }
 
 
@@ -239,6 +240,22 @@ void Object::setPosition(float x, float y, float z)
     mInitialPosition[1] = mPosition[1] = y;
     mInitialPosition[2] = mPosition[2] = z;
 }
+
+void Object::setRotation(float x, float y, float z)
+{
+    mInitialRotation[0] = mRotation[0] = x;
+    mInitialRotation[1] = mRotation[1] = y;
+    mInitialRotation[2] = mRotation[2] = z;
+}
+
+
+void Object::setScale(float x, float y, float z)
+{
+    mInitialScale[0] = mScale[0] = x;
+    mInitialScale[1] = mScale[1] = y;
+    mInitialScale[2] = mScale[2] = z;
+}
+
 
 void Object::setColor(float r, float g, float b, float a)
 {

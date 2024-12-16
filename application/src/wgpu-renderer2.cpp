@@ -70,9 +70,9 @@ void Renderer2::render(Scene& scene, LayerStack& layerStack)
     // ----------
     for (Object* obj : scene.mObjects)
     {
-        obj->update();
-
         obj->physicsUpdate();
+
+        obj->update();
 
         wgpuRenderPassEncoderSetPipeline(renderPass, obj->getRenderPipeline());
 

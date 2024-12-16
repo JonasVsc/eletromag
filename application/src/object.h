@@ -12,7 +12,7 @@ class Object
 {
 public:
 
-    enum class Type { Field, Eletron, None };
+    enum class Type { Field, Eletron, Arrow, None };
 
     virtual Type getType() const { return Type::None; }
 
@@ -31,6 +31,10 @@ public:
     virtual void physicsUpdate();
 
     void setPosition(float x, float y, float z);
+
+    void setRotation(float x, float y, float z);
+
+    void setScale(float x, float y, float z);
 
     void setColor(float r, float g, float b, float a);
 

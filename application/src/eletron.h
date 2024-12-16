@@ -9,6 +9,9 @@ class Charge : public Object
 
 public:
 
+    float mCharge = 0.0f;
+    float mDirection = 0.0f;
+
     Type getType() const override { return Type::Eletron; }
 
     Charge(std::string debugName, const std::filesystem::path& path)
@@ -28,7 +31,6 @@ public:
             return;
         }
 
-        Physics::applyVelocity(this, mVelocityDirection, mVelocity);
 
     }
 

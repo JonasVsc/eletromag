@@ -210,6 +210,20 @@ void ImGuiLayer::objectTreeGUI()
                 }
                 break;
             }
+            case Object::Type::Arrow:
+            {
+                if(ImGui::TreeNode("Transform"))
+                {
+                    ImGui::Text("Position:");
+                    ImGui::DragFloat3((Id + "Position").c_str(), position, 0.1);
+                    ImGui::Text("Rotation:");
+                    ImGui::DragFloat3((Id + "Rotation").c_str(), rotation, 0.1);
+                    ImGui::Text("Scale:");
+                    ImGui::DragFloat3((Id + "Scale").c_str(), scale, 0.1);
+                    ImGui::TreePop();
+                }
+                break;
+            }
             case Object::Type::None:
             {
                 if(ImGui::TreeNode("Transform"))
