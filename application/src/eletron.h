@@ -1,6 +1,7 @@
 #pragma once
 
 #include "object.h"
+#include "field.h"
 
 
 class Charge : public Object
@@ -11,6 +12,8 @@ public:
     Charge(std::string debugName, const std::filesystem::path& path)
         : Object(debugName, path)
     {
+        setColor(0.0f, 0.0f, 1.0f, 1.0f);
+        setPosition(2.5f, 2.0f, -3.0f);
     }
 
     ~Charge() {}
@@ -24,12 +27,6 @@ public:
         }
 
         Physics::applyVelocity(this, mVelocityDirection, mVelocity);
-
-        // glm::vec3 velocityDirection = glm::normalize(glm::vec3(mVelocityDirection[0], mVelocityDirection[1], mVelocityDirection[2]));
-        // mPosition[0] += (float)velocityDirection.x * mVelocity * Application::get().deltaTime;
-        // mPosition[1] += (float)velocityDirection.y * mVelocity * Application::get().deltaTime;
-        // mPosition[2] += (float)velocityDirection.z * mVelocity * Application::get().deltaTime;
-        
 
     }
 

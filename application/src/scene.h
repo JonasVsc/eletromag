@@ -18,6 +18,8 @@ public:
 
     void addObject(Object* obj);
 
+    Object* getObjectByDebugName(const std::string& debugName);
+
     virtual void load() {};
 
     inline std::string getDebugName() { return mDebugName; }

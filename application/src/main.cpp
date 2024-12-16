@@ -8,6 +8,7 @@
 #include "definitions.h"
 
 #include "eletron.h"
+#include "field.h"
 
 int main() 
 {
@@ -18,7 +19,8 @@ int main()
 
         Scene teste1("TESTE 1");
 
-        teste1.addObject(new Charge("Charge", "C:/Dev/eletromag/application/resources/sphere_with_vector.obj"));
+        teste1.addObject(new Charge("Charge", "C:/Dev/eletromag/application/resources/electron.obj"));
+        teste1.addObject(new Field("Magnetic Field", "C:/Dev/eletromag/application/resources/field.obj"));
         app.insertScene(teste1);
 
       

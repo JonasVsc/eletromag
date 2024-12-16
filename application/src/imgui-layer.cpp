@@ -189,7 +189,7 @@ void ImGuiLayer::objectTreeGUI()
 void ImGuiLayer::fpsGUI()
 {
     ImVec2 windowPos = ImVec2(0, ImGui::GetIO().DisplaySize.y - 60);
-    ImVec2 windowSize = ImVec2(100, 60); 
+    ImVec2 windowSize = ImVec2(200, 60); 
 
     ImGui::SetNextWindowPos(windowPos);
     ImGui::SetNextWindowSize(windowSize);
@@ -198,7 +198,7 @@ void ImGuiLayer::fpsGUI()
     float fps = ImGui::GetIO().Framerate;
 
     if(Application::get().mRunningSimulation)
-        ImGui::Text("State: Simulating Physics");
+        ImGui::Text("State: Running");
     else
         ImGui::Text("State: Idle");
 
