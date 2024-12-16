@@ -32,8 +32,8 @@ void ImGuiLayer::onAttach()
     ImGuiStyle& style = ImGui::GetStyle();
     ImVec4 customColor = ImVec4(0.1f, 0.5f, 0.8f, 1.0f);
     style.Colors[ImGuiCol_Button] = customColor;
-    style.Colors[ImGuiCol_ButtonHovered] = ImVec4(0.2f, 0.6f, 0.9f, 1.0f);
-    style.Colors[ImGuiCol_ButtonActive] = ImVec4(0.0f, 0.4f, 0.7f, 1.0f);
+    style.Colors[ImGuiCol_ButtonHovered] = ImVec4(0.4f, 0.4f, 0.4f, 1.0f);
+    style.Colors[ImGuiCol_ButtonActive] = ImVec4(0.6f, 0.6f, 0.6f, 1.0f);
     style.WindowPadding = ImVec2(10.0f, 10.0f);  
     style.FramePadding = ImVec2(5.0f, 5.0f);     
     style.ItemSpacing  = ImVec2(8.0f, 4.0f);     
@@ -146,12 +146,13 @@ void ImGuiLayer::objectTreeGUI()
     {
         auto& obj = scene->mObjects.at(selected);
         auto objLabel = obj.getDebugName();
+        auto Id = "##" + objLabel;
+
         ImGui::Text("Propriedades");
         ImGui::SetNextItemOpen(true, ImGuiCond_Once);
 
         if(ImGui::TreeNode("Transform"))
         {
-            auto Id = "##" + objLabel;
             ImGui::Text("Position:");
             ImGui::DragFloat3((Id + "Position").c_str(), obj.mPosition, 0.1);
             ImGui::Text("Rotation:");
@@ -160,11 +161,20 @@ void ImGuiLayer::objectTreeGUI()
             ImGui::DragFloat3((Id + "Scale").c_str(), obj.mScale, 0.1);
             ImGui::TreePop();
         }
+
         if(ImGui::TreeNode("Material"))
         {
-            auto Id = "##" + objLabel;
             ImGui::Text("Color:");
             ImGui::ColorEdit4((Id + "Color").c_str(), (float*)&obj.mColor);
+            ImGui::TreePop();
+        }
+
+        if(ImGui::TreeNode("Physics"))
+        {
+            ImGui::Text("Velocity:");
+            ImGui::DragFloat((Id + "Scale").c_str(), (float*)&obj.mVelocity, 0.1);
+            ImGui::DragFloat3((Id + "Scale").c_str(), obj.mVelocityDirection, 0.1);
+
             ImGui::TreePop();
         }
     }
@@ -175,15 +185,20 @@ void ImGuiLayer::objectTreeGUI()
 
 void ImGuiLayer::fpsGUI()
 {
-    ImVec2 windowPos = ImVec2(0, ImGui::GetIO().DisplaySize.y - 30);
-    ImVec2 windowSize = ImVec2(100, 30); 
+    ImVec2 windowPos = ImVec2(0, ImGui::GetIO().DisplaySize.y - 60);
+    ImVec2 windowSize = ImVec2(100, 60); 
 
     ImGui::SetNextWindowPos(windowPos);
     ImGui::SetNextWindowSize(windowSize);
     ImGui::SetNextWindowBgAlpha(0.0f);  
     ImGui::Begin("FPS Window", nullptr, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoInputs);
     float fps = ImGui::GetIO().Framerate;
+
+    if(Application::get().mRunningSimulation)
+        ImGui::Text("State: Simulating Physics");
+    else
+        ImGui::Text("State: Idle");
+
     ImGui::Text("FPS: %.f", fps);
     ImGui::End();
 }
-

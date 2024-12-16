@@ -45,7 +45,7 @@ private:
 
     WGPUTextureView getNextSurfaceTextureView();
 
-    void processCameraMovement();
+    void processInput();
 
     void processMouseMovement(double xposIn, double yposIn);
 

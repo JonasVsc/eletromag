@@ -26,11 +26,15 @@ int main()
         field.setPosition(0.0f, 0.0f, 0.0f);
         field.setColor(1.0f, 0.0f, 0.0f, 1.0f);
 
-        Scene scene1("Tópico 1");
-        scene1.addObject(eletron);
-        scene1.addObject(vector);
-        scene1.addObject(field);
-        app.insertScene(scene1);
+        Scene topico1("Tópico 1");
+        topico1.addObject(eletron);
+        topico1.addObject(vector);
+        topico1.addObject(field);
+        app.insertScene(topico1);
+
+        Scene teste1("TESTE 1");
+        teste1.addObject(eletron);
+        app.insertScene(teste1);
 
       
 

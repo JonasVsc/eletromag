@@ -44,13 +44,13 @@ private:
 
     Renderer2 mRenderer;
 
-    bool running;
-
     LayerStack mLayerStack;
 
     Camera mMainCamera;
 
 public:
+
+    bool mRunningSimulation = false;
 
     static double deltaTime;
     static double lastFrame;

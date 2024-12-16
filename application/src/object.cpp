@@ -196,6 +196,15 @@ void Object::update()
     wgpuQueueWriteBuffer(renderer.getQueue(), getUniformBuffer(), offsetof(MyUniforms, color), &mColor, sizeof(glm::vec4));
 }
 
+void Object::physicsUpdate()
+{
+    if(!Application::get().mRunningSimulation)
+        return;
+
+    // physics update
+    std::cout << "using physics!" << '\n';   
+}
+
 
 void Object::setPosition(float x, float y, float z)
 {

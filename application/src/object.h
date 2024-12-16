@@ -20,6 +20,8 @@ public:
 
     void update();
 
+    void physicsUpdate();
+
     void setPosition(float x, float y, float z);
 
     void setColor(float r, float g, float b, float a);
@@ -39,6 +41,9 @@ public:
     float mScale[3] {1.0f, 1.0f, 1.0f};
 
     float mColor[4] {0.5f, 0.5f, 0.5f, 1.0f};
+
+    float mVelocityDirection[3] {0.0f, 0.0f, 0.0f};
+    float mVelocity = 0.0f;
 
 private:
 

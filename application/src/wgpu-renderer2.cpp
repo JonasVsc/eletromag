@@ -24,7 +24,7 @@ void Renderer2::init()
 
 void Renderer2::render(Scene& scene, LayerStack& layerStack)
 {
-    processCameraMovement();
+    processInput();
 
     WGPUTextureView nextTexture = getNextSurfaceTextureView();
     if(!nextTexture)
@@ -71,6 +71,8 @@ void Renderer2::render(Scene& scene, LayerStack& layerStack)
     for (Object& obj : scene.mObjects)
     {
         obj.update();
+
+        obj.physicsUpdate();
 
         wgpuRenderPassEncoderSetPipeline(renderPass, obj.getRenderPipeline());
 
@@ -288,13 +290,19 @@ WGPUTextureView Renderer2::getNextSurfaceTextureView()
 	return targetView;
 }
 
-void Renderer2::processCameraMovement()
+void Renderer2::processInput()
 {
     float speed = 7.5f * Application::deltaTime;
 
     Application& app = Application::get();
     Camera& camera = app.getMainCamera();
     GLFWwindow* window = static_cast<GLFWwindow*>(app.getWindow().getNativeWindow());
+
+    if(glfwGetKey(window, GLFW_KEY_R) && GLFW_PRESS)
+    {
+        emscripten_sleep(100);
+        app.mRunningSimulation = !app.mRunningSimulation;
+    }
 
     // Camera Movement
 	if (glfwGetKey(window, GLFW_KEY_W) && GLFW_PRESS)
