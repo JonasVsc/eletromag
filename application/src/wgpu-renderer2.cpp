@@ -22,7 +22,7 @@ void Renderer2::init()
     initDepthBuffer();
 }
 
-void Renderer2::render(Scene& scene, LayerStack& layerStack)
+void Renderer2::render(Scene* scene)
 {
     processInput();
 
@@ -68,25 +68,16 @@ void Renderer2::render(Scene& scene, LayerStack& layerStack)
     
     // draw scene
     // ----------
-    for (Object* obj : scene.mObjects)
-    {
-        obj->update();
-
-        obj->render();
-
-        wgpuRenderPassEncoderSetPipeline(renderPass, obj->getRenderPipeline());
-
-        wgpuRenderPassEncoderSetBindGroup(renderPass, 0, obj->getBindGroup(), 0, nullptr);
-
-        wgpuRenderPassEncoderSetVertexBuffer(renderPass, 0, obj->getVertexBuffer(), 0, wgpuBufferGetSize(obj->getVertexBuffer()));
-
-        wgpuRenderPassEncoderDraw(renderPass, obj->getVertexCount(), 1, 0, 0);
-    }
+    if(scene != nullptr)
+        scene->render(renderPass);
 
     // update layers
     // -------------
-    for (Layer* layer : layerStack)
-            layer->onUpdate(renderPass);
+    LayerStack& layerStack = Application::get().mLayerStack;
+    for (auto& layer : layerStack)
+    {
+        layer->onUpdate(renderPass);
+    }
 
     
 

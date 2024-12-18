@@ -17,7 +17,7 @@ public:
 
     void init();
 
-    void render(Scene& scene, LayerStack& layerStack);
+    void render(Scene* scene);
 
     void renderScene(const Scene& scene, WGPURenderPassEncoder renderPass);
 

@@ -44,7 +44,6 @@ private:
 
     Renderer2 mRenderer;
 
-    LayerStack mLayerStack;
 
     Camera mMainCamera;
 
@@ -54,6 +53,8 @@ public:
 
     static double deltaTime;
     static double lastFrame;
+
+    LayerStack mLayerStack;
 
     std::unordered_map<std::string, Scene> mScenes;
     Scene* mCurrentScene;

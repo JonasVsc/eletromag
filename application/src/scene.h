@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "object.h"
+#include "layer.h"
 
 class Scene
 {
@@ -20,12 +21,14 @@ public:
 
     Object* getObjectByDebugName(const std::string& debugName);
 
-    virtual void load() {};
+    void render(WGPURenderPassEncoder renderPass);
 
     inline std::string getDebugName() { return mDebugName; }
 
     std::vector<Object*> mObjects;
 
     std::string mDebugName;
+
+    Layer* physicsLayer;
 
 };

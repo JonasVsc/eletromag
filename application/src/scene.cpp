@@ -16,3 +16,23 @@ Object* Scene::getObjectByDebugName(const std::string& debugName)
     }
     return nullptr;
 }
+
+void Scene::render(WGPURenderPassEncoder renderPass)
+{
+    for (Object* obj : mObjects)
+    {
+        obj->update();
+
+        obj->render();
+
+        wgpuRenderPassEncoderSetPipeline(renderPass, obj->getRenderPipeline());
+
+        wgpuRenderPassEncoderSetBindGroup(renderPass, 0, obj->getBindGroup(), 0, nullptr);
+
+        wgpuRenderPassEncoderSetVertexBuffer(renderPass, 0, obj->getVertexBuffer(), 0, wgpuBufferGetSize(obj->getVertexBuffer()));
+
+        wgpuRenderPassEncoderDraw(renderPass, obj->getVertexCount(), 1, 0, 0);
+    }
+
+    physicsLayer->onUpdate(renderPass);
+}

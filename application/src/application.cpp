@@ -31,7 +31,7 @@ void Application::run()
     {
         calcDeltaTime();
 
-        mRenderer.render(*mCurrentScene, mLayerStack);
+        mRenderer.render(mCurrentScene);
 
         mWindow.update();
 

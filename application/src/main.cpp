@@ -3,11 +3,14 @@
 #include <emscripten.h>
 #include <exception>
 #include <iostream>
+
 #include "imgui-layer.h"
 
 #include "definitions.h"
 #include "transform.h"
 #include "mesh.h"
+
+#include "topico1-scene.h"
 
 
 int main() 
@@ -17,16 +20,9 @@ int main()
         Application app;
         app.init();
 
-        Scene scene("Topico 6");
-        Object* sphere = new Object("sphere", "C:/Dev/eletromag/application/resources/electron.obj");
-        sphere->addComponent<Transform>();
-        sphere->addComponent<Mesh>();
 
-        scene.addObject(sphere);
-        app.insertScene(scene);
-        app.setCurrentScene(scene);
-
-      
+        SceneTopico1 topico1;
+        app.setCurrentScene(topico1);
 
         app.pushLayer(new ImGuiLayer());
 
