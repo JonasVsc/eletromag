@@ -1,6 +1,7 @@
 #include "imgui-layer.h"
 
 #include "application.h"
+#include "transform.h"
 
 #include <imgui.h>
 #include <backends/imgui_impl_wgpu.h>
@@ -151,21 +152,24 @@ void ImGuiLayer::objectTreeGUI()
         ImGui::Text("Propriedades");
         ImGui::SetNextItemOpen(true, ImGuiCond_Once);
 
-        glm::vec3& position = !Application::sRunningSimulation ? obj->transform.mInitialPosition : obj->transform.mPosition;
-        glm::vec3& rotation = !Application::sRunningSimulation ? obj->transform.mInitialRotation : obj->transform.mRotation;
-        glm::vec3& scale  = !Application::sRunningSimulation ? obj->transform.mInitialScale : obj->transform.mScale;
-
-    
-        if(ImGui::TreeNode("Transform"))
+        if(Transform* transform = obj->getComponent<Transform>())
         {
-            ImGui::Text("Position:");
-            ImGui::DragFloat3((Id + "Position").c_str(), glm::value_ptr(position), 0.1);
-            ImGui::Text("Rotation:");
-            ImGui::DragFloat3((Id + "Rotation").c_str(), glm::value_ptr(rotation), 0.1);
-            ImGui::Text("Scale:");
-            ImGui::DragFloat3((Id + "Scale").c_str(), glm::value_ptr(scale), 0.1);
-            ImGui::TreePop();
-        }
+            glm::vec3& position = !Application::sRunningSimulation ? transform->initialPosition : transform->position;
+            glm::vec3& rotation = !Application::sRunningSimulation ? transform->initialRotation : transform->rotation;
+            glm::vec3& scale    = !Application::sRunningSimulation ? transform->initialScale : transform->scale;
+
+            if (ImGui::TreeNode("Transform")) 
+            {
+                ImGui::Text("Position:");
+                ImGui::DragFloat3((Id + "Position").c_str(), glm::value_ptr(position), 0.1f);
+                ImGui::Text("Rotation:");
+                ImGui::DragFloat3((Id + "Rotation").c_str(), glm::value_ptr(rotation), 0.1f);
+                ImGui::Text("Scale:");
+                ImGui::DragFloat3((Id + "Scale").c_str(), glm::value_ptr(scale), 0.1f);
+                ImGui::TreePop();
+            }
+        } 
+            
     }
     ImGui::End();
 }

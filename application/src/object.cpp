@@ -5,6 +5,10 @@
 #include "utils/resource-manager.h"
 #include <glm/glm.hpp>
 #include <glm/ext.hpp>
+#include <utility>
+
+#include "component.h"
+#include "transform.h"
 
 
 
@@ -176,20 +180,20 @@ void Object::update()
         return;
     }
 
-    
+
 }
 
 void Object::reset()
 {
-    transform.mPosition = transform.mInitialPosition;
-    transform.mPosition = transform.mInitialPosition;
-    transform.mPosition = transform.mInitialPosition;
-    transform.mRotation = transform.mInitialRotation;
-    transform.mRotation = transform.mInitialRotation;
-    transform.mRotation = transform.mInitialRotation;
-    transform.mScale = transform.mInitialScale;
-    transform.mScale = transform.mInitialScale;
-    transform.mScale = transform.mInitialScale;
+    // transform.mPosition = transform.mInitialPosition;
+    // transform.mPosition = transform.mInitialPosition;
+    // transform.mPosition = transform.mInitialPosition;
+    // transform.mRotation = transform.mInitialRotation;
+    // transform.mRotation = transform.mInitialRotation;
+    // transform.mRotation = transform.mInitialRotation;
+    // transform.mScale = transform.mInitialScale;
+    // transform.mScale = transform.mInitialScale;
+    // transform.mScale = transform.mInitialScale;
 
 }
 
@@ -203,13 +207,7 @@ void Object::render()
     view = camera.getViewMatrix();
     wgpuQueueWriteBuffer(renderer.getQueue(), getUniformBuffer(), offsetof(MyUniforms, viewMatrix), &view, sizeof(glm::mat4));
 
-    // update modelMatrix
-    glm::mat4 model(1.0f);
-    model = glm::translate(model, transform.mPosition);
-    model = glm::rotate(model, glm::radians(transform.mRotation.x), glm::vec3(1.0f, 0.0f, 0.0f));
-    model = glm::rotate(model, glm::radians(transform.mRotation.y), glm::vec3(0.0f, 1.0f, 0.0f));
-    model = glm::rotate(model, glm::radians(transform.mRotation.z), glm::vec3(0.0f, 0.0f, 1.0f));
-    model = glm::scale(model, transform.mScale);
-    wgpuQueueWriteBuffer(renderer.getQueue(), getUniformBuffer(), offsetof(MyUniforms, modelMatrix), &model, sizeof(glm::mat4));
+    for (auto& comp : components)
+        comp->update(Application::deltaTime);
 }
 

@@ -6,6 +6,7 @@
 #include "imgui-layer.h"
 
 #include "definitions.h"
+#include "transform.h"
 
 
 int main() 
@@ -15,11 +16,13 @@ int main()
         Application app;
         app.init();
 
-        Scene topico6("Topico 6");
+        Scene scene("Topico 6");
         Object* sphere = new Object("sphere", "C:/Dev/eletromag/application/resources/electron.obj");
-        topico6.addObject(sphere);
-        app.insertScene(topico6);
-        app.setCurrentScene(topico6);
+        sphere->addComponent<Transform>();
+
+        scene.addObject(sphere);
+        app.insertScene(scene);
+        app.setCurrentScene(scene);
 
       
 

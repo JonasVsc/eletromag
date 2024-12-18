@@ -1,9 +1,7 @@
 #pragma once
 
-
-
 #include "definitions.h"
-#include "transform.h"
+#include "component.h"
 #include "physics.h"
 
 #include <glm/glm.hpp>
@@ -23,6 +21,26 @@ public:
     virtual Type getType() const { return Type::None; }
 
     Object(std::string debugName, const std::filesystem::path& path);
+
+    template<typename T, typename... Args>
+    T* addComponent(Args&&... args)
+    {
+        T* comp = new T(std::forward<Args>(args)...);
+        comp->parent = this;
+        components.emplace_back(comp);
+        return comp;
+    }
+
+    template<typename T>
+    T* getComponent() 
+    {
+        for (auto* comp : components) {
+            if (auto casted = dynamic_cast<T*>(comp)) {
+                return casted;
+            }
+        }
+        return nullptr;
+    }
 
     void initRenderPipeline();
 
@@ -46,9 +64,7 @@ public:
     inline MyUniforms& getUniform() { return mUniform; }
     inline uint32_t getVertexCount() { return mVertexCount; }
 
-
-
-    Transform transform;
+    std::vector<Component*> components;
 
 protected:
 

@@ -16,7 +16,7 @@ void Physics::applyVelocity(Object* obj, glm::vec3 direction, float speed)
     // obj->mPosition[1] += dir.y * velSpeed;
     // obj->mPosition[2] += dir.z * velSpeed;
 
-    obj->transform.mPosition += dir * velSpeed;
+    // obj->transform.mPosition += dir * velSpeed;
 }
 
 void Physics::applyVelocityByCurrentDirection(Object* obj, float speed)
