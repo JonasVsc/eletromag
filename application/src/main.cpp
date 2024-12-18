@@ -7,6 +7,7 @@
 
 #include "definitions.h"
 #include "transform.h"
+#include "mesh.h"
 
 
 int main() 
@@ -19,6 +20,7 @@ int main()
         Scene scene("Topico 6");
         Object* sphere = new Object("sphere", "C:/Dev/eletromag/application/resources/electron.obj");
         sphere->addComponent<Transform>();
+        sphere->addComponent<Mesh>();
 
         scene.addObject(sphere);
         app.insertScene(scene);

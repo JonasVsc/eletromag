@@ -54,6 +54,7 @@ add_executable(ElectroApp
 
     "application/src/component.h"
     "application/src/transform.h"
+    "application/src/mesh.h"
 )
 
 add_subdirectory("application/vendor/glm")

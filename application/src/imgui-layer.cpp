@@ -2,6 +2,7 @@
 
 #include "application.h"
 #include "transform.h"
+#include "mesh.h"
 
 #include <imgui.h>
 #include <backends/imgui_impl_wgpu.h>
@@ -166,6 +167,19 @@ void ImGuiLayer::objectTreeGUI()
                 ImGui::DragFloat3((Id + "Rotation").c_str(), glm::value_ptr(rotation), 0.1f);
                 ImGui::Text("Scale:");
                 ImGui::DragFloat3((Id + "Scale").c_str(), glm::value_ptr(scale), 0.1f);
+                ImGui::TreePop();
+            }
+        } 
+
+        if(Mesh* mesh = obj->getComponent<Mesh>())
+        {
+            glm::vec4& color = !Application::sRunningSimulation ? mesh->initialColor : mesh->color;
+
+            if (ImGui::TreeNode("Mesh")) 
+            {
+                ImGui::Text("Color:");
+                ImGui::ColorEdit4((Id + "Color").c_str(), glm::value_ptr(color));
+                ImGui::Text("Material: ( will be implemented )");
                 ImGui::TreePop();
             }
         } 
