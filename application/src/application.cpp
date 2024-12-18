@@ -2,6 +2,8 @@
 
 
 Application* Application::sInstance = nullptr;
+bool Application::sRunningSimulation = false;
+
 
 double Application::deltaTime = 0.0f;
 double Application::lastFrame = 0.0f;

@@ -70,9 +70,9 @@ void Renderer2::render(Scene& scene, LayerStack& layerStack)
     // ----------
     for (Object* obj : scene.mObjects)
     {
-        obj->physicsUpdate();
-
         obj->update();
+
+        obj->render();
 
         wgpuRenderPassEncoderSetPipeline(renderPass, obj->getRenderPipeline());
 
@@ -301,7 +301,7 @@ void Renderer2::processInput()
     if(glfwGetKey(window, GLFW_KEY_R) && GLFW_PRESS)
     {
         emscripten_sleep(100);
-        app.mRunningSimulation = !app.mRunningSimulation;
+        app.sRunningSimulation = !app.sRunningSimulation;
     }
 
     // Camera Movement

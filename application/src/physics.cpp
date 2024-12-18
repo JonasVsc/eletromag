@@ -4,16 +4,19 @@
 
 
 
-void Physics::applyVelocity(Object* obj, const float(&direction)[3], float speed)
+void Physics::applyVelocity(Object* obj, glm::vec3 direction, float speed)
 {
-    if(direction[0] == 0 && direction[1] == 0 && direction[2] == 0)
+    if(direction.x == 0 && direction.y == 0 && direction.z == 0)
         return;
-    glm::vec3 dir = glm::normalize(glm::vec3(direction[0], direction[1], direction[2]));
+
+    glm::vec3 dir = glm::normalize(direction);
     float velSpeed = speed * Application::get().deltaTime;
 
-    obj->mPosition[0] += dir.x * velSpeed;
-    obj->mPosition[1] += dir.y * velSpeed;
-    obj->mPosition[2] += dir.z * velSpeed;
+    // obj->mPosition[0] += dir.x * velSpeed;
+    // obj->mPosition[1] += dir.y * velSpeed;
+    // obj->mPosition[2] += dir.z * velSpeed;
+
+    obj->transform.mPosition += dir * velSpeed;
 }
 
 void Physics::applyVelocityByCurrentDirection(Object* obj, float speed)

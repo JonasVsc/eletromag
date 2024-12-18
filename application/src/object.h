@@ -1,7 +1,13 @@
 #pragma once
 
+
+
 #include "definitions.h"
+#include "transform.h"
 #include "physics.h"
+
+#include <glm/glm.hpp>
+#include <glm/ext.hpp>
 
 #include <webgpu/webgpu.h>
 #include <filesystem>
@@ -26,17 +32,9 @@ public:
 
     void reset();
 
-    void update();
+    void render();
 
-    virtual void physicsUpdate();
-
-    void setPosition(float x, float y, float z);
-
-    void setRotation(float x, float y, float z);
-
-    void setScale(float x, float y, float z);
-
-    void setColor(float r, float g, float b, float a);
+    virtual void update();
 
     virtual ~Object() = default;
 
@@ -48,23 +46,9 @@ public:
     inline MyUniforms& getUniform() { return mUniform; }
     inline uint32_t getVertexCount() { return mVertexCount; }
 
-    float mPosition[3] {0.0f, 0.0f, 0.0f};
-    float mRotation[3] {0.0f, 0.0f, 0.0f};
-    float mScale[3] {1.0f, 1.0f, 1.0f};
 
-    float mColor[4] {0.5f, 0.5f, 0.5f, 1.0f};
 
-    float mVelocityDirection[3] {0.0f, 0.0f, 0.0f};
-    float mVelocity = 0.0f;
-
-    float mInitialPosition[3] {0.0f, 0.0f, 0.0f};
-    float mInitialRotation[3] {0.0f, 0.0f, 0.0f};
-    float mInitialScale[3] {1.0f, 1.0f, 1.0f};
-
-    float mInitialColor[4] {0.5f, 0.5f, 0.5f, 1.0f};
-
-    float mInitialVelocityDirection[3] {0.0f, 0.0f, 0.0f};
-    float mInitialVelocity = 0.0f;
+    Transform transform;
 
 protected:
 

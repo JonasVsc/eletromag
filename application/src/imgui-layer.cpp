@@ -8,8 +8,6 @@
 
 #include <array>
 
-#include "eletron.h"
-#include "field.h"
 
 
 ImGuiLayer::ImGuiLayer()
@@ -153,91 +151,20 @@ void ImGuiLayer::objectTreeGUI()
         ImGui::Text("Propriedades");
         ImGui::SetNextItemOpen(true, ImGuiCond_Once);
 
-        float(&position)[3] = !Application::get().mRunningSimulation ? obj->mInitialPosition : obj->mPosition;
-        float(&rotation)[3] = !Application::get().mRunningSimulation ? obj->mInitialRotation : obj->mRotation;
-        float(&scale)[3] = !Application::get().mRunningSimulation ? obj->mInitialScale : obj->mScale;
+        glm::vec3& position = !Application::sRunningSimulation ? obj->transform.mInitialPosition : obj->transform.mPosition;
+        glm::vec3& rotation = !Application::sRunningSimulation ? obj->transform.mInitialRotation : obj->transform.mRotation;
+        glm::vec3& scale  = !Application::sRunningSimulation ? obj->transform.mInitialScale : obj->transform.mScale;
 
-        switch (obj->getType())
+    
+        if(ImGui::TreeNode("Transform"))
         {
-            case Object::Type::Eletron:
-            {
-                if(ImGui::TreeNode("Transform"))
-                {
-                    ImGui::Text("Position:");
-                    ImGui::DragFloat3((Id + "Position").c_str(), position, 0.1);
-                    ImGui::Text("Rotation:");
-                    ImGui::DragFloat3((Id + "Rotation").c_str(), rotation, 0.1);
-                    ImGui::Text("Scale:");
-                    ImGui::DragFloat3((Id + "Scale").c_str(), scale, 0.1);
-                    ImGui::TreePop();
-                }
-                if(ImGui::TreeNode("Physics"))
-                {
-                    ImGui::Text("Velocity Speed (m/s):");
-                    ImGui::DragFloat((Id + "Scale").c_str(), (float*)&obj->mInitialVelocity, 0.1);
-                    ImGui::Text("Direction:");
-                    ImGui::DragFloat3((Id + "Scale").c_str(), obj->mInitialVelocityDirection, 0.1);
-                    static bool dummy = false;
-                    if(ImGui::Checkbox("Show debug vector", &dummy))
-                    {
-                        // TODO: show and hide velocity direction vector
-                    }
-
-                    ImGui::TreePop();
-                }
-                break;
-            }
-            case Object::Type::Field:
-            {
-                if(ImGui::TreeNode("Transform"))
-                {
-                    ImGui::Text("Position:");
-                    ImGui::DragFloat3((Id + "Position").c_str(), position, 0.1);
-                    ImGui::Text("Rotation:");
-                    ImGui::DragFloat3((Id + "Rotation").c_str(), rotation, 0.1);
-                    ImGui::Text("Scale:");
-                    ImGui::DragFloat3((Id + "Scale").c_str(), scale, 0.1);
-                    ImGui::TreePop();
-                }
-                if(ImGui::TreeNode("Physics"))
-                {
-                    Field* field = reinterpret_cast<Field*>(obj);
-                    ImGui::Text("Intensity (T):");
-                    ImGui::DragFloat((Id + "Scale").c_str(), (float*)&field->mIntensity, 0.1);
-                    ImGui::DragFloat3((Id + "Scale").c_str(), obj->mInitialVelocityDirection, 0.1);
-
-                    ImGui::TreePop();
-                }
-                break;
-            }
-            case Object::Type::Arrow:
-            {
-                if(ImGui::TreeNode("Transform"))
-                {
-                    ImGui::Text("Position:");
-                    ImGui::DragFloat3((Id + "Position").c_str(), position, 0.1);
-                    ImGui::Text("Rotation:");
-                    ImGui::DragFloat3((Id + "Rotation").c_str(), rotation, 0.1);
-                    ImGui::Text("Scale:");
-                    ImGui::DragFloat3((Id + "Scale").c_str(), scale, 0.1);
-                    ImGui::TreePop();
-                }
-                break;
-            }
-            case Object::Type::None:
-            {
-                if(ImGui::TreeNode("Transform"))
-                {
-                    ImGui::Text("Position:");
-                    ImGui::DragFloat3((Id + "Position").c_str(), position, 0.1);
-                    ImGui::Text("Rotation:");
-                    ImGui::DragFloat3((Id + "Rotation").c_str(), rotation, 0.1);
-                    ImGui::Text("Scale:");
-                    ImGui::DragFloat3((Id + "Scale").c_str(), scale, 0.1);
-                    ImGui::TreePop();
-                }
-                break;
-            }
+            ImGui::Text("Position:");
+            ImGui::DragFloat3((Id + "Position").c_str(), glm::value_ptr(position), 0.1);
+            ImGui::Text("Rotation:");
+            ImGui::DragFloat3((Id + "Rotation").c_str(), glm::value_ptr(rotation), 0.1);
+            ImGui::Text("Scale:");
+            ImGui::DragFloat3((Id + "Scale").c_str(), glm::value_ptr(scale), 0.1);
+            ImGui::TreePop();
         }
     }
     ImGui::End();
@@ -255,7 +182,7 @@ void ImGuiLayer::fpsGUI()
     ImGui::Begin("FPS Window", nullptr, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoInputs);
     float fps = ImGui::GetIO().Framerate;
 
-    if(Application::get().mRunningSimulation)
+    if(Application::sRunningSimulation)
         ImGui::Text("State: Running");
     else
         ImGui::Text("State: Idle");

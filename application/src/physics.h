@@ -9,7 +9,7 @@ class Physics
 {
 public:
 
-    static void applyVelocity(Object* obj, const float(&direction)[3], float speed);
+    static void applyVelocity(Object* obj, glm::vec3 direction, float speed);
     static void applyVelocityByCurrentDirection(Object* obj, float speed); // for objects which act like vectors
 
     static void crossVectorialProduct(float(&res)[3], const float(&vec1)[3], const float(&vec2)[3]);

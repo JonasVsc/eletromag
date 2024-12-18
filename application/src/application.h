@@ -50,7 +50,7 @@ private:
 
 public:
 
-    bool mRunningSimulation = false;
+    static bool sRunningSimulation;
 
     static double deltaTime;
     static double lastFrame;

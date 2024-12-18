@@ -7,9 +7,6 @@
 
 #include "definitions.h"
 
-#include "eletron.h"
-#include "field.h"
-#include "arrow.h"
 
 int main() 
 {
@@ -18,13 +15,11 @@ int main()
         Application app;
         app.init();
 
-        Scene topico1("Topico 1");
-
-        topico1.addObject(new Charge("Charge", "C:/Dev/eletromag/application/resources/electron.obj"));
-        topico1.addObject(new Field("Magnetic Field", "C:/Dev/eletromag/application/resources/field.obj"));
-        topico1.addObject(new Arrow("Arrow", "C:/Dev/eletromag/application/resources/arrow.obj"));
-        app.insertScene(topico1);
-        app.setCurrentScene(topico1);
+        Scene topico6("Topico 6");
+        Object* sphere = new Object("sphere", "C:/Dev/eletromag/application/resources/electron.obj");
+        topico6.addObject(sphere);
+        app.insertScene(topico6);
+        app.setCurrentScene(topico6);
 
       
 

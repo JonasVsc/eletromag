@@ -119,8 +119,6 @@ void Object::initUniformData()
     mUniform.modelMatrix = glm::mat4x4(1.0f);
     mUniform.viewMatrix = camera.getViewMatrix();
     mUniform.projectionMatrix = glm::perspective(glm::radians(camera.fov), camera.aspectRatio, camera.nearPlane, camera.farPlane);
-    mUniform.color = { 0.0f, 0.0f, 1.0f, 1.0f };
-
 }
 
 
@@ -170,34 +168,32 @@ void Object::initBuffers(const std::filesystem::path& path)
         std::cerr << "[ERROR] Failed to init bind group" << '\n';
 }
 
+void Object::update()
+{
+    if(!Application::sRunningSimulation)
+    {
+        reset();
+        return;
+    }
+
+    
+}
+
 void Object::reset()
 {
-    mPosition[0] = mInitialPosition[0];
-    mPosition[1] = mInitialPosition[1];
-    mPosition[2] = mInitialPosition[2];
-
-    mColor[0] = mInitialColor[0];
-    mColor[1] = mInitialColor[1];
-    mColor[2] = mInitialColor[2];
-    mColor[3] = mInitialColor[3];
-
-    mRotation[0] = mInitialRotation[0];
-    mRotation[1] = mInitialRotation[1];
-    mRotation[2] = mInitialRotation[2];
-
-    mScale[0] = mInitialScale[0];
-    mScale[1] = mInitialScale[1];
-    mScale[2] = mInitialScale[2];
-
-    mVelocity = mInitialVelocity;
-
-    mVelocityDirection[0] = mInitialVelocityDirection[0];
-    mVelocityDirection[1] = mInitialVelocityDirection[1];
-    mVelocityDirection[2] = mInitialVelocityDirection[2];
+    transform.mPosition = transform.mInitialPosition;
+    transform.mPosition = transform.mInitialPosition;
+    transform.mPosition = transform.mInitialPosition;
+    transform.mRotation = transform.mInitialRotation;
+    transform.mRotation = transform.mInitialRotation;
+    transform.mRotation = transform.mInitialRotation;
+    transform.mScale = transform.mInitialScale;
+    transform.mScale = transform.mInitialScale;
+    transform.mScale = transform.mInitialScale;
 
 }
 
-void Object::update()
+void Object::render()
 {
     Renderer2& renderer = Application::get().getRenderer();
     Camera& camera = Application::get().getMainCamera();
@@ -209,58 +205,11 @@ void Object::update()
 
     // update modelMatrix
     glm::mat4 model(1.0f);
-    model = glm::translate(model, glm::vec3(mPosition[0], mPosition[1], mPosition[2]));
-    model = glm::rotate(model, glm::radians(mRotation[0]), glm::vec3(1.0f, 0.0f, 0.0f));
-    model = glm::rotate(model, glm::radians(mRotation[1]), glm::vec3(0.0f, 1.0f, 0.0f));
-    model = glm::rotate(model, glm::radians(mRotation[2]), glm::vec3(0.0f, 0.0f, 1.0f));
-    model = glm::scale(model, glm::vec3(mScale[0], mScale[1], mScale[2]));
+    model = glm::translate(model, transform.mPosition);
+    model = glm::rotate(model, glm::radians(transform.mRotation.x), glm::vec3(1.0f, 0.0f, 0.0f));
+    model = glm::rotate(model, glm::radians(transform.mRotation.y), glm::vec3(0.0f, 1.0f, 0.0f));
+    model = glm::rotate(model, glm::radians(transform.mRotation.z), glm::vec3(0.0f, 0.0f, 1.0f));
+    model = glm::scale(model, transform.mScale);
     wgpuQueueWriteBuffer(renderer.getQueue(), getUniformBuffer(), offsetof(MyUniforms, modelMatrix), &model, sizeof(glm::mat4));
-
-    // update color
-    wgpuQueueWriteBuffer(renderer.getQueue(), getUniformBuffer(), offsetof(MyUniforms, color), &mColor, sizeof(glm::vec4));
 }
 
-void Object::physicsUpdate()
-{
-    // Stuff you want to run in idle mode
-
-    if(!Application::get().mRunningSimulation) // idle
-    {
-        reset();
-        return;
-    }
-    // Stuff you want to run only in running mode
-    
-}
-
-
-void Object::setPosition(float x, float y, float z)
-{
-    mInitialPosition[0] = mPosition[0] = x;
-    mInitialPosition[1] = mPosition[1] = y;
-    mInitialPosition[2] = mPosition[2] = z;
-}
-
-void Object::setRotation(float x, float y, float z)
-{
-    mInitialRotation[0] = mRotation[0] = x;
-    mInitialRotation[1] = mRotation[1] = y;
-    mInitialRotation[2] = mRotation[2] = z;
-}
-
-
-void Object::setScale(float x, float y, float z)
-{
-    mInitialScale[0] = mScale[0] = x;
-    mInitialScale[1] = mScale[1] = y;
-    mInitialScale[2] = mScale[2] = z;
-}
-
-
-void Object::setColor(float r, float g, float b, float a)
-{
-    mInitialColor[0] = mColor[0] = r;
-    mInitialColor[1] = mColor[1] = g;
-    mInitialColor[2] = mColor[2] = b;
-    mInitialColor[3] = mColor[3] = a;
-}
