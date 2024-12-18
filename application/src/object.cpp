@@ -174,26 +174,8 @@ void Object::initBuffers(const std::filesystem::path& path)
 
 void Object::update()
 {
-    if(!Application::sRunningSimulation)
-    {
-        reset();
-        return;
-    }
+    
 
-
-}
-
-void Object::reset()
-{
-    // transform.mPosition = transform.mInitialPosition;
-    // transform.mPosition = transform.mInitialPosition;
-    // transform.mPosition = transform.mInitialPosition;
-    // transform.mRotation = transform.mInitialRotation;
-    // transform.mRotation = transform.mInitialRotation;
-    // transform.mRotation = transform.mInitialRotation;
-    // transform.mScale = transform.mInitialScale;
-    // transform.mScale = transform.mInitialScale;
-    // transform.mScale = transform.mInitialScale;
 
 }
 
@@ -209,5 +191,6 @@ void Object::render()
 
     for (auto& comp : components)
         comp->update(Application::deltaTime);
+
 }
 

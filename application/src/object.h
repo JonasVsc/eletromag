@@ -48,8 +48,6 @@ public:
 
     void initBuffers(const std::filesystem::path& path);
 
-    void reset();
-
     void render();
 
     virtual void update();
