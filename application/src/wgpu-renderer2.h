@@ -49,6 +49,8 @@ private:
 
     void processMouseMovement(double xposIn, double yposIn);
 
+    void processMouseScroll(double yoffset);
+
     void processMouseButtonCallback(int button, int action, int mods);
 
 private:

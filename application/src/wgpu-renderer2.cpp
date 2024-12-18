@@ -148,7 +148,16 @@ void Renderer2::initDevice()
         if (renderer) {
             renderer->processMouseMovement(xpos, ypos);
         }
+    }); 
+
+    glfwSetScrollCallback(window, [](GLFWwindow* window, double xoffset, double yoffset)
+    {
+        Renderer2* renderer = static_cast<Renderer2*>(glfwGetWindowUserPointer(window));
+        if (renderer) {
+            renderer->processMouseScroll(yoffset);
+        }
     });
+
     glfwSetMouseButtonCallback(window, [](GLFWwindow* window, int button, int action, int mods)
     {
         Renderer2* renderer = static_cast<Renderer2*>(glfwGetWindowUserPointer(window));
@@ -370,6 +379,16 @@ void Renderer2::processMouseMovement(double xposIn, double yposIn)
         front.y = sin(glm::radians(camera.pitch));
         front.z = sin(glm::radians(camera.yaw)) * cos(glm::radians(camera.pitch));
         camera.mFront = glm::normalize(front);
+    }
+}
+
+void Renderer2::processMouseScroll(double yoffset)
+{
+    Camera& camera = Application::get().getMainCamera();
+    float scrollSpeed = 2.5f;
+    if(camera.rightbuttonPressed)
+    {
+        camera.mPosition += camera.mFront * (scrollSpeed * static_cast<float>(yoffset));
     }
 }
 
