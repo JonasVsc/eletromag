@@ -36,16 +36,16 @@ void Topico1GUI::onUpdate(WGPURenderPassEncoder renderPass)
     ImGui::SetNextWindowSize(ImVec2(450, 250), ImGuiCond_Once); 
     ImGui::Begin("Calculadora de Força Magnética");
 
-    ImGui::InputFloat("Carga (C)", &carga, 0.1f, 10.0f);
-    ImGui::InputFloat("Velocidade (m/s)", &velocidade, 0.1f, 100.0f);
-    ImGui::InputFloat("Campo Magnético (T)", &campoMagnetico, 10.00f, 10.0f);
-    ImGui::InputFloat("Ângulo (graus)", &anguloGraus, 0.01f, 3.14f);
+    ImGui::InputFloat("Carga (C)", &carga, 10.0f, 10.0f, "%.12f");
+    ImGui::InputFloat("Velocidade (m/s)", &velocidade, 10.0f, 10.0f, "%.12f");
+    ImGui::InputFloat("Campo Magnético (T)", &campoMagnetico, 10.0f, 10.0f, "%.12f");
+    ImGui::InputFloat("Ângulo (graus)", &anguloGraus, 10.0f, 10.0f);
 
     if (ImGui::Button("Calcular Força")) {
         forca = Physics::calcularForcaMagnetica(carga, velocidade, campoMagnetico, anguloGraus);
     }
 
-    ImGui::Text("Força Magnética: %f N", forca);
+    ImGui::Text("Força Magnética: %.12f N", forca);
 
     ImGui::End();
 }
