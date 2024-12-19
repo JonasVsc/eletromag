@@ -21,7 +21,7 @@ public:
 
     struct WindowData
     {
-        unsigned int width = 1280, height = 720;
+        unsigned int width = 1920, height = 1080;
         
         const char* title = "Pitanguinha";
     };
