@@ -51,12 +51,17 @@ add_executable(ElectroApp
 
     "application/src/topico1-scene.h"
     "application/src/topico1-gui.h"
+    "application/src/topico1-gui.cpp"
     "application/src/topico1-physics.h"
     "application/src/topico1-physics.cpp"
 
     "application/src/topico2-scene.h"
     "application/src/topico2-physics.h"
     "application/src/topico2-physics.cpp"
+
+    "application/src/topico3-scene.h"
+    "application/src/topico3-physics.h"
+    "application/src/topico3-physics.cpp"
 
 
     "application/src/physics.h"

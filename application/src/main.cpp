@@ -12,6 +12,7 @@
 
 #include "topico1-scene.h"
 #include "topico2-scene.h"
+#include "topico3-scene.h"
 
 
 int main() 
@@ -27,6 +28,10 @@ int main()
 
         SceneTopico2 topico2;
         app.insertScene(topico2);
+
+        SceneTopico3 topico3;
+        app.insertScene(topico3);
+
 
         app.pushLayer(new ImGuiLayer());
 

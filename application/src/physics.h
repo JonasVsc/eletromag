@@ -15,6 +15,8 @@ public:
     static void crossVectorialProduct(float(&res)[3], const float(&vec1)[3], const float(&vec2)[3]);
     static void rotateToTarget(Object* obj, glm::vec3 target);
 
+    static float calcularForcaMagnetica(float carga, float velocidade, float campoMagnetico, float anguloGraus);
+
 
 
 private:

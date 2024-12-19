@@ -23,7 +23,17 @@ void Topico1PhysicsLayer::onAttach()
 void Topico1PhysicsLayer::onUpdate(WGPURenderPassEncoder renderPass)
 {
     Renderer2 renderer = Application::get().getRenderer();
-    auto tranform = mScene.forcaMagnetica->getComponent<Transform>();
+    auto fm_transform = mScene.forcaMagnetica->getComponent<Transform>();
+
+
+    if(mScene.intensidadeCarga < 0.0f)
+    {
+        fm_transform->initialRotation.z = 90.0f;
+    }
+    else
+    {
+        fm_transform->initialRotation.z = -90.0f;
+    }
 
 }
 

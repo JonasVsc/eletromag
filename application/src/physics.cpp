@@ -35,3 +35,9 @@ void Physics::rotateToTarget(Object* obj, glm::vec3 target)
 {
     
 }
+
+float Physics::calcularForcaMagnetica(float carga, float velocidade, float campoMagnetico, float anguloGraus) 
+{
+    float anguloRadianos = anguloGraus * (M_PI / 180.0f);
+    return carga * velocidade * campoMagnetico * sin(anguloRadianos);
+}

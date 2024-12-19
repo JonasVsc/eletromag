@@ -22,11 +22,11 @@ public:
 
     void init()
     {
-        eletron = new Object("Carga", "C:/Dev/eletromag/application/resources/old_sphere_with_vector.obj");
-        eletron->addComponent<Transform>();
-        eletron->getComponent<Transform>()->initialRotation = glm::vec3(0.0f, -90.0f, 0.0f);
-        eletron->addComponent<Mesh>();
-        eletron->getComponent<Mesh>()->initialColor = glm::vec4(0.0f, 0.0f, 1.0f, 1.0f);
+        cargaEletrica = new Object("Carga", "C:/Dev/eletromag/application/resources/old_sphere_with_vector.obj");
+        cargaEletrica->addComponent<Transform>();
+        cargaEletrica->getComponent<Transform>()->initialRotation = glm::vec3(0.0f, 0.0f, 0.0f);
+        cargaEletrica->addComponent<Mesh>();
+        cargaEletrica->getComponent<Mesh>()->initialColor = glm::vec4(0.0f, 0.0f, 1.0f, 1.0f);
 
         campoMagnetico = new Object("Campo Magnético", "C:/Dev/eletromag/application/resources/old_field.obj");
         campoMagnetico->addComponent<Transform>();
@@ -41,7 +41,7 @@ public:
         forcaMagnetica->getComponent<Mesh>()->initialColor = glm::vec4(0.0f, 1.0f, 0.0f, 1.0f);
 
         
-        addObject(eletron);
+        addObject(cargaEletrica);
         addObject(campoMagnetico);
         addObject(forcaMagnetica);
     }
@@ -53,11 +53,12 @@ public:
     
 public:
 
-    Object* eletron;
+    Object* cargaEletrica;
     Object* campoMagnetico;
     Object* forcaMagnetica;
 
-    glm::vec3 eletronDirection = glm::vec3(0.0f, 0.0f, 1.0f);
+    float intensidadeCarga = 0.0f;
+
     glm::vec3 campoMagneticoDirection = glm::vec3(1.0f, 0.0f, 0.0f);
     glm::vec3 forcaMagneticaDirection = glm::vec3(0.0f, 1.0f, 0.0f);
 
