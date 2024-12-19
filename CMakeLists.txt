@@ -50,9 +50,12 @@ add_executable(ElectroApp
     "application/src/scene.cpp"
 
     "application/src/topico1-scene.h"
-    #"application/src/topico1-scene.cpp"
     "application/src/topico1-physics.cpp"
     "application/src/topico1-physics.cpp"
+
+    "application/src/topico2-scene.h"
+    "application/src/topico2-physics.cpp"
+    "application/src/topico2-physics.cpp"
 
 
     "application/src/physics.h"

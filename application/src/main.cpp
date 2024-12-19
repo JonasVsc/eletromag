@@ -11,6 +11,7 @@
 #include "mesh.h"
 
 #include "topico1-scene.h"
+#include "topico2-scene.h"
 
 
 int main() 
@@ -22,7 +23,9 @@ int main()
 
 
         SceneTopico1 topico1;
-        app.setCurrentScene(topico1);
+        SceneTopico2 topico2;
+        app.insertScene(topico1);
+        app.insertScene(topico2);
 
         app.pushLayer(new ImGuiLayer());
 

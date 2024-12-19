@@ -34,5 +34,7 @@ void Scene::render(WGPURenderPassEncoder renderPass)
         wgpuRenderPassEncoderDraw(renderPass, obj->getVertexCount(), 1, 0, 0);
     }
 
-    physicsLayer->onUpdate(renderPass);
+    if(physicsLayer != nullptr)
+        physicsLayer->onUpdate(renderPass);
+
 }
