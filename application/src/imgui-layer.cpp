@@ -73,6 +73,9 @@ void ImGuiLayer::onUpdate(WGPURenderPassEncoder renderPass)
     sceneGUI();
     fpsGUI();
 
+    if(Application::get().mCurrentScene->guiLayer != nullptr)
+        Application::get().mCurrentScene->guiLayer->onUpdate(renderPass);
+
     ImGui::EndFrame();
     ImGui::Render();
     ImGui_ImplWGPU_RenderDrawData(ImGui::GetDrawData(), renderPass);
@@ -117,7 +120,7 @@ void ImGuiLayer::objectTreeGUI()
     ImGui::SetNextWindowSize(ImVec2(300, 720), ImGuiCond_Once); 
     ImGui::SetNextWindowPos(ImVec2(ImGui::GetIO().DisplaySize.x - 300, 0));
     ImGui::SetNextWindowSizeConstraints(ImVec2(300, 720), ImVec2(300, 720));
-    ImGui::Begin("Objetos", nullptr, ImGuiWindowFlags_NoTitleBar);
+    ImGui::Begin("Objetos", nullptr);
 
     float listBoxHeight = ImGui::GetTextLineHeightWithSpacing() * 5; 
     ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(4.0f, 2.0f));

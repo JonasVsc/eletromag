@@ -13,7 +13,7 @@ public:
     static void applyVelocityByCurrentDirection(Object* obj, float speed); // for objects which act like vectors
 
     static void crossVectorialProduct(float(&res)[3], const float(&vec1)[3], const float(&vec2)[3]);
-    static void rotateToTarget(glm::mat4 &modelMatrix, const float(&currentPosition)[3], const float(&targetPosition)[3]);
+    static void rotateToTarget(Object* obj, glm::vec3 target);
 
 
 

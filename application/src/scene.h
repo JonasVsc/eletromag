@@ -30,5 +30,6 @@ public:
     std::string mDebugName;
 
     Layer* physicsLayer;
+    Layer* guiLayer;
 
 };

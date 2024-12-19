@@ -24,7 +24,6 @@ int main()
 
         SceneTopico1 topico1;
         app.insertScene(topico1);
-
         app.pushLayer(new ImGuiLayer());
 
         auto callback = [](void* arg) 
