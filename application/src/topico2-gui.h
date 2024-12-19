@@ -6,17 +6,17 @@
 #include <backends/imgui_impl_wgpu.h>
 #include <backends/imgui_impl_glfw.h>
 
-class SceneTopico1;
+class SceneTopico2;
 
 class Topico2GUI : public Layer
 {
 
 public:
-    SceneTopico1& mScene;
+    SceneTopico2& mScene;
 
 public:
 
-    Topico2GUI(SceneTopico1& scene) 
+    Topico2GUI(SceneTopico2& scene) 
         : mScene(scene), Layer("Topico2GUILayer")
     {
 

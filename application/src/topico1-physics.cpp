@@ -25,6 +25,5 @@ void Topico1PhysicsLayer::onUpdate(WGPURenderPassEncoder renderPass)
     Renderer2 renderer = Application::get().getRenderer();
     auto tranform = mScene.forcaMagnetica->getComponent<Transform>();
 
-
 }
 

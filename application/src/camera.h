@@ -15,7 +15,7 @@ public:
 	glm::vec3 mUp;
 
 	float fov = 45.0f; 
-	float aspectRatio = 1280.0f / 720.0f; 
+	float aspectRatio = 1920.0f / 1080.0f; 
 	float nearPlane = 0.1f; 
 	float farPlane = 1000.0f; 
 

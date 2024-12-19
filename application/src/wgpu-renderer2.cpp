@@ -40,7 +40,7 @@ void Renderer2::render(Scene* scene)
     renderPassColorAttachment.view = nextTexture;
     renderPassColorAttachment.loadOp = WGPULoadOp_Clear;
 	renderPassColorAttachment.storeOp = WGPUStoreOp_Store;
-    renderPassColorAttachment.clearValue = WGPUColor{ 0.3, 0.3, 1.0, 1.0 };
+    renderPassColorAttachment.clearValue = WGPUColor{ 0.7, 0.7, 0.7, 1.0 };
     renderPassColorAttachment.depthSlice = WGPU_DEPTH_SLICE_UNDEFINED;
 	renderPassDesc.colorAttachmentCount = 1;
 	renderPassDesc.colorAttachments = &renderPassColorAttachment;
@@ -212,7 +212,7 @@ void Renderer2::initDepthBuffer()
     depthTextureDesc.format = mDepthTextureFormat;
     depthTextureDesc.mipLevelCount = 1;
     depthTextureDesc.sampleCount = 1;
-    depthTextureDesc.size = { 1280, 720, 1 };
+    depthTextureDesc.size = { 1920, 1080, 1 };
     depthTextureDesc.usage = WGPUTextureUsage_RenderAttachment;
     depthTextureDesc.viewFormatCount = 1;
     depthTextureDesc.viewFormats = &mDepthTextureFormat;

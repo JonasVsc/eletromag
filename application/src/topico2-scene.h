@@ -2,6 +2,7 @@
 
 #include "scene.h"
 #include "topico2-physics.h"
+#include "topico2-gui.h"
 
 #include "transform.h"
 #include "mesh.h"
@@ -14,17 +15,26 @@ public:
         : Scene("Topico 2")
     {
         physicsLayer = new Topico2PhysicsLayer(*this);
-        guiLayer = new Topico2PhysicsLayer(*this);
+        guiLayer = new Topico2GUI(*this);
 
         init();
     }
 
     void init()
     {
-        teste = new Object("Teste 2", "C:/Dev/eletromag/application/resources/electron.obj");
-        teste->addComponent<Transform>();
-        teste->addComponent<Mesh>();
-        addObject(teste);
+        apontador = new Object("Apontador", "C:/Dev/eletromag/application/resources/sphere_with_vector.obj");
+        apontador->addComponent<Transform>();
+        apontador->addComponent<Mesh>();
+        apontador->getComponent<Mesh>()->initialColor = glm::vec4(0.0f, 1.0f, 0.0f, 1.0f);
+
+        qualquer = new Object("Objeto", "C:/Dev/eletromag/application/resources/electron.obj");
+        qualquer->addComponent<Transform>();
+        qualquer->getComponent<Transform>()->initialPosition = glm::vec3(-5.0f, 6.0f, 2.0f);
+        qualquer->addComponent<Mesh>();
+        qualquer->getComponent<Mesh>()->initialColor = glm::vec4(0.0f, 0.0f, 1.0f, 1.0f);
+        
+        addObject(apontador);
+        addObject(qualquer);
     }
 
     ~SceneTopico2()
@@ -34,7 +44,8 @@ public:
     
 public:
 
-    Object* teste;
+    Object* apontador;
+    Object* qualquer;
 
 };
 

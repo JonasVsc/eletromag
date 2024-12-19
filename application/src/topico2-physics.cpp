@@ -29,4 +29,5 @@ void Topico2PhysicsLayer::onDettach()
 
 void Topico2PhysicsLayer::onUpdate(WGPURenderPassEncoder renderPass)
 {
+    
 }

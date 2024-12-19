@@ -16,7 +16,7 @@ Application::Application()
     : mCurrentScene(new Scene("None"))
 {
     sInstance = this;
-	mWindow.create(1280, 720, "WebGPU");
+	mWindow.create(1920, 1080, "WebGPU");
 }
 
 void Application::init()
