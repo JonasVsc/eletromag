@@ -75,6 +75,7 @@ void Application::selectScene(const std::string sceneName)
 void Application::setCurrentScene(Scene& scene) 
 { 
     mCurrentScene = &scene; 
+    mCurrentScene->physicsLayer->onAttach();
 }
 
 void Application::insertScene(const Scene& scene)

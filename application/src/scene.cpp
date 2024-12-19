@@ -1,5 +1,6 @@
 #include "scene.h"
 
+#include "application.h"
 #include "object.h"
 
 void Scene::addObject(Object* obj)
@@ -34,7 +35,9 @@ void Scene::render(WGPURenderPassEncoder renderPass)
         wgpuRenderPassEncoderDraw(renderPass, obj->getVertexCount(), 1, 0, 0);
     }
 
-    if(physicsLayer != nullptr)
-        physicsLayer->onUpdate(renderPass);
+    if(physicsLayer == nullptr)
+        return;
+
+    physicsLayer->onUpdate(renderPass);
 
 }

@@ -13,12 +13,34 @@ public:
     SceneTopico1() 
         : Scene("Topico 1")
     {
-        physicsLayer = new Topico1PhysicsLayer(this);
+        physicsLayer = new Topico1PhysicsLayer(*this);
         
-        teste = new Object("Teste", "C:/Dev/eletromag/application/resources/electron.obj");
-        teste->addComponent<Transform>();
-        addObject(teste);
+        init();
+    }
+
+    void init()
+    {
+
+        eletron = new Object("Carga", "C:/Dev/eletromag/application/resources/electron.obj");
+        eletron->addComponent<Transform>();
+        eletron->addComponent<Mesh>();
+        eletron->getComponent<Mesh>()->initialColor = glm::vec4(0.0f, 0.0f, 1.0f, 1.0f);
+
+        campoMagnetico = new Object("Campo Magnético", "C:/Dev/eletromag/application/resources/field.obj");
+        campoMagnetico->addComponent<Transform>();
+        campoMagnetico->addComponent<Mesh>();
+        campoMagnetico->getComponent<Mesh>()->initialColor = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
+
         
+        forcaMagnetica = new Object("Força Magnética", "C:/Dev/eletromag/application/resources/arrow.obj");
+        forcaMagnetica->addComponent<Transform>();
+        forcaMagnetica->addComponent<Mesh>();
+        forcaMagnetica->getComponent<Mesh>()->initialColor = glm::vec4(0.0f, 1.0f, 0.0f, 1.0f);
+
+        
+        addObject(eletron);
+        addObject(campoMagnetico);
+        addObject(forcaMagnetica);
     }
 
     ~SceneTopico1()
@@ -28,7 +50,9 @@ public:
     
 public:
 
-    Object* teste;
+    Object* eletron;
+    Object* campoMagnetico;
+    Object* forcaMagnetica;
 
 };
 
