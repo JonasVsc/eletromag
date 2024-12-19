@@ -109,8 +109,8 @@ body {
 }
 
 canvas {
-  width: 1920px;
-  height: 1080px;
+  width: 100%;
+  height: 100%;
 }
 
 </style>
@@ -207,6 +207,14 @@ canvas {
           if (text) console.error('[post-exception status] ' + text);
         };
       };
+    </script>
+    <script>
+      window.addEventListener("keydown", (event) => {
+          // Desabilita o espaço e as setas para evitar rolagem
+          if ([" ", "ArrowUp", "ArrowDown"].includes(event.key)) {
+              event.preventDefault();  // Desabilita o comportamento padrão
+          }
+      });
     </script>
     <script async type="text/javascript" src="ElectroApp.js"></script>
   </body>

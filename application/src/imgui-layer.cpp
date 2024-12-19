@@ -200,6 +200,7 @@ void ImGuiLayer::fpsGUI()
     ImGui::SetNextWindowPos(windowPos);
     ImGui::SetNextWindowSize(windowSize);
     ImGui::SetNextWindowBgAlpha(0.0f);  
+    ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.0f, 0.0f, 0.0f, 1.0f)); 
     ImGui::Begin("FPS Window", nullptr, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoInputs);
     float fps = ImGui::GetIO().Framerate;
 
@@ -210,4 +211,6 @@ void ImGuiLayer::fpsGUI()
 
     ImGui::Text("FPS: %.f", fps);
     ImGui::End();
+    ImGui::PopStyleColor(1);
+
 }
