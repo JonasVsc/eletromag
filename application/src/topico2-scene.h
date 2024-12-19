@@ -13,13 +13,18 @@ public:
     SceneTopico2() 
         : Scene("Topico 2")
     {
-        physicsLayer = new Topico2PhysicsLayer(this);
-        
+        physicsLayer = new Topico2PhysicsLayer(*this);
+        guiLayer = new Topico2PhysicsLayer(*this);
+
+        init();
+    }
+
+    void init()
+    {
         teste = new Object("Teste 2", "C:/Dev/eletromag/application/resources/electron.obj");
         teste->addComponent<Transform>();
         teste->addComponent<Mesh>();
         addObject(teste);
-        
     }
 
     ~SceneTopico2()

@@ -22,7 +22,6 @@ public:
 
     void init()
     {
-
         eletron = new Object("Carga", "C:/Dev/eletromag/application/resources/old_sphere_with_vector.obj");
         eletron->addComponent<Transform>();
         eletron->getComponent<Transform>()->initialRotation = glm::vec3(0.0f, -90.0f, 0.0f);

@@ -8,11 +8,11 @@ class Topico2PhysicsLayer : public Layer
 {
 
 public:
-    SceneTopico2* mScene = nullptr;
+    SceneTopico2& mScene;
 
 public:
 
-    Topico2PhysicsLayer(SceneTopico2* scene);
+    Topico2PhysicsLayer(SceneTopico2& scene);
 
     ~Topico2PhysicsLayer();
 
