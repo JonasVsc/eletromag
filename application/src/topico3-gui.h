@@ -33,9 +33,8 @@ public:
     {
 
         ImGui::SetNextWindowSize(ImVec2(450, 250), ImGuiCond_Once); 
-        ImGui::Begin("Calculadora de Alguma coisa");
+        ImGui::Begin("Calculadora Efeito Hall");
 
-        ImGui::Text("Força Alguma coisa:");
 
         ImGui::End();
     }

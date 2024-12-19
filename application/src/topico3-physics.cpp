@@ -36,4 +36,11 @@ void Topico3PhysicsLayer::onDettach()
 void Topico3PhysicsLayer::onUpdate(WGPURenderPassEncoder renderPass)
 {
     Renderer2 renderer = Application::get().getRenderer();
+    auto carga_transform = mScene.carga->getComponent<Transform>();
+    glm::mat4& carga_modelMatrix = mScene.carga->getUniform().modelMatrix;
+    float time = glfwGetTime();
+
+
+
+
 }

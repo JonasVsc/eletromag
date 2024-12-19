@@ -22,12 +22,12 @@ public:
 
     void init()
     {
-        tower = new Object("Tower", "C:/Dev/eletromag/application/resources/tower.obj");
-        tower->addComponent<Transform>();
-        tower->addComponent<Mesh>();
-        tower->getComponent<Mesh>()->initialColor = glm::vec4(0.0f, 1.0f, 0.0f, 1.0f);
+        carga = new Object("carga", "C:/Dev/eletromag/application/resources/electron.obj");
+        carga->addComponent<Transform>();
+        carga->addComponent<Mesh>();
+        carga->getComponent<Mesh>()->initialColor = glm::vec4(0.0f, 0.0f, 1.0f, 1.0f);
         
-        addObject(tower);
+        addObject(carga);
     }
 
     ~SceneTopico3()
@@ -37,7 +37,7 @@ public:
     
 public:
 
-    Object* tower;
+    Object* carga;
 
 };
 
